@@ -16,6 +16,124 @@
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
+        // --- GUIDE SLIDER LOGIC ---
+        document.addEventListener('DOMContentLoaded', function () {
+            // Modal open/close
+            const openGuideBtn = document.getElementById('openGuideBtn');
+            const guideModal = document.getElementById('guideModal');
+            const closeGuideModal = document.getElementById('closeGuideModal');
+            openGuideBtn.addEventListener('click', function () {
+                guideModal.classList.remove('hidden');
+                guideModal.classList.add('flex');
+            });
+            closeGuideModal.addEventListener('click', function () {
+                guideModal.classList.add('hidden');
+                guideModal.classList.remove('flex');
+            });
+
+            // Guide slider logic
+            const guideSlider = document.getElementById('guideSlider');
+            const guideSlides = guideSlider.querySelectorAll('img');
+            const guideDots = document.querySelectorAll('#guideSliderDots .guide-dot');
+            let guideIndex = 0;
+            let guideStartX = 0;
+            let guideIsDragging = false;
+            let guideDragDistance = 0;
+            let guideAutoSlideInterval;
+
+            function showGuideSlide(index, smooth = true) {
+                guideIndex = index;
+                guideSlider.style.transition = smooth ? 'transform 0.6s cubic-bezier(0.4,0,0.2,1)' : 'none';
+                guideSlider.style.transform = `translateX(-${index * 100}%)`;
+                guideDots.forEach((dot, i) => {
+                    dot.classList.toggle('opacity-100', i === index);
+                    dot.classList.toggle('opacity-70', i !== index);
+                    dot.classList.toggle('bg-rose-500', i === index);
+                    dot.classList.toggle('bg-rose-300', i !== index);
+                });
+            }
+            function nextGuideSlide() {
+                showGuideSlide((guideIndex + 1) % guideSlides.length);
+            }
+            function prevGuideSlide() {
+                showGuideSlide((guideIndex - 1 + guideSlides.length) % guideSlides.length);
+            }
+            guideDots.forEach(dot => {
+                dot.addEventListener('click', function () {
+                    showGuideSlide(parseInt(dot.dataset.index));
+                });
+            });
+            // Auto slide
+            function startGuideAutoSlide() {
+                guideAutoSlideInterval = setInterval(nextGuideSlide, 4000);
+            }
+            function stopGuideAutoSlide() {
+                clearInterval(guideAutoSlideInterval);
+            }
+            guideSlider.addEventListener('mouseenter', stopGuideAutoSlide);
+            guideSlider.addEventListener('mouseleave', startGuideAutoSlide);
+            showGuideSlide(0);
+            startGuideAutoSlide();
+            // Touch/drag support
+            guideSlider.addEventListener('touchstart', function (e) {
+                stopGuideAutoSlide();
+                guideIsDragging = true;
+                guideStartX = e.touches[0].clientX;
+                guideSlider.style.transition = 'none';
+            });
+            guideSlider.addEventListener('touchmove', function (e) {
+                if (!guideIsDragging) return;
+                guideDragDistance = e.touches[0].clientX - guideStartX;
+                guideSlider.style.transform = `translateX(calc(-${guideIndex * 100}% + ${guideDragDistance}px))`;
+            });
+            guideSlider.addEventListener('touchend', function (e) {
+                if (!guideIsDragging) return;
+                guideIsDragging = false;
+                if (guideDragDistance > 50) {
+                    prevGuideSlide();
+                } else if (guideDragDistance < -50) {
+                    nextGuideSlide();
+                } else {
+                    showGuideSlide(guideIndex);
+                }
+                guideDragDistance = 0;
+                startGuideAutoSlide();
+            });
+            // Mouse drag (optional)
+            guideSlider.addEventListener('mousedown', function (e) {
+                stopGuideAutoSlide();
+                guideIsDragging = true;
+                guideStartX = e.clientX;
+                guideSlider.style.transition = 'none';
+            });
+            guideSlider.addEventListener('mousemove', function (e) {
+                if (!guideIsDragging) return;
+                guideDragDistance = e.clientX - guideStartX;
+                guideSlider.style.transform = `translateX(calc(-${guideIndex * 100}% + ${guideDragDistance}px))`;
+            });
+            guideSlider.addEventListener('mouseup', function (e) {
+                if (!guideIsDragging) return;
+                guideIsDragging = false;
+                if (guideDragDistance > 50) {
+                    prevGuideSlide();
+                } else if (guideDragDistance < -50) {
+                    nextGuideSlide();
+                } else {
+                    showGuideSlide(guideIndex);
+                }
+                guideDragDistance = 0;
+                startGuideAutoSlide();
+            });
+            guideSlider.addEventListener('mouseleave', function () {
+                if (guideIsDragging) {
+                    guideIsDragging = false;
+                    showGuideSlide(guideIndex);
+                    guideDragDistance = 0;
+                    startGuideAutoSlide();
+                }
+            });
+        });
+        // --- END GUIDE SLIDER LOGIC ---
         tailwind.config = {
             theme: {
                 extend: {
@@ -672,34 +790,68 @@
         <!-- Custom Bouquet Example Slider -->
         <div class="w-full max-w-4xl mx-auto mt-2 mb-4">
             <div class="relative overflow-hidden rounded-xl shadow-lg">
-                <div id="bouquetSlider" class="flex transition-transform duration-700 ease-in-out">
+                <div id="bouquetSlider" class="flex transition-transform duration-700 ease-in-out touch-pan-x">
                     <img src="{{ asset('3.jpg') }}" alt="Bouquet 1" class="w-full h-full object-cover flex-shrink-0">
                     <img src="{{ asset('4.jpg') }}" alt="Bouquet 2" class="w-full h-full object-cover flex-shrink-0">
                     <img src="{{ asset('5.jpg') }}" alt="Bouquet 3" class="w-full h-full object-cover flex-shrink-0">
                     <img src="{{ asset('6.jpg') }}" alt="Bouquet 4" class="w-full h-full object-cover flex-shrink-0">
                 </div>
-                <!-- Prev/Next Buttons -->
-                <button id="prevSlide"
-                    class="absolute left-2 top-1/2 -translate-y-1/2 bg-white/80 rounded-full p-2 shadow hover:bg-white z-10">
-                    <i class="bi bi-chevron-left text-xl"></i>
-                </button>
-                <button id="nextSlide"
-                    class="absolute right-2 top-1/2 -translate-y-1/2 bg-white/80 rounded-full p-2 shadow hover:bg-white z-10">
-                    <i class="bi bi-chevron-right text-xl"></i>
-                </button>
                 <!-- Dots -->
                 <div id="sliderDots" class="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-2">
-                    <span class="slider-dot w-3 h-3 bg-rose-300 rounded-full opacity-70 cursor-pointer"
+                    <span class="slider-dot w-3 h-3 bg-[#172124] rounded-full opacity-70 cursor-pointer"
                         data-index="0"></span>
-                    <span class="slider-dot w-3 h-3 bg-rose-300 rounded-full opacity-70 cursor-pointer"
+                    <span class="slider-dot w-3 h-3 bg-[#172124] rounded-full opacity-70 cursor-pointer"
                         data-index="1"></span>
-                    <span class="slider-dot w-3 h-3 bg-rose-300 rounded-full opacity-70 cursor-pointer"
+                    <span class="slider-dot w-3 h-3 bg-[#172124] rounded-full opacity-70 cursor-pointer"
                         data-index="2"></span>
-                    <span class="slider-dot w-3 h-3 bg-rose-300 rounded-full opacity-70 cursor-pointer"
+                    <span class="slider-dot w-3 h-3 bg-[#172124] rounded-full opacity-70 cursor-pointer"
                         data-index="3"></span>
                 </div>
+
             </div>
-            <br>
+            <!-- Modal Panduan Slider -->
+            <div id="guideModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+                <div class="bg-white rounded-xl shadow-xl max-w-lg w-full mx-4 max-h-[90vh] overflow-y-auto relative">
+                    <button id="closeGuideModal"
+                        class="absolute top-3 right-3 text-gray-600 hover:text-[#f2527d] text-2xl">
+                        <i class="bi bi-x-lg"></i>
+                    </button>
+                    <div class="p-6">
+                        <h3 class="text-lg font-bold mb-4 text-[#f2527d] text-center">Panduan Custom Bouquet</h3>
+                        <div class="relative overflow-hidden rounded-lg">
+                            <div id="guideSlider" class="flex transition-transform duration-700 ease-in-out">
+                                <img src="{{ asset('3.jpg') }}" alt="Panduan 1"
+                                    class="w-full h-full object-cover flex-shrink-0">
+                                <img src="{{ asset('4.jpg') }}" alt="Panduan 2"
+                                    class="w-full h-full object-cover flex-shrink-0">
+                                <img src="{{ asset('5.jpg') }}" alt="Panduan 3"
+                                    class="w-full h-full object-cover flex-shrink-0">
+                                <img src="{{ asset('6.jpg') }}" alt="Panduan 3"
+                                    class="w-full h-full object-cover flex-shrink-0">
+                            </div>
+                            <div id="guideSliderDots" class="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-2">
+                                <span class="guide-dot w-3 h-3 bg-bg-[#172124] rounded-full opacity-70 cursor-pointer"
+                                    data-index="0"></span>
+                                <span class="guide-dot w-3 h-3 bg-bg-[#172124] rounded-full opacity-70 cursor-pointer"
+                                    data-index="1"></span>
+                                <span class="guide-dot w-3 h-3 bg-bg-[#172124] rounded-full opacity-70 cursor-pointer"
+                                    data-index="2"></span>
+                                <span class="guide-dot w-3 h-3 bg-bg-[#172124] rounded-full opacity-70 cursor-pointer"
+                                    data-index="3"></span>
+                            </div>
+                        </div>
+                        <div class="mt-4 text-center text-sm text-gray-500">Geser gambar untuk melihat langkah-langkah
+                            panduan custom bouquet.</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex justify-center mt-3 mb-2" style:baground-color="#ff0000">
+                <button id="openGuideBtn"
+                    class="bg-[#f2527d] hover:bg-[#f285a2] text-white font-semibold px-5 py-2 rounded-lg shadow transition-all duration-200">
+                    <i class="bi bi-cursor-fill"></i> Lihat Panduan Custom Bouquet
+                </button>
+            </div>
         </div>
 
         <!-- Horizontal Bouquet Builder -->
@@ -736,7 +888,8 @@
                                 <div class="bg-white/10 rounded-lg px-4 py-2 text-center stats-card">
                                     <div class="text-xs opacity-80">Total Harga</div>
                                     <div class="text-lg font-bold" id="builderHeaderPrice">
-                                        Rp {{ number_format((float) ($customBouquet->total_price ?? 0), 0, ',', '.') }}
+                                        Rp
+                                        {{ number_format((float) ($customBouquet->total_price ?? 0), 0, ',', '.') }}
                                     </div>
                                 </div>
                             </div>
@@ -763,13 +916,15 @@
                                     </div>
                                     <p class="text-sm font-medium">Belum ada komponen yang dipilih</p>
                                     <p class="text-xs text-gray-400 mt-2 leading-relaxed">
-                                        💡 Klik <span class="text-black-600 font-semibold">"+ Tambah ke Bouquet"</span>
+                                        💡 Klik <span class="text-black-600 font-semibold">"+ Tambah ke
+                                            Bouquet"</span>
                                         pada produk di bawah
                                     </p>
                                     <div class="mt-4 flex justify-center">
                                         <div
                                             class="bg-gradient-to-r from-purple-100 to-pink-100 rounded-full px-4 py-2">
-                                            <span class="text-xs text-purple-700 font-medium">Mulai membangun bouquet
+                                            <span class="text-xs text-purple-700 font-medium">Mulai membangun
+                                                bouquet
                                                 impian Anda</span>
                                         </div>
                                     </div>
@@ -1159,14 +1314,21 @@
         document.addEventListener('DOMContentLoaded', function () {
             const slider = document.getElementById('bouquetSlider');
             const slides = slider.querySelectorAll('img');
-            const prevBtn = document.getElementById('prevSlide');
-            const nextBtn = document.getElementById('nextSlide');
             const dots = document.querySelectorAll('#sliderDots .slider-dot');
             let currentIndex = 0;
             let autoSlideInterval;
+            let startX = 0;
+            let isDragging = false;
+            let dragDistance = 0;
+            let sliderWidth = slider.offsetWidth;
 
-            function showSlide(index) {
+            function showSlide(index, smooth = true) {
                 currentIndex = index;
+                if (smooth) {
+                    slider.style.transition = 'transform 0.6s cubic-bezier(0.4,0,0.2,1)';
+                } else {
+                    slider.style.transition = 'none';
+                }
                 slider.style.transform = `translateX(-${index * 100}%)`;
                 dots.forEach((dot, i) => {
                     dot.classList.toggle('opacity-100', i === index);
@@ -1183,8 +1345,6 @@
                 showSlide((currentIndex - 1 + slides.length) % slides.length);
             }
 
-            nextBtn.addEventListener('click', nextSlide);
-            prevBtn.addEventListener('click', prevSlide);
             dots.forEach(dot => {
                 dot.addEventListener('click', function () {
                     showSlide(parseInt(dot.dataset.index));
@@ -1193,7 +1353,9 @@
 
             // Auto slide
             function startAutoSlide() {
-                autoSlideInterval = setInterval(nextSlide, 3500);
+                autoSlideInterval = setInterval(() => {
+                    nextSlide();
+                }, 3500);
             }
             function stopAutoSlide() {
                 clearInterval(autoSlideInterval);
@@ -1202,6 +1364,70 @@
             slider.addEventListener('mouseleave', startAutoSlide);
             showSlide(0);
             startAutoSlide();
+
+            // Touch/drag support (smooth swipe)
+            slider.addEventListener('touchstart', function (e) {
+                stopAutoSlide();
+                isDragging = true;
+                startX = e.touches[0].clientX;
+                slider.style.transition = 'none';
+            });
+            slider.addEventListener('touchmove', function (e) {
+                if (!isDragging) return;
+                dragDistance = e.touches[0].clientX - startX;
+                slider.style.transform = `translateX(calc(-${currentIndex * 100}% + ${dragDistance}px))`;
+            });
+            slider.addEventListener('touchend', function (e) {
+                if (!isDragging) return;
+                isDragging = false;
+                if (dragDistance > 50) {
+                    prevSlide();
+                } else if (dragDistance < -50) {
+                    nextSlide();
+                } else {
+                    showSlide(currentIndex);
+                }
+                dragDistance = 0;
+                startAutoSlide();
+            });
+
+            // Mouse drag (optional, for desktop)
+            slider.addEventListener('mousedown', function (e) {
+                stopAutoSlide();
+                isDragging = true;
+                startX = e.clientX;
+                slider.style.transition = 'none';
+            });
+            slider.addEventListener('mousemove', function (e) {
+                if (!isDragging) return;
+                dragDistance = e.clientX - startX;
+                slider.style.transform = `translateX(calc(-${currentIndex * 100}% + ${dragDistance}px))`;
+            });
+            slider.addEventListener('mouseup', function (e) {
+                if (!isDragging) return;
+                isDragging = false;
+                if (dragDistance > 50) {
+                    prevSlide();
+                } else if (dragDistance < -50) {
+                    nextSlide();
+                } else {
+                    showSlide(currentIndex);
+                }
+                dragDistance = 0;
+                startAutoSlide();
+            });
+            slider.addEventListener('mouseleave', function () {
+                if (isDragging) {
+                    isDragging = false;
+                    showSlide(currentIndex);
+                    dragDistance = 0;
+                    startAutoSlide();
+                }
+            });
+
+            window.addEventListener('resize', function () {
+                sliderWidth = slider.offsetWidth;
+            });
         });
         // --- END SLIDER LOGIC ---
         // Scroll to Bottom Button Logic
