@@ -668,6 +668,40 @@
 
     <!-- Main Content -->
     <div class="w-full max-w-6xl mx-auto px-4 py-6">
+
+        <!-- Custom Bouquet Example Slider -->
+        <div class="w-full max-w-4xl mx-auto mt-2 mb-4">
+            <div class="relative overflow-hidden rounded-xl shadow-lg">
+                <div id="bouquetSlider" class="flex transition-transform duration-700 ease-in-out">
+                    <img src="{{ asset('3.jpg') }}" alt="Bouquet 1" class="w-full h-full object-cover flex-shrink-0">
+                    <img src="{{ asset('4.jpg') }}" alt="Bouquet 2" class="w-full h-full object-cover flex-shrink-0">
+                    <img src="{{ asset('5.jpg') }}" alt="Bouquet 3" class="w-full h-full object-cover flex-shrink-0">
+                    <img src="{{ asset('6.jpg') }}" alt="Bouquet 4" class="w-full h-full object-cover flex-shrink-0">
+                </div>
+                <!-- Prev/Next Buttons -->
+                <button id="prevSlide"
+                    class="absolute left-2 top-1/2 -translate-y-1/2 bg-white/80 rounded-full p-2 shadow hover:bg-white z-10">
+                    <i class="bi bi-chevron-left text-xl"></i>
+                </button>
+                <button id="nextSlide"
+                    class="absolute right-2 top-1/2 -translate-y-1/2 bg-white/80 rounded-full p-2 shadow hover:bg-white z-10">
+                    <i class="bi bi-chevron-right text-xl"></i>
+                </button>
+                <!-- Dots -->
+                <div id="sliderDots" class="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-2">
+                    <span class="slider-dot w-3 h-3 bg-rose-300 rounded-full opacity-70 cursor-pointer"
+                        data-index="0"></span>
+                    <span class="slider-dot w-3 h-3 bg-rose-300 rounded-full opacity-70 cursor-pointer"
+                        data-index="1"></span>
+                    <span class="slider-dot w-3 h-3 bg-rose-300 rounded-full opacity-70 cursor-pointer"
+                        data-index="2"></span>
+                    <span class="slider-dot w-3 h-3 bg-rose-300 rounded-full opacity-70 cursor-pointer"
+                        data-index="3"></span>
+                </div>
+            </div>
+            <br>
+        </div>
+
         <!-- Horizontal Bouquet Builder -->
         <div class="mb-6 horizontal-builder">
             <div class="bg-white rounded-xl shadow-lg overflow-hidden">
@@ -1121,6 +1155,55 @@
     <script>
 
 
+        // --- SLIDER LOGIC ---
+        document.addEventListener('DOMContentLoaded', function () {
+            const slider = document.getElementById('bouquetSlider');
+            const slides = slider.querySelectorAll('img');
+            const prevBtn = document.getElementById('prevSlide');
+            const nextBtn = document.getElementById('nextSlide');
+            const dots = document.querySelectorAll('#sliderDots .slider-dot');
+            let currentIndex = 0;
+            let autoSlideInterval;
+
+            function showSlide(index) {
+                currentIndex = index;
+                slider.style.transform = `translateX(-${index * 100}%)`;
+                dots.forEach((dot, i) => {
+                    dot.classList.toggle('opacity-100', i === index);
+                    dot.classList.toggle('opacity-70', i !== index);
+                    dot.classList.toggle('bg-rose-500', i === index);
+                    dot.classList.toggle('bg-rose-300', i !== index);
+                });
+            }
+
+            function nextSlide() {
+                showSlide((currentIndex + 1) % slides.length);
+            }
+            function prevSlide() {
+                showSlide((currentIndex - 1 + slides.length) % slides.length);
+            }
+
+            nextBtn.addEventListener('click', nextSlide);
+            prevBtn.addEventListener('click', prevSlide);
+            dots.forEach(dot => {
+                dot.addEventListener('click', function () {
+                    showSlide(parseInt(dot.dataset.index));
+                });
+            });
+
+            // Auto slide
+            function startAutoSlide() {
+                autoSlideInterval = setInterval(nextSlide, 3500);
+            }
+            function stopAutoSlide() {
+                clearInterval(autoSlideInterval);
+            }
+            slider.addEventListener('mouseenter', stopAutoSlide);
+            slider.addEventListener('mouseleave', startAutoSlide);
+            showSlide(0);
+            startAutoSlide();
+        });
+        // --- END SLIDER LOGIC ---
         // Scroll to Bottom Button Logic
         const scrollToBottomBtn = document.getElementById('scrollToBottomBtn');
         function checkScrollButtons() {
