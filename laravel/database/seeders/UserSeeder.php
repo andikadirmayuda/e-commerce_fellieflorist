@@ -25,10 +25,10 @@ class UserSeeder extends Seeder
 
         // Create Owner
         $owner = User::updateOrCreate(
-            ['email' => 'owner@seikatbungo.com'],
+            ['email' => 'owner@fellieflorist.com'],
             [
                 'name' => 'Owner Florist',
-                'password' => Hash::make('Owner_seikatbungo2025@###'),
+                'password' => Hash::make('Owner_fellieflorist2025@###'),
                 'status' => 'active',
             ]
         );
@@ -36,10 +36,10 @@ class UserSeeder extends Seeder
 
         // Create Admin
         $admin = User::updateOrCreate(
-            ['email' => 'admin@seikatbungo.com'],
+            ['email' => 'admin@fellieflorist.com'],
             [
                 'name' => 'Admin Florist',
-                'password' => Hash::make('Admin_seikatbungo123@###'),
+                'password' => Hash::make('Admin_fellieflorist123@###'),
                 'status' => 'active',
             ]
         );
@@ -47,10 +47,10 @@ class UserSeeder extends Seeder
 
         // Create Kasir
         $kasir = User::updateOrCreate(
-            ['email' => 'kasir@seikatbungo.com'],
+            ['email' => 'kasir@fellieflorist.com'],
             [
                 'name' => 'Kasir Florist',
-                'password' => Hash::make('Kasir_seikatbungo123@###'),
+                'password' => Hash::make('Kasir_fellieflorist123@###'),
                 'status' => 'active',
             ]
         );
@@ -58,10 +58,10 @@ class UserSeeder extends Seeder
 
         // Create Staff
         $karyawan = User::updateOrCreate(
-            ['email' => 'karyawan@seikatbungo.com'],
+            ['email' => 'karyawan@fellieflorist.com'],
             [
                 'name' => 'karyawan',
-                'password' => Hash::make('Karyawan_seikatbungo'),
+                'password' => Hash::make('Karyawan_fellieflorist'),
                 'status' => 'active',
             ]
         );
@@ -69,10 +69,10 @@ class UserSeeder extends Seeder
 
         // Create Customers Service
         $cs = User::updateOrCreate(
-            ['email' => 'cs@seikatbungo.com'],
+            ['email' => 'cs@fellieflorist.com'],
             [
                 'name' => 'Customers Service',
-                'password' => Hash::make('cs_seikatbungo'),
+                'password' => Hash::make('cs_fellieflorist'),
                 'status' => 'active',
             ]
         );
