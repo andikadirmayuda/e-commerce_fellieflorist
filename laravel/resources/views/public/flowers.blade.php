@@ -950,13 +950,14 @@
 
         .professional-name:hover {
             background: rgba(255, 255, 255, 0.15);
-            border-color: #fff;
+            color: #172124;
+            border-color: #ffffff;
             box-shadow: 0 0 10px rgba(255, 255, 255, 0.4);
             transform: translateY(-2px);
         }
 
         .professional-name:hover i {
-            color: #f25270;
+            color: #172124;
             /* hijau soft */
         }
     </style>
@@ -1610,7 +1611,7 @@
     </div>
 
     <!-- Enhanced Footer -->
-    <footer class="bg-gradient-to-r from-[#f2527d] to-[#f25270] text-white py-12 mt-16">
+    <footer class="bg-gradient-to-r from-[#f25270] to-[#172124] text-white py-12 mt-16">
         <div class="max-w-6xl mx-auto px-4 text-center">
             <div class="w-16 h-16 bg-white/20 rounded-full mx-auto mb-4 flex items-center justify-center">
                 {{-- <span class="text-white font-bold text-2xl">F</span> --}}
@@ -1643,7 +1644,7 @@
                 <i class="bi bi-laptop mr-2"></i>
                 Designed and Developed by :
                 <a href="https://www.instagram.com/adrmyd/" target="_blank" class="professional-name ml-2">
-                    <i class="bi bi-code-slash mr-1"></i> adrmyd
+                    <i class="bi bi-code-slash mr-1 font-bold"></i> adrmyd
                 </a>
             </div>
         </div>

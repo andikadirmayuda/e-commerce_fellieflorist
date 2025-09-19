@@ -22,6 +22,7 @@ export default {
                 },
                 neutral: {
                     black: "#172124",   // Hitam elegan
+                    gray: "#ca79a1ff",    // Abu-abu netral
                     soft: "#f2f3f1",    // Putih soft (background)
                     white: "#ffffff",   // Putih bersih
                 },

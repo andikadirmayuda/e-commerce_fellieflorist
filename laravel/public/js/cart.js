@@ -165,7 +165,7 @@ function getEmptyCartHTML() {
 
 function getCartInfoPanel() {
     return `
-        <div class="bg-gradient-to-r from-rose-50 to-pink-50 border border-rose-200 rounded-lg p-3 mb-4" style="background: #f2527d;">
+        <div class="bg-gradient-to-r from-[#666666] to-[#f2527d] border border-rose-200 rounded-lg p-3 mb-4">
             <div class="flex items-center mb-2">
                 <i class="bi bi-info-circle text-white mr-2"></i>
                 <h4 class="font-semibold text-white text-sm">Keranjang Terpadu</h4>

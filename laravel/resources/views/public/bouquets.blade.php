@@ -753,7 +753,7 @@
     </div>
 
     <!-- Enhanced Footer -->
-    <footer class="bg-gradient-to-r from-[#f2527d] to-[#f25270] text-white py-12 mt-16">
+    <footer class="bg-gradient-to-r from-[#f25270] via-[#666666] to-[#172124] text-white py-12 mt-16">
         <div class="max-w-6xl mx-auto px-4 text-center">
             <div class="w-16 h-16 bg-white/20 rounded-full mx-auto mb-4 flex items-center justify-center">
                 <img src="{{ asset('logo-fellie-florist.png') }}" alt="Logo" class="brand-logo rounded-full w-12 h-12">

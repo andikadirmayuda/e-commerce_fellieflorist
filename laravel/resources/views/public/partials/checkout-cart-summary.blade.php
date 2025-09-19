@@ -14,7 +14,7 @@
         @foreach($cartData as $item)
             @php 
                 $subtotal = $item['price'] * $item['quantity'];
-                $total += $subtotal;
+    $total += $subtotal;
             @endphp
             <div class="flex items-start gap-3 p-3 bg-gray-50 rounded-xl">
                 <div class="flex-1">
@@ -116,7 +116,7 @@
                     <input type="text" name="voucher_code" class="w-full px-4 py-3 border border-rose-200 rounded-xl input-focus focus:outline-none" placeholder="Masukkan kode voucher" required>
                 </div>
                 <button type="submit" 
-                    class="px-6 py-3 bg-gradient-to-r from-rose-500 to-orange-500 text-white font-semibold rounded-xl hover:from-rose-600 hover:to-orange-600 transition-all duration-200 shadow-lg hover:shadow-xl">
+                    class="px-6 py-3 bg-gradient-to-r from-rose-500 to-[#172124] text-white font-semibold rounded-xl hover:from-[#172124] hover:to-[#f25270] transition-all duration-200 shadow-lg hover:shadow-xl">
                     <i class="bi bi-check2 mr-1"></i>
                     Gunakan
                 </button>
@@ -136,184 +136,184 @@
             </div>
         @endif
         @if(session('applied_voucher'))
-            <div class="mt-4">
-                <!-- Dynamic voucher design by type -->
-                @php
-                    $voucher = session('applied_voucher');
-                    $type = $voucher['type'] ?? '';
-                    $icon = 'bi-ticket-perforated';
-                    $label = 'Voucher Diskon';
-                    $mainValue = '';
-                    $mainDesc = '';
-                    $extra = '';
-                    switch ($type) {
-                        case 'percent':
-                        case 'percentage':
-                            $icon = 'bi-percent';
-                            $label = 'Diskon Persentase';
-                            $mainValue = ($voucher['value'] ?? 0) . '%';
-                            $mainDesc = 'Potongan langsung dari total belanja';
-                            break;
-                        case 'nominal':
-                            $icon = 'bi-cash-coin';
-                            $label = 'Diskon Nominal';
-                            $mainValue = 'Rp ' . number_format($voucher['value'] ?? 0, 0, ',', '.');
-                            $mainDesc = 'Potongan harga langsung';
-                            break;
-                        case 'cashback':
-                            $icon = 'bi-wallet2';
-                            $label = 'Cashback';
-                            $mainValue = 'Rp ' . number_format($voucher['value'] ?? 0, 0, ',', '.');
-                            $mainDesc = 'Cashback setelah transaksi selesai';
-                            break;
-                        case 'shipping':
-                            $icon = 'bi-truck';
-                            $label = 'Potongan Ongkir';
-                            $mainValue = 'Rp ' . number_format($voucher['value'] ?? 0, 0, ',', '.');
-                            $mainDesc = 'Potongan biaya pengiriman';
-                            break;
-                        case 'seasonal':
-                            $icon = 'bi-calendar-heart';
-                            $label = 'Voucher Event';
-                            $mainValue = $voucher['description'] ?? 'Voucher Musiman';
-                            $mainDesc = $voucher['event_name'] ?? 'Event Spesial';
-                            break;
-                        case 'first_purchase':
-                            $icon = 'bi-stars';
-                            $label = 'Voucher Pembelian Pertama';
-                            $mainValue = 'Rp ' . number_format($voucher['value'] ?? 0, 0, ',', '.');
-                            $mainDesc = 'Khusus untuk pembelian pertama';
-                            break;
-                        case 'loyalty':
-                            $icon = 'bi-gem';
-                            $label = 'Voucher Member';
-                            $mainValue = 'Rp ' . number_format($voucher['value'] ?? 0, 0, ',', '.');
-                            $mainDesc = 'Khusus member/loyal customer';
-                            $extra = $voucher['member_level'] ?? '';
-                            break;
-                        default:
-                            $icon = 'bi-ticket-perforated';
-                            $label = 'Voucher Diskon';
-                            $mainValue = $voucher['description'] ?? '';
-                            $mainDesc = '';
-                    }
-                @endphp
-                <style>
-                    .voucher-custom {
-                        position: relative;
-                        width: 100%;
-                        max-width: 100%;
-                        height: 110px;
-                        background: linear-gradient(to right, #0b3b36 0%, #0b3b36 35%, #f4511e 35%, #f4511e 100%);
-                        border-radius: 10px;
-                        display: flex;
-                        color: white;
-                        overflow: hidden;
-                        margin: 0 auto 12px auto;
-                    }
-                    .voucher-custom::before,
-                    .voucher-custom::after {
-                        content: "";
-                        position: absolute;
-                        left: 35%;
-                        width: 28px;
-                        height: 28px;
-                        background: white;
-                        border-radius: 50%;
-                        transform: translateX(-50%);
-                    }
-                    .voucher-custom::before {
-                        top: -14px;
-                    }
-                    .voucher-custom::after {
-                        bottom: -14px;
-                    }
-                    .voucher-left-custom {
-                        flex: 35%;
-                        display: flex;
-                        justify-content: center;
-                        align-items: center;
-                        font-weight: bold;
-                        font-size: 13px;
-                        color: #f4511e;
-                        background: transparent;
-                    }
-                    .voucher-right-custom {
-                        flex: 65%;
-                        display: flex;
-                        flex-direction: column;
-                        justify-content: center;
-                        align-items: center;
-                        text-align: center;
-                        padding: 6px;
-                    }
-                    .voucher-right-custom h2 {
-                        margin: 0;
-                        font-size: 14px;
-                        font-weight: bold;
-                    }
-                    .voucher-right-custom h1 {
-                        margin: 2px 0 2px 0;
-                        font-size: 28px;
-                        font-weight: bold;
-                    }
-                    .voucher-right-custom small {
-                        background: #0b3b36;
-                        color: white;
-                        padding: 2px 6px;
-                        border-radius: 5px;
-                        font-size: 10px;
-                        margin-top: 2px;
-                    }
-                    .voucher-remove-btn {
-                        position: absolute;
-                        top: 6px;
-                        right: 6px;
-                        background: #ff9800;
-                        color: #fff;
-                        border: none;
-                        border-radius: 50%;
-                        width: 22px;
-                        height: 22px;
-                        display: flex;
-                        align-items: center;
-                        justify-content: center;
-                        cursor: pointer;
-                        transition: background 0.2s;
-                        font-size: 13px;
-                        box-shadow: 0 2px 6px rgba(255,152,0,0.2);
-                    }
-                    .voucher-remove-btn {
-                        background: #f4511e;
-                    }
-                </style>
-                <div style="display: flex; justify-content: flex-end; align-items: flex-start; margin-bottom: 2px;">
-                    <form action="{{ route('checkout.remove-voucher') }}" method="POST" style="margin:0;">
-                        @csrf
-                        <button type="submit" class="voucher-remove-btn" title="Hapus Voucher" style="position:static;top:auto;right:auto;margin-bottom:2px;"><i class="bi bi-x-lg"></i></button>
-                    </form>
-                </div>
-                <div class="voucher-custom">
-                    <div class="voucher-left-custom">
-                        {{ $voucher['code'] ?? 'VOUCHER' }}
+                    <div class="mt-4">
+                        <!-- Dynamic voucher design by type -->
+                        @php
+    $voucher = session('applied_voucher');
+    $type = $voucher['type'] ?? '';
+    $icon = 'bi-ticket-perforated';
+    $label = 'Voucher Diskon';
+    $mainValue = '';
+    $mainDesc = '';
+    $extra = '';
+    switch ($type) {
+        case 'percent':
+        case 'percentage':
+            $icon = 'bi-percent';
+            $label = 'Diskon Persentase';
+            $mainValue = ($voucher['value'] ?? 0) . '%';
+            $mainDesc = 'Potongan langsung dari total belanja';
+            break;
+        case 'nominal':
+            $icon = 'bi-cash-coin';
+            $label = 'Diskon Nominal';
+            $mainValue = 'Rp ' . number_format($voucher['value'] ?? 0, 0, ',', '.');
+            $mainDesc = 'Potongan harga langsung';
+            break;
+        case 'cashback':
+            $icon = 'bi-wallet2';
+            $label = 'Cashback';
+            $mainValue = 'Rp ' . number_format($voucher['value'] ?? 0, 0, ',', '.');
+            $mainDesc = 'Cashback setelah transaksi selesai';
+            break;
+        case 'shipping':
+            $icon = 'bi-truck';
+            $label = 'Potongan Ongkir';
+            $mainValue = 'Rp ' . number_format($voucher['value'] ?? 0, 0, ',', '.');
+            $mainDesc = 'Potongan biaya pengiriman';
+            break;
+        case 'seasonal':
+            $icon = 'bi-calendar-heart';
+            $label = 'Voucher Event';
+            $mainValue = $voucher['description'] ?? 'Voucher Musiman';
+            $mainDesc = $voucher['event_name'] ?? 'Event Spesial';
+            break;
+        case 'first_purchase':
+            $icon = 'bi-stars';
+            $label = 'Voucher Pembelian Pertama';
+            $mainValue = 'Rp ' . number_format($voucher['value'] ?? 0, 0, ',', '.');
+            $mainDesc = 'Khusus untuk pembelian pertama';
+            break;
+        case 'loyalty':
+            $icon = 'bi-gem';
+            $label = 'Voucher Member';
+            $mainValue = 'Rp ' . number_format($voucher['value'] ?? 0, 0, ',', '.');
+            $mainDesc = 'Khusus member/loyal customer';
+            $extra = $voucher['member_level'] ?? '';
+            break;
+        default:
+            $icon = 'bi-ticket-perforated';
+            $label = 'Voucher Diskon';
+            $mainValue = $voucher['description'] ?? '';
+            $mainDesc = '';
+    }
+                        @endphp
+                        <style>
+                            .voucher-custom {
+                                position: relative;
+                                width: 100%;
+                                max-width: 100%;
+                                height: 110px;
+                                background: linear-gradient(to right, #f25270 0%, #f25270 35%, #666666 35%, #172124 100%);
+                                border-radius: 10px;
+                                display: flex;
+                                color: white;
+                                overflow: hidden;
+                                margin: 0 auto 12px auto;
+                            }
+                            .voucher-custom::before,
+                            .voucher-custom::after {
+                                content: "";
+                                position: absolute;
+                                left: 35%;
+                                width: 28px;
+                                height: 28px;
+                                background: white;
+                                border-radius: 50%;
+                                transform: translateX(-50%);
+                            }
+                            .voucher-custom::before {
+                                top: -14px;
+                            }
+                            .voucher-custom::after {
+                                bottom: -14px;
+                            }
+                            .voucher-left-custom {
+                                flex: 35%;
+                                display: flex;
+                                justify-content: center;
+                                align-items: center;
+                                font-weight: bold;
+                                font-size: 13px;
+                                color: #fff;
+                                background: transparent;
+                            }
+                            .voucher-right-custom {
+                                flex: 65%;
+                                display: flex;
+                                flex-direction: column;
+                                justify-content: center;
+                                align-items: center;
+                                text-align: center;
+                                padding: 6px;
+                            }
+                            .voucher-right-custom h2 {
+                                margin: 0;
+                                font-size: 14px;
+                                font-weight: bold;
+                            }
+                            .voucher-right-custom h1 {
+                                margin: 2px 0 2px 0;
+                                font-size: 28px;
+                                font-weight: bold;
+                            }
+                            .voucher-right-custom small {
+                                background: #f25270;
+                                color: white;
+                                padding: 2px 6px;
+                                border-radius: 5px;
+                                font-size: 10px;
+                                margin-top: 2px;
+                            }
+                            .voucher-remove-btn {
+                                position: absolute;
+                                top: 6px;
+                                right: 6px;
+                                background: #f25270;
+                                color: #fff;
+                                border: none;
+                                border-radius: 50%;
+                                width: 22px;
+                                height: 22px;
+                                display: flex;
+                                align-items: center;
+                                justify-content: center;
+                                cursor: pointer;
+                                transition: background 0.2s;
+                                font-size: 13px;
+                                box-shadow: 0 2px 6px rgba(255,152,0,0.2);
+                            }
+                            .voucher-remove-btn {
+                                background: #f25270;
+                            }
+                        </style>
+                        <div style="display: flex; justify-content: flex-end; align-items: flex-start; margin-bottom: 2px;">
+                            <form action="{{ route('checkout.remove-voucher') }}" method="POST" style="margin:0;">
+                                @csrf
+                                <button type="submit" class="voucher-remove-btn" title="Hapus Voucher" style="position:static;top:auto;right:auto;margin-bottom:2px;"><i class="bi bi-x-lg"></i></button>
+                            </form>
+                        </div>
+                        <div class="voucher-custom">
+                            <div class="voucher-left-custom">
+                                {{ $voucher['code'] ?? 'VOUCHER' }}
+                            </div>
+                            <div class="voucher-right-custom">
+                                <h2>{{ strtoupper($label ?? 'VOUCHER') }}</h2>
+                                <h1>
+                                    @if($type === 'cashback')
+                                        {{ (int) ($voucher['value'] ?? 0) >= 1000 ? ((int) ($voucher['value'] ?? 0) / 1000) : $voucher['value'] }} <span style="font-size:20px;">rb</span>
+                                    @else
+                                        {{ $mainValue }}
+                                    @endif
+                                </h1>
+                                <small>*min. belanja {{ isset($voucher['minimum_spend']) ? number_format($voucher['minimum_spend'], 0, ',', '.') : '-' }}</small>
+                            </div>
+                        </div>
+                        <!-- Success message -->
+                        <div class="mt-3 text-center">
+                            <span class="inline-flex items-center px-4 py-2 bg-green-50 text-green-700 rounded-xl text-sm font-semibold"><i class="bi bi-check-circle mr-2"></i>Voucher berhasil diterapkan!</span>
+                        </div>
                     </div>
-                    <div class="voucher-right-custom">
-                        <h2>{{ strtoupper($label ?? 'VOUCHER') }}</h2>
-                        <h1>
-                            @if($type === 'cashback')
-                                {{ (int) ($voucher['value'] ?? 0) >= 1000 ? ((int) ($voucher['value'] ?? 0) / 1000) : $voucher['value'] }} <span style="font-size:20px;">rb</span>
-                            @else
-                                {{ $mainValue }}
-                            @endif
-                        </h1>
-                        <small>*min. belanja {{ isset($voucher['minimum_spend']) ? number_format($voucher['minimum_spend'], 0, ',', '.') : '-' }}</small>
-                    </div>
-                </div>
-                <!-- Success message -->
-                <div class="mt-3 text-center">
-                    <span class="inline-flex items-center px-4 py-2 bg-green-50 text-green-700 rounded-xl text-sm font-semibold"><i class="bi bi-check-circle mr-2"></i>Voucher berhasil diterapkan!</span>
-                </div>
-            </div>
         @endif
     </div>
 

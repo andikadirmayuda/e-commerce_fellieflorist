@@ -231,8 +231,8 @@
                 <div class="flex items-center space-x-4">
                     <!-- Track Order - Active -->
                     <a href="{{ route('public.order.track') }}"
-                        class="text-white bg-rose-500 hover:bg-rose-600 p-2 rounded-full hover:shadow-lg transition-all duration-200"
-                        style="background:#f25270" title="Lacak Pesanan">
+                        class="text-white bg-gradient-to-r from-[#666666] to-[#f2527d] p-2 rounded-full hover:shadow-lg transition-all duration-200"
+                        title="Lacak Pesanan">
                         <i class="bi bi-truck text-xl"></i>
                     </a>
 
@@ -334,9 +334,8 @@
                         </div>
 
                         <button type="submit"
-                            class="w-full bg-gradient-to-r from-rose-500 to-pink-600 hover:from-rose-600 hover:to-pink-700 text-white font-semibold py-3 px-6 rounded-lg transition-all duration-200 hover:scale-105 hover:shadow-lg flex items-center justify-center gap-3"
-                            style="background:#f25270">
-                            <i class="bi bi-search"></i>
+                            class="w-full bg-gradient-to-r from-[#172124] to-rose-500 hover:from-[#f25270] hover:to-[#172124] text-white font-semibold py-3 px-6 rounded-lg transition-all duration-200 hover:scale-105 hover:shadow-lg flex items-center justify-center gap-3"><i
+                                class="bi bi-search"></i>
                             <span>Lacak Pesanan</span>
                         </button>
                     </form>
