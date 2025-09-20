@@ -11,14 +11,14 @@
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 
-<body class="min-h-screen bg-[#F5F7F6] font-sans">
+<body class="min-h-screen bg-[#fff] font-sans">
     <div class="max-w-2xl mx-auto py-10 px-4">
-        <h1 class="text-3xl font-bold text-center mb-8 text-[#2D9C8F]">Cara Memesan di Fellie Florist</h1>
+        <h1 class="text-3xl font-bold text-center mb-8 text-[#f25270]">Cara Memesan di Fellie Florist</h1>
         <div class="space-y-6">
             <div class="bg-white rounded-lg shadow p-5 flex items-start gap-4">
                 <div class="flex-shrink-0">
                     <span
-                        class="bg-[#2D9C8F] text-white rounded-full w-10 h-10 flex items-center justify-center font-bold text-lg">1</span>
+                        class="bg-[#f25270] text-white rounded-full w-10 h-10 flex items-center justify-center font-bold text-lg">1</span>
                 </div>
                 <div>
                     <h2 class="font-semibold text-lg mb-1">Pilih Produk Bunga</h2>
@@ -30,7 +30,7 @@
             <div class="bg-white rounded-lg shadow p-5 flex items-start gap-4">
                 <div class="flex-shrink-0">
                     <span
-                        class="bg-[#2D9C8F] text-white rounded-full w-10 h-10 flex items-center justify-center font-bold text-lg">2</span>
+                        class="bg-[#f25270] text-white rounded-full w-10 h-10 flex items-center justify-center font-bold text-lg">2</span>
                 </div>
                 <div>
                     <h2 class="font-semibold text-lg mb-1">Tambahkan ke Keranjang</h2>
@@ -42,7 +42,7 @@
             <div class="bg-white rounded-lg shadow p-5 flex items-start gap-4">
                 <div class="flex-shrink-0">
                     <span
-                        class="bg-[#2D9C8F] text-white rounded-full w-10 h-10 flex items-center justify-center font-bold text-lg">3</span>
+                        class="bg-[#f25270] text-white rounded-full w-10 h-10 flex items-center justify-center font-bold text-lg">3</span>
                 </div>
                 <div>
                     <h2 class="font-semibold text-lg mb-1">Lihat & Edit Keranjang</h2>
@@ -53,7 +53,7 @@
             <div class="bg-white rounded-lg shadow p-5 flex items-start gap-4">
                 <div class="flex-shrink-0">
                     <span
-                        class="bg-[#2D9C8F] text-white rounded-full w-10 h-10 flex items-center justify-center font-bold text-lg">4</span>
+                        class="bg-[#f25270] text-white rounded-full w-10 h-10 flex items-center justify-center font-bold text-lg">4</span>
                 </div>
                 <div>
                     <h2 class="font-semibold text-lg mb-1">Lanjutkan ke Checkout</h2>
@@ -64,7 +64,7 @@
             <div class="bg-white rounded-lg shadow p-5 flex items-start gap-4">
                 <div class="flex-shrink-0">
                     <span
-                        class="bg-[#2D9C8F] text-white rounded-full w-10 h-10 flex items-center justify-center font-bold text-lg">5</span>
+                        class="bg-[#f25270] text-white rounded-full w-10 h-10 flex items-center justify-center font-bold text-lg">5</span>
                 </div>
                 <div>
                     <h2 class="font-semibold text-lg mb-1">Form Pemesanan & Pilih Voucher Yang Tersedia</h2>
@@ -75,7 +75,7 @@
             <div class="bg-white rounded-lg shadow p-5 flex items-start gap-4">
                 <div class="flex-shrink-0">
                     <span
-                        class="bg-[#2D9C8F] text-white rounded-full w-10 h-10 flex items-center justify-center font-bold text-lg">6</span>
+                        class="bg-[#f25270] text-white rounded-full w-10 h-10 flex items-center justify-center font-bold text-lg">6</span>
                 </div>
                 <div>
                     <h2 class="font-semibold text-lg mb-1">Konfirmasi & Selesaikan Pesanan</h2>

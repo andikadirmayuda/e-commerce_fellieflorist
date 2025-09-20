@@ -201,8 +201,8 @@
                                     method="POST" class="flex gap-3 items-end">
                                     @csrf
                                     <div class="flex-1">
-                                        <label class="block text-sm text-gray-600 mb-1">Masa Berlaku (Jam)</label>
-                                        <input type="number" name="expiry_hours" value="24" min="1" max="168"
+                                        <label class="block text-sm text-gray-600 mb-1">Masa Berlaku (Hari)</label>
+                                        <input type="number" name="expiry_days" value="30" min="1" max="30"
                                             class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-purple-500 focus:border-purple-500 text-sm"
                                             required>
                                     </div>

@@ -398,7 +398,7 @@ class OnlineCustomerController extends Controller
     {
         $request->validate([
             'code' => 'nullable|string|max:20',
-            'expiry_hours' => 'required|integer|min:1|max:168', // Maksimal 1 minggu
+            'expiry_days' => 'required|integer|min:1|max:30', // Maksimal 1 bulan
             'notes' => 'nullable|string|max:500'
         ]);
 
@@ -414,8 +414,8 @@ class OnlineCustomerController extends Controller
             return redirect()->back()->with('error', 'Customer belum terdaftar sebagai reseller');
         }
 
-        // Pastikan expiry_hours adalah integer
-        $expiryHours = (int) $request->expiry_hours;
+        // Konversi expiry_days ke jam
+        $expiryHours = ((int) $request->expiry_days) * 24;
 
         // Generate kode baru dengan kode custom jika diberikan
         $code = $request->code ? strtoupper($request->code) : ResellerCode::generateUniqueCode();

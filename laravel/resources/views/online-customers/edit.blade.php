@@ -111,13 +111,14 @@
                                 </div>
                             </div>
                             <div class="flex-1">
-                                <label class="block text-sm text-gray-600 mb-1">Berlaku Selama (Jam)</label>
-                                <select id="expiryHoursEdit" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-purple-500 focus:border-purple-500 text-sm">
-                                    <option value="24">24 Jam (1 Hari)</option>
-                                    <option value="48">48 Jam (2 Hari)</option>
-                                    <option value="72" selected>72 Jam (3 Hari)</option>
-                                    <option value="168">168 Jam (1 Minggu)</option>
-                                </select>
+                                    <label class="block text-sm text-gray-600 mb-1">Berlaku Selama (Hari)</label>
+                                    <select id="expiryDaysEdit" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-purple-500 focus:border-purple-500 text-sm">
+                                        <option value="1">1 Hari</option>
+                                        <option value="3">3 Hari</option>
+                                        <option value="7">7 Hari</option>
+                                        <option value="14">14 Hari</option>
+                                        <option value="30" selected>30 Hari (1 Bulan)</option>
+                                    </select>
                             </div>
                             <div class="flex-1">
                                 <label class="block text-sm text-gray-600 mb-1">Catatan</label>
@@ -272,7 +273,7 @@
 
         function generateResellerCodeEdit() {
             const code = document.getElementById('resellerCodeEdit').value.trim();
-            const expiryHours = document.getElementById('expiryHoursEdit').value;
+            const expiryDays = document.getElementById('expiryDaysEdit').value;
             const notes = document.getElementById('notesEdit').value.trim();
 
             if (!code) {
@@ -280,8 +281,8 @@
                 return;
             }
 
-            if (!expiryHours || expiryHours < 1 || expiryHours > 168) {
-                alert('Jam berlaku harus antara 1-168 jam!');
+            if (!expiryDays || expiryDays < 1 || expiryDays > 30) {
+                alert('Masa aktif harus antara 1-30 hari!');
                 return;
             }
 
@@ -300,7 +301,7 @@
                 },
                 body: JSON.stringify({
                     code: code,
-                    expiry_hours: expiryHours,
+                    expiry_days: expiryDays,
                     notes: notes || null
                 })
             })
@@ -310,7 +311,7 @@
                     alert('Kode reseller berhasil di-generate!\n\nKode: ' + data.code + '\nBerlaku hingga: ' + data.expires_at);
                     // Reset form
                     document.getElementById('resellerCodeEdit').value = '';
-                    document.getElementById('expiryHoursEdit').value = '72';
+                    document.getElementById('expiryDaysEdit').value = '30';
                     document.getElementById('notesEdit').value = '';
                     // Refresh halaman untuk update data
                     location.reload();

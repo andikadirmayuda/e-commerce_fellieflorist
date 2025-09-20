@@ -149,7 +149,7 @@
                                                                     @foreach($customer->all_names as $name)
                                                                         <span
                                                                             class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium 
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            {{ $name === $customer->customer_name ? 'bg-pink-100 text-pink-700' : 'bg-gray-100 text-gray-600' }}">
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            {{ $name === $customer->customer_name ? 'bg-pink-100 text-pink-700' : 'bg-gray-100 text-gray-600' }}">
                                                                             {{ $name }}
                                                                             @if($name === $customer->customer_name)
                                                                                 <i class="bi bi-star-fill ml-1 text-xs"></i>
@@ -399,7 +399,7 @@
                 },
                 body: JSON.stringify({
                     code: code,
-                    expiry_hours: expiryHours,
+                    expiry_days: expiryHours,
                     notes: notes || null
                 })
             })
