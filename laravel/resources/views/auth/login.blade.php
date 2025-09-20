@@ -46,7 +46,7 @@
                 @endif --}}
             </div>
             <button type="submit"
-                class="w-full py-3 bg-[#f25270] text-white rounded-sm font-semibold transition">LOGIN</button>
+                class="w-full py-3 bg-gradient-to-r from-[#172124] to-[#f25270] text-white rounded-lg shadow-lg font-semibold hover:from-[#f25270] hover:to-[#172124]">LOGIN</button>
         </form>
         {{-- <div class="mt-2">
             <span class="text-xs text-gray-400">Or Sign Up with </span>
