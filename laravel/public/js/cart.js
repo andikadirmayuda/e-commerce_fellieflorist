@@ -188,6 +188,19 @@ function getCartInfoPanel() {
                 </p>
             </div>
         </div>
+
+        <div class="bg-gradient-to-r from-[#666666] to-[#f2527d] border border-rose-200 rounded-lg p-3 mb-4">
+            <div class="flex items-center mb-2">
+                <i class="bi bi-info-circle text-white mr-2"></i>
+                <h4 class="font-semibold text-white text-sm"> Periksa Ketersediaan Stok</h4>
+            </div>
+            <div class="text-xs text-white space-y-1">
+                <p class="text-white mt-2 text-xs">
+                    ⚠️ Sebelum checkout, pastikan semua Produk memiliki jumlah yang sesuai dengan stok yang tersedia. 😊
+                </p>
+            </div>
+        </div>
+        
     `;
 }
 
@@ -199,12 +212,14 @@ function getCartHTML(items) {
 }
 
 function getCartItemHTML(item) {
+    // Tambahkan atribut data-stock untuk validasi stok di updateQuantity
     return `
-        <div class="flex items-start space-x-4 mb-4 pb-4 border-b border-gray-100" data-cart-key="${item.id}">
+        <div class="flex items-start space-x-4 mb-4 pb-4 border-b border-gray-100" data-cart-key="${item.id}" data-stock="${item.stock ?? ''}">
             ${getItemImageHTML(item)}
             <div class="flex-1">
                 ${getItemDetailsHTML(item)}
                 ${getItemQuantityControlsHTML(item)}
+                <div class="text-xs text-red-500 cart-stock-warning" style="display: none;"></div>
             </div>
             <button onclick="removeFromCart('${item.id}', '${item.name.replace(/'/g, "\\'")}')" 
                     class="text-gray-400 hover:text-red-500 p-1 transition-colors duration-200 hover:bg-red-50 rounded-lg">
@@ -330,9 +345,18 @@ function updateQuantity(cartKey, change) {
     const currentQuantity = parseInt(quantityElement.textContent);
     const newQuantity = currentQuantity + change;
 
+    // Ambil stok maksimal dari atribut data-stock (pastikan backend mengirimkan ini)
+    const maxStock = itemElement.getAttribute('data-stock') ? parseInt(itemElement.getAttribute('data-stock')) : null;
     if (newQuantity < 1) {
         showToast('Jumlah minimum adalah 1', 'warning');
         return;
+    }
+    if (maxStock !== null && newQuantity > maxStock) {
+        showCartStockWarning(itemElement, maxStock);
+        showToast('Stok tidak mencukupi, stok tersedia hanya ' + maxStock, 'error');
+        return;
+    } else {
+        removeCartStockWarning(itemElement);
     }
 
     const buttons = itemElement.querySelectorAll('button');
@@ -400,161 +424,72 @@ function updateQuantity(cartKey, change) {
         });
 }
 
-function removeFromCart(cartKey, itemName = 'produk ini') {
-    // Create backdrop
-    const backdrop = document.createElement('div');
-    backdrop.className = 'fixed inset-0 bg-black bg-opacity-40 z-50 backdrop-blur-sm transition-opacity duration-200';
-    backdrop.style.opacity = '0';
+function removeFromCart(cartKey) {
+    const itemElement = document.querySelector(`[data-cart-key="${cartKey}"]`);
+    if (itemElement) {
+        itemElement.remove();
+    }
 
-    // Create modal
-    const modal = document.createElement('div');
-    modal.className = 'fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white rounded-xl shadow-xl z-[60] transition-all duration-200 scale-95 opacity-0 w-[90%] max-w-sm p-6';
-    modal.innerHTML = `
-        <div class="text-center">
-            <div class="w-12 h-12 rounded-full bg-red-50 mx-auto mb-4 flex items-center justify-center">
-                <i class="bi bi-trash text-red-500 text-xl"></i>
-            </div>
-            <h3 class="text-lg font-medium text-gray-900 mb-1">Hapus dari Keranjang?</h3>
-            <p class="text-gray-500 text-sm mb-6">Apakah Anda yakin ingin menghapus ${itemName} dari keranjang belanja?</p>
-            <div class="flex space-x-3">
-                <button class="flex-1 px-4 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-sm font-medium transition-colors cancel-button">
-                    Batal
-                </button>
-                <button class="flex-1 px-4 py-2.5 bg-red-500 hover:bg-red-600 text-white rounded-lg text-sm font-medium transition-colors confirm-button">
-                    Ya, Hapus
-                </button>
-            </div>
-        </div>
-    `;
-
-    // Add to DOM
-    document.body.appendChild(backdrop);
-    document.body.appendChild(modal);
-
-    // Animate in
-    requestAnimationFrame(() => {
-        backdrop.style.opacity = '1';
-        modal.style.opacity = '1';
-        modal.style.transform = 'translate(-50%, -50%) scale(1)';
-    });
-
-    // Handle confirmation
-    return new Promise((resolve) => {
-        function removeModal() {
-            modal.style.opacity = '0';
-            modal.style.transform = 'translate(-50%, -50%) scale(0.95)';
-            backdrop.style.opacity = '0';
-            setTimeout(() => {
-                backdrop.remove();
-                modal.remove();
-            }, 200);
+    fetch(`/cart/remove/${cartKey}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
         }
-
-        // Cancel button
-        modal.querySelector('.cancel-button').addEventListener('click', () => {
-            removeModal();
-            resolve(false);
-        });
-
-        // Confirm button
-        modal.querySelector('.confirm-button').addEventListener('click', () => {
-            removeModal();
-            resolve(true);
-
-            // Hapus item dari DOM
-            const itemElement = document.querySelector(`[data-cart-key="${cartKey}"]`);
-            if (itemElement) {
-                itemElement.remove();
+    })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                updateCart(true);
+                showToast('Item berhasil dihapus', 'success');
+            } else {
+                showToast('Gagal menghapus item', 'error');
             }
-
-            // Kirim request ke server
-            fetch(`/cart/remove/${cartKey}`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-                }
-            })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        updateCart(true);
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                });
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showToast('Terjadi kesalahan saat menghapus', 'error');
         });
-
-        // Click backdrop to cancel
-        backdrop.addEventListener('click', () => {
-            removeModal();
-            resolve(false);
-        });
-    });
 }
 
+
 function showToast(message, type = 'info') {
-    // Remove existing toast and overlay
+    // Hapus toast lama
     const existingToast = document.getElementById('cartToast');
-    const existingOverlay = document.getElementById('toastOverlay');
+
     if (existingToast) existingToast.remove();
-    if (existingOverlay) existingOverlay.remove();
 
-    // Create backdrop overlay
-    const backdrop = document.createElement('div');
-    backdrop.id = 'toastOverlay';
-    backdrop.className = 'fixed inset-0 bg-black bg-opacity-40 z-50 backdrop-blur-sm transition-opacity duration-300';
-    backdrop.style.opacity = '0';
+    // Elemen toast
+    const toast = document.createElement('div');
+    toast.id = 'cartToast';
+    toast.className = `fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 py-3 px-6 rounded-lg shadow-lg z-[9999] ${getNotificationColor(type)} transition-all duration-300 opacity-0 transform scale-95`;
 
-    // Create notification element
-    const notification = document.createElement('div');
-    notification.id = 'cartToast';
-    notification.className = `fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 py-3 px-6 rounded-lg shadow-xl z-[60] ${getNotificationColor(type)} transition-all duration-300 scale-95 opacity-0`;
 
-    // Add content to notification
-    notification.innerHTML = `
+
+    toast.innerHTML = `
         <div class="flex items-center space-x-3">
-            <div class="flex-shrink-0 text-xl">${getNotificationIcon(type)}</div>
+            <div class="flex-shrink-0 text-lg">${getNotificationIcon(type)}</div>
             <p class="text-sm font-medium text-white">${message}</p>
         </div>
     `;
 
-    // Add elements to DOM
-    document.body.appendChild(backdrop);
-    document.body.appendChild(notification);
+    document.body.appendChild(toast);
 
-    // Animate in
+    // Animasi masuk
     requestAnimationFrame(() => {
-        backdrop.style.opacity = '1';
-        notification.style.opacity = '1';
-        notification.style.transform = 'translate(-50%, -50%) scale(1)';
+        toast.style.opacity = '1';
+        toast.style.transform = 'translateY(0)';
     });
 
-    // Auto remove after 2 seconds (except for loading)
-    if (type !== 'loading') {
-        setTimeout(() => {
-            notification.style.opacity = '0';
-            notification.style.transform = 'translate(-50%, -50%) scale(0.95)';
-            backdrop.style.opacity = '0';
-            setTimeout(() => {
-                backdrop.remove();
-                notification.remove();
-            }, 300);
-        }, 2000);
-    }
-
-    // Click backdrop to close
-    backdrop.addEventListener('click', () => {
-        notification.style.opacity = '0';
-        notification.style.transform = 'translate(-50%, -50%) scale(0.95)';
-        backdrop.style.opacity = '0';
-        setTimeout(() => {
-            backdrop.remove();
-            notification.remove();
-        }, 300);
-    });
+    // Auto hilang 2 detik
+    setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateY(-10px)';
+        setTimeout(() => toast.remove(), 300);
+    }, 2000);
 }
+
+
 
 function getNotificationColor(type) {
     switch (type) {
@@ -593,5 +528,22 @@ function getToastIcon(type) {
         case 'warning': return '<i class="bi bi-exclamation-circle text-white"></i>';
         case 'info': return '<i class="bi bi-info-circle text-white"></i>';
         default: return '<i class="bi bi-bell text-white"></i>';
+    }
+}
+
+// Tampilkan warning stok di keranjang
+function showCartStockWarning(itemElement, maxStock) {
+    const warning = itemElement.querySelector('.cart-stock-warning');
+    if (warning) {
+        warning.textContent = `Stok tersedia hanya ${maxStock}`;
+        warning.style.display = '';
+    }
+}
+
+function removeCartStockWarning(itemElement) {
+    const warning = itemElement.querySelector('.cart-stock-warning');
+    if (warning) {
+        warning.textContent = '';
+        warning.style.display = 'none';
     }
 }
