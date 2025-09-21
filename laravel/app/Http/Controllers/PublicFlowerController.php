@@ -63,4 +63,20 @@ class PublicFlowerController extends Controller
             'flowers' => $flowers,
         ];
     }
+
+    /**
+     * API: Ambil stok terbaru produk bunga
+     */
+    public function getStock($id)
+    {
+        $flower = \App\Models\Product::find($id);
+        if (!$flower) {
+            return response()->json(['error' => 'Not found'], 404);
+        }
+        return response()->json([
+            'id' => $flower->id,
+            'current_stock' => $flower->current_stock,
+            'base_unit' => $flower->base_unit,
+        ]);
+    }
 }

@@ -12,7 +12,7 @@
     <!-- Figtree Font -->
     <link href="https://fonts.bunny.net/css?family=figtree:400,500,600,700" rel="stylesheet" />
     <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="{{ asset('css/output.css') }}" rel="stylesheet">
     <script>
         tailwind.config = {
             theme: {

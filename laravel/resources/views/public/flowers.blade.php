@@ -17,7 +17,7 @@
     <!-- Notification Styles -->
     <link rel="stylesheet" href="{{ asset('css/notifications.css') }}">
     <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="{{ asset('css/output.css') }}" rel="stylesheet">
     <script>
         // Helper function untuk format harga yang aman
         function safeFormatPrice(price) {
@@ -66,15 +66,15 @@
                 alert('Harga produk tidak tersedia.');
             }
         }
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: {
-                        'sans': ['Figtree', 'sans-serif'],
-                    }
-                }
-            }
-        }
+        // tailwind.config = {
+        //     theme: {
+        //         extend: {
+        //             fontFamily: {
+        //                 'sans': ['Figtree', 'sans-serif'],
+        //             }
+        //         }
+        //     }
+        // }
 
         // Fungsi untuk toggle menu mobile
         function toggleMobileMenu() {
@@ -1417,7 +1417,7 @@
         // Gunakan base_unit dari database atau default ke 'tangkai'
         $baseUnit = $flower->base_unit ?? 'tangkai';
                                             @endphp
-                                            {{ $flower->current_stock }} {{ $baseUnit }}{{ $ikatLabel }}
+                                            <span id="stock-{{ $flower->id }}">{{ $flower->current_stock }} {{ $baseUnit }}{{ $ikatLabel }}</span>
                                         </span>
                                     </div>
                                     <div class="w-full bg-gray-200 rounded-full h-1.5">
@@ -1665,6 +1665,49 @@
     </button>
 
     <script src="{{ asset('js/cart.js') }}?v={{ time() }}"></script>
+    <script>
+        // Polling AJAX untuk update stok setiap 5 detik
+        document.addEventListener('DOMContentLoaded', function () {
+            function updateFlowerStock(flowerId, baseUnit, ikatPrice) {
+                fetch(`/api/flower-stock/${flowerId}`)
+                    .then(res => res.json())
+                    .then (data => {
+                        if (data.current_stock !== undefined) {
+                            let ikatLabel = '';
+                            if (ikatPrice && ikatPrice.unit_equivalent > 0) {
+                                const ikatCount = Math.floor(data.current_stock / ikatPrice.unit_equivalent);
+                                ikatLabel = ` / ${ikatCount} ikat`;
+                            }
+                            document.getElementById(`stock-${flowerId}`).textContent = `${data.current_stock} ${baseUnit}${ikatLabel}`;
+                        }
+                    });
+                }
+
+            // Siapkan polling untuk semua bunga yang ada di window.flowerPrices
+            @foreach($flowers as $flower)
+                (function () {
+                    const flowerId = {{ (int) $flower->id }};
+                    const baseUnit = "{{ $flower->base_unit ?? 'tangkai' }}";
+                    // Cari harga ikat yang tersedia
+                    let ikatPrice = null;
+                    @php
+                        $ikatPrice = $flower->prices->firstWhere('type', 'ikat_3')
+                            ?: $flower->prices->firstWhere('type', 'ikat 3')
+                            ?: $flower->prices->firstWhere('type', 'ikat_5')
+                            ?: $flower->prices->firstWhere('type', 'ikat 5')
+                            ?: $flower->prices->firstWhere('type', 'ikat_10')
+                            ?: $flower->prices->firstWhere('type', 'ikat 10')
+                            ?: $flower->prices->firstWhere('type', 'ikat_20')
+                            ?: $flower->prices->firstWhere('type', 'ikat 20');
+                    @endphp
+                    ikatPrice = @json($ikatPrice);
+                    setInterval(function () {
+                        updateFlowerStock(flowerId, baseUnit, ikatPrice);
+                    }, 3000);
+                })();
+            @endforeach
+    });
+    </script>
     <script>
         // Scroll to Bottom Button Logic
         const scrollToBottomBtn = document.getElementById('scrollToBottomBtn');

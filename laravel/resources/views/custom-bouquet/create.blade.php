@@ -14,7 +14,7 @@
     <!-- Notification Styles -->
     <link rel="stylesheet" href="{{ asset('css/notifications.css') }}">
     <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="{{ asset('css/output.css') }}" rel="stylesheet">
     <script>
         // --- GUIDE SLIDER LOGIC ---
         document.addEventListener('DOMContentLoaded', function () {
@@ -133,17 +133,7 @@
                 }
             });
         });
-        // --- END GUIDE SLIDER LOGIC ---
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: {
-                        'sans': ['Figtree', 'sans-serif'],
-                    }
-                }
-            }
-        }
-
+        // --- BOUQUET SLIDER LOGIC ---
         // Fungsi untuk toggle menu mobile
         function toggleMobileMenu() {
             const mobileMenu = document.getElementById('mobileMenu');
@@ -1242,7 +1232,7 @@
                 <!-- Actions -->
                 <div class="flex space-x-3">
                     <button type="button" id="cancelModalBtn"
-                        class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-700 py-2 px-4 rounded-md transition-colors">
+                        class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-700 hover:text-gray-900 font-medium py-2 px-4 rounded-md transition-colors">
                         Batal
                     </button>
                     <button type="button" id="addToBuilderBtn"
@@ -1706,7 +1696,6 @@
                     validateQuantity();
                 });
             });
-
             // Reset quantity
             document.getElementById('quantity').value = 1;
             validateQuantity();

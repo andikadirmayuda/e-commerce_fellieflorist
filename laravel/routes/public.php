@@ -35,6 +35,9 @@ Route::get('/public-order/{public_code}', [PublicOrderController::class, 'show']
 Route::get('/checkout', [PublicCheckoutController::class, 'show'])->name('public.checkout');
 Route::post('/checkout', [PublicCheckoutController::class, 'process'])->name('public.checkout.process');
 
+// API untuk mengambil stok terbaru produk bunga
+Route::get('/api/flower-stock/{id}', [App\Http\Controllers\PublicFlowerController::class, 'getStock'])->name('api.flower-stock');
+
 // Cart routes (agar keranjang dan checkout konsisten di public)
 Route::get('/cart', [PublicCartController::class, 'index'])->name('public.cart.index');
 Route::post('/cart/add', [PublicCartController::class, 'add'])->name('public.cart.add');

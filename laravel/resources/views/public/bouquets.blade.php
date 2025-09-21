@@ -15,7 +15,7 @@
     <!-- Notification Styles -->
     <link rel="stylesheet" href="{{ asset('css/notifications.css') }}">
     <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="{{ asset('css/output.css') }}" rel="stylesheet">
     <style>
         /* Custom scrollbar for mobile: lebih kecil */
         ::-webkit-scrollbar {

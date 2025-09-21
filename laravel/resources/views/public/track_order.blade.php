@@ -17,19 +17,7 @@
     <!-- Notification Styles -->
     <link rel="stylesheet" href="{{ asset('css/notifications.css') }}">
     <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: {
-                        'sans': ['Figtree', 'sans-serif'],
-                    }
-                }
-            }
-        }
-    </script>
-
+    <link href="{{ asset('css/output.css') }}" rel="stylesheet">
 
     <style>
         body,

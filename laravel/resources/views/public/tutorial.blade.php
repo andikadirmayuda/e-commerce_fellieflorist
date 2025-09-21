@@ -8,7 +8,7 @@
     <link rel="icon" href="{{ asset(config('app.logo')) }}" type="image/png">
     <link rel="icon" href="/favicon.ico" type="image/x-icon">
     <link href="https://fonts.bunny.net/css?family=figtree:400,500,600,700" rel="stylesheet" />
-    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="{{ asset('css/output.css') }}" rel="stylesheet">
 </head>
 
 <body class="min-h-screen bg-[#fff] font-sans">

@@ -1,8 +1,8 @@
-import defaultTheme from 'tailwindcss/defaultTheme';
-import forms from '@tailwindcss/forms';
+const defaultTheme = require('tailwindcss/defaultTheme');
+const forms = require('@tailwindcss/forms');
 
 /** @type {import('tailwindcss').Config} */
-export default {
+module.exports = {
     content: [
         './vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php',
         './storage/framework/views/*.php',
@@ -16,20 +16,20 @@ export default {
             },
             colors: {
                 primary: {
-                    DEFAULT: "#f25270", // Pink utama
-                    dark: "#f2527d",    // Pink variasi (hover/active)
-                    light: "#f285a2",   // Pink terang (accent/soft bg)
+                    DEFAULT: "#f25270",
+                    dark: "#f2527d",
+                    light: "#f285a2",
                 },
                 neutral: {
-                    black: "#172124",   // Hitam elegan
-                    gray: "#ca79a1ff",    // Abu-abu netral
-                    soft: "#f2f3f1",    // Putih soft (background)
-                    white: "#ffffff",   // Putih bersih
+                    black: "#172124",
+                    gray: "#ca79a1ff",
+                    soft: "#f2f3f1",
+                    white: "#ffffff",
                 },
                 text: {
-                    DEFAULT: "#172124", // Text utama (hitam)
-                    light: "#666666",   // Text sekunder
-                    white: "#ffffff",   // Text putih
+                    DEFAULT: "#172124",
+                    light: "#666666",
+                    white: "#ffffff",
                 },
             },
         },
