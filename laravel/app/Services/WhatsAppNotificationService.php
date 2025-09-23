@@ -114,7 +114,7 @@ class WhatsAppNotificationService
                 $message .= "• Ongkir: {$formattedShippingFee}\n";
             }
             if ($voucherAmount > 0) {
-                $message .= "• Voucher: -{$formattedVoucher}\n";
+                $message .= "• Potongan Voucher: -{$formattedVoucher}\n";
             }
             $message .= "• *Total Keseluruhan: {$formattedGrandTotal}*\n\n";
 

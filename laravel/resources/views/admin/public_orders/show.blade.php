@@ -1381,7 +1381,7 @@ $customBouquetItems = $order->items->filter(function ($item) {
                         @endphp
                                             <a href="https://wa.me/{{ preg_replace('/^0/', '62', preg_replace('/[^0-9]/', '', $order->wa_number)) }}?text={{ urlencode($waMessage) }}"
                                                 target="_blank"
-                                                class="inline-flex items-center justify-center px-4 py-3 bg-pink-600 hover:bg-pink-700 text-white font-medium rounded-lg transition-colors duration-200 shadow-sm">
+                                                class="inline-flex items-center justify-center px-4 py-3 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition-colors duration-200 shadow-sm">
                             <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 32 32">
                                 <path d="M16 0C7.163 0 0 7.163 0 16c0 8.837 7.163 16 16 16s16-7.163 16-16c0-8.837-7.163-16-16-16zm8.363 23.363c-.363.363-1.45.693-2.025.787-.55.088-1.275.163-2.075-.163-.475-.188-1.025-.375-1.75-.725-2.975-1.375-4.875-4.125-5.025-4.325-.15-.2-1.2-1.6-1.2-3.075 0-1.475.75-2.175 1.025-2.475.275-.3.6-.375.8-.375.2 0 .4.013.575.025.175.013.425.013.65.525.225.513.725 1.75.788 1.875.063.125.1.275.025.45-.075.175-.113.275-.225.425-.113.15-.225.325-.325.425-.1.1-.2.2-.088.375.113.175.5.825 1.025 1.338.525.513 1.025.675 1.225.75.2.075.325.063.45-.038.125-.1.575-.7.725-.938.15-.238.3-.2.5-.125.2.075 1.275.6 1.775.825.5.225.85.375.975.575.125.2.125 1.15-.238 1.513z" />
                             </svg>
@@ -1400,7 +1400,7 @@ $customBouquetItems = $order->items->filter(function ($item) {
                         </button>
 
                         <button onclick="shareToEmployeeGroup({{ $order->id }})"
-                            class="inline-flex items-center justify-center px-4 py-3 bg-gray-600 hover:bg-gray-700 text-white font-medium rounded-lg transition-colors duration-200 shadow-sm">
+                            class="inline-flex items-center justify-center px-4 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors duration-200 shadow-sm">
                             <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
                                 <path d="M16 12A4 4 0 1 1 12 8a4 4 0 0 1 4 4Z"/>
                                  <path d="M16 8v5a3 3 0 0 0 6 0v-1a10 10 0 1 0-3.92 7.94 1 1 0 1 0-.16-2A8 8 0 1 1 20 10.76V13a1 1 0  0 1-2 0V8a1 1 0 0 1 1-1 1 1 0 0 1 1 1v.28A10 10 0 0 0 12 2a10 10 0 0 0-8 16 1 1 0 0 0 1.6 1.2A8 8 0 0 1 12 4a8 8 0 0 1 3.2.64A6 6 0 0 0 12 8a6 6 0 0 0 4 5.66Z"/>

@@ -13,28 +13,7 @@
             <!-- Daftar harga akan diisi via JS -->
         </div>
 
-        <!-- Harga Grosir Section (hanya lihat)-->
-        <div id="wholesalePriceSection" class="mt-4" style="display:none;">
-            <div class="mb-2 flex flex-col items-center gap-2 justify-center text-center">
 
-                <span class="font-semibold text-blue-800 text-sm" style="color:#fca400"><i
-                        class="bi bi-box-seam text-blue-500" style="color:#fca400"></i> Harga
-                    Grosir</span>
-            </div>
-            <div class="overflow-x-auto">
-                <table class="min-w-full text-xs border border-[#fca400] rounded-lg">
-                    <thead>
-                        <tr class="bg-[#fca400] text-white">
-                            <th class="px-3 py-2 text-left-center">Jumlah Pembelian</th>
-                            <th class="px-3 py-2 text-left-center">Harga Satuan</th>
-                        </tr>
-                    </thead>
-                    <tbody id="wholesalePriceTableBody">
-                        <!-- Diisi via JS -->
-                    </tbody>
-                </table>
-            </div>
-        </div>
 
         <!-- Reseller Option Section -->
         <div id="resellerSection" class="mt-4 p-3 bg-amber-50 rounded-lg border border-amber-200"
@@ -61,6 +40,26 @@
             </div>
         </div>
 
+        <!-- Important Info Message (rapi) -->
+        <div class="flex items-start gap-3 p-3 bg-yellow-50 border border-yellow-200 rounded-lg mt-4 mb-2">
+            <div class="pt-1">
+                <i class="bi bi-person-vcard-fill text-yellow-500 text-lg"></i>
+            </div>
+            <div>
+                <div class="font-semibold text-yellow-800 text-sm mb-0.5">Syarat Gabung -> Reseller Fellie Florist
+                </div>
+                <div class="text-xs text-yellow-700 leading-snug">(- Total Belanja Dari Awal Pembelian
+                    <span class="font-semibold"> Min : Rp. 1.000.000)</span><br>
+                    (- Aktif Berbelanja di Fellie Florist)<br>
+                    (- Memiliki Nomor WhatsApp Aktif)<br><br>
+                    * Untuk Pendaftaran<br>Silahkan Hubungi Customer Service Fellie
+                    <br>
+                    Chat Via WhatsApp : 6282177929879 / klik icon WhatsApp
+                    <a href="https://wa.me/6282177929879" class="underline font-semibold"><i
+                            class="bi bi-whatsapp text-blue-500"></i></a>
+                </div>
+            </div>
+        </div>
         <!-- Important Info Message (rapi) -->
         <div class="flex items-start gap-3 p-3 bg-yellow-50 border border-yellow-200 rounded-lg mt-4 mb-2">
             <div class="pt-1">
@@ -138,12 +137,12 @@
     }
 
     function openCartPriceModal(flowerId, prices) {
+
+        // ...existing code...
         const modal = document.getElementById('cartPriceModal');
         const optionsDiv = document.getElementById('modalPriceOptions');
         const addBtn = document.getElementById('modalAddToCartBtn');
         const resellerSection = document.getElementById('resellerSection');
-        const wholesaleSection = document.getElementById('wholesalePriceSection');
-        const wholesaleTableBody = document.getElementById('wholesalePriceTableBody');
 
         currentFlowerId = flowerId;
         availablePrices = prices.filter(price => !['custom_ikat', 'custom_tangkai', 'custom_khusus'].includes(price.type));
@@ -172,44 +171,16 @@
                     customLabel = 'Per Ikat (Isi 20 Tangkai)';
                 }
                 return `
-                <label class="flex items-center gap-3 mb-2 cursor-pointer">
-                    <input type="radio" name="priceOption" value="${price.type}" onchange="selectPriceOption('${price.type}')">
-                    <span class="font-semibold text-gray-700">${customLabel}</span>
-                    <span class="ml-auto font-bold" style="color:#f25270">Rp ${formatPrice(price.price)}</span>
-                </label>
-            `;
+                    <label class="flex items-center gap-3 mb-2 cursor-pointer">
+                        <input type="radio" name="priceOption" value="${price.type}" onchange="selectPriceOption('${price.type}')">
+                        <span class="font-semibold text-gray-700">${customLabel}</span>
+                        <span class="ml-auto font-bold" style="color:#f25270">Rp ${formatPrice(price.price)}</span>
+                    </label>
+                `;
             })
             .join('');
 
-        // Render grosir/wholesale price table
-        const grosirPrices = prices.filter(price => price.type === 'grosir' || price.type === 'harga_grosir');
-        // Ambil semua min_grosir_qty unik dari harga selain grosir
-        const minGrosirQtyList = prices
-            .filter(price => (price.type === 'grosir' || price.type === 'harga_grosir') && price.min_grosir_qty)
-            .map(price => price.min_grosir_qty)
-            .filter((qty, idx, arr) => arr.indexOf(qty) === idx) // unik
-            .sort((a, b) => a - b);
-        if (grosirPrices.length > 0) {
-            wholesaleSection.style.display = 'block';
-            // Untuk setiap grosir price, render baris untuk setiap min_grosir_qty unik
-            wholesaleTableBody.innerHTML = grosirPrices.map(price => {
-                // Cek min_grosir_qty dari setiap price individual
-                if (price.min_grosir_qty && price.min_grosir_qty !== null && price.min_grosir_qty !== '') {
-                    return `<tr>
-            <td class="px-3 py-2 font-semibold">≥ ${price.min_grosir_qty} pcs</td>
-            <td class="px-3 py-2 font-bold text-blue-700">Rp ${formatPrice(price.price)}</td>
-        </tr>`;
-                } else {
-                    return `<tr>
-                        <td class="px-3 py-2 font-bold text-blue-700 text-center" style="color:#2D9C8F">Min > 2 Ikat</td>
-                        <td class="px-3 py-2 font-bold text-blue-700 text-center" style="color:#2D9C8F">Rp ${formatPrice(price.price)}</td>
-                    </tr>`;
-                }
-            }).join('');
-        } else {
-            wholesaleSection.style.display = 'none';
-            wholesaleTableBody.innerHTML = '';
-        }
+        // ...grosir logic removed...
 
         // Show/hide reseller section
         if (hasResellerPrice) {
@@ -227,6 +198,9 @@
             if (selectedPriceId) addToCartWithPrice(flowerId, selectedPriceId);
         };
     }
+
+    // ...existing code...
+
 
     function closeCartPriceModal() {
         document.getElementById('cartPriceModal').classList.add('hidden');

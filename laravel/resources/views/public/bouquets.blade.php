@@ -768,6 +768,10 @@
                 <a href="https://www.instagram.com/fellieflorist/" class="text-white hover:text-white transition-colors">
                     <i class="bi bi-instagram text-xl"></i>
                 </a>
+                <a href="https://shopee.co.id/fellieflorist" target="_blank" rel="noopener noreferrer"
+                    class="text-white hover:text-white transition-colors">
+                    <i class="bi bi-bag-fill text-xl"></i>
+                </a>
                 <a href="https://www.tiktok.com/@fellieflorist" class="text-white hover:text-white transition-colors"
                     target="_blank" rel="noopener noreferrer">
                     <i class="bi bi-tiktok text-xl"></i>

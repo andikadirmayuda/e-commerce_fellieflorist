@@ -432,7 +432,7 @@
             white-space: nowrap;
             font-size: 8px;
             font-weight: 700;
-            color: #f25270;
+            color: #ffffff;
             /* text-shadow: 0 1px 2px #fff, 0 0 2px #fff; */
         }
 
@@ -1628,6 +1628,10 @@
                     class="text-white hover:text-white transition-colors">
                     <i class="bi bi-instagram text-xl"></i>
                 </a>
+                <a href="https://shopee.co.id/fellieflorist" target="_blank" rel="noopener noreferrer"
+                    class="text-white hover:text-white transition-colors">
+                    <i class="bi bi-bag-fill text-xl"></i>
+                </a>
                 <a href="https://www.tiktok.com/@fellieflorist" class="text-white hover:text-white transition-colors"
                     target="_blank" rel="noopener noreferrer">
                     <i class="bi bi-tiktok text-xl"></i>
@@ -1691,14 +1695,14 @@
                     // Cari harga ikat yang tersedia
                     let ikatPrice = null;
                     @php
-                        $ikatPrice = $flower->prices->firstWhere('type', 'ikat_3')
-                            ?: $flower->prices->firstWhere('type', 'ikat 3')
-                            ?: $flower->prices->firstWhere('type', 'ikat_5')
-                            ?: $flower->prices->firstWhere('type', 'ikat 5')
-                            ?: $flower->prices->firstWhere('type', 'ikat_10')
-                            ?: $flower->prices->firstWhere('type', 'ikat 10')
-                            ?: $flower->prices->firstWhere('type', 'ikat_20')
-                            ?: $flower->prices->firstWhere('type', 'ikat 20');
+    $ikatPrice = $flower->prices->firstWhere('type', 'ikat_3')
+        ?: $flower->prices->firstWhere('type', 'ikat 3')
+        ?: $flower->prices->firstWhere('type', 'ikat_5')
+        ?: $flower->prices->firstWhere('type', 'ikat 5')
+        ?: $flower->prices->firstWhere('type', 'ikat_10')
+        ?: $flower->prices->firstWhere('type', 'ikat 10')
+        ?: $flower->prices->firstWhere('type', 'ikat_20')
+        ?: $flower->prices->firstWhere('type', 'ikat 20');
                     @endphp
                     ikatPrice = @json($ikatPrice);
                     setInterval(function () {

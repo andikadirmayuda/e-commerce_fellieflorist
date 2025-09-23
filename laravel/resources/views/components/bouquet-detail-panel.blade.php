@@ -11,7 +11,7 @@
     </div>
 
     <!-- Panel Content -->
-    <div class="overflow-y-auto h-full pb-20">
+    <div class="overflow-y-auto" style="max-height: calc(100vh - 112px); padding-bottom: 2rem;">
         <div id="bouquetDetailContent" class="p-6">
             <!-- Content will be populated by JavaScript -->
             <div class="flex items-center justify-center h-64">
@@ -24,7 +24,7 @@
     </div>
 
     <!-- Panel Footer Actions -->
-    <div class="absolute bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4">
+    <div class="absolute bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4 mt-16">
         <div class="flex gap-3">
             <button id="addBouquetToCart" onclick="addCurrentBouquetToCart()"
                 class="flex-1 bg-gradient-to-r from-rose-500 to-pink-500 hover:from-rose-600 hover:to-pink-600 text-white font-semibold py-3 px-4 rounded-xl transition-all duration-200 shadow-md hover:shadow-lg">
