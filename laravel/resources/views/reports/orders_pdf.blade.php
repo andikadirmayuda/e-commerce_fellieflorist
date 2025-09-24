@@ -211,6 +211,28 @@
                 <p>Sudah Dibayar Lunas</p>
             </div>
         </div>
+        <div class="summary-grid">
+            <div class="summary-card">
+                <h3 class="currency">Rp{{ isset($totalCashOrder) ? number_format($totalCashOrder, 0, ',', '.') : '0' }}
+                </h3>
+                <p>Pendapatan Cash</p>
+            </div>
+            <div class="summary-card">
+                <h3 class="currency">
+                    Rp{{ isset($totalTransferOrder) ? number_format($totalTransferOrder, 0, ',', '.') : '0' }}</h3>
+                <p>Pendapatan Transfer</p>
+            </div>
+            <div class="summary-card">
+                <h3 class="currency">
+                    Rp{{ isset($totalDebitOrder) ? number_format($totalDebitOrder, 0, ',', '.') : '0' }}</h3>
+                <p>Pendapatan Debit</p>
+            </div>
+            <div class="summary-card">
+                <h3 class="currency">
+                    Rp{{ isset($totalEwalletOrder) ? number_format($totalEwalletOrder, 0, ',', '.') : '0' }}</h3>
+                <p>Pendapatan E-Wallet</p>
+            </div>
+        </div>
     </div>
 
     <!-- Orders Table -->

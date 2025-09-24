@@ -128,8 +128,7 @@
                 <!-- Pesanan Diproses Card -->
                 <div class="stats-card p-6 relative overflow-hidden">
                     <div class="absolute right-0 top-0 w-32 h-32 opacity-10">
-                        <i
-                            class="bi bi-credit-card-check text-8xl text-green-500 transform translate-x-8 -translate-y-8"></i>
+                        <i class="bi bi-credit-card-check text-8xl text-green-500 transform translate-x-8 -translate-y-8"></i>
                     </div>
                     <div class="relative">
                         <div class="flex items-center mb-4">
@@ -149,8 +148,7 @@
                 <!-- Menunggu Pembayaran Card -->
                 <div class="stats-card p-6 relative overflow-hidden">
                     <div class="absolute right-0 top-0 w-32 h-32 opacity-10">
-                        <i
-                            class="bi bi-credit-card text-8xl text-orange-500 transform translate-x-8 -translate-y-8"></i>
+                        <i class="bi bi-credit-card text-8xl text-orange-500 transform translate-x-8 -translate-y-8"></i>
                     </div>
                     <div class="relative">
                         <div class="flex items-center mb-4">
@@ -163,6 +161,83 @@
                         <div class="flex items-center mt-2">
                             <i class="bi bi-hourglass-split text-xs text-orange-500 mr-1"></i>
                             <p class="text-xs text-gray-500">Menunggu pembayaran</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card Statistik Pendapatan Per Metode Pembayaran -->
+                <div class="stats-card p-6 relative overflow-hidden">
+                    <div class="absolute right-0 top-0 w-32 h-32 opacity-10">
+                        <i class="bi bi-cash text-8xl text-green-400 transform translate-x-8 -translate-y-8"></i>
+                    </div>
+                    <div class="relative">
+                        <div class="flex items-center mb-4">
+                            <div class="p-3 bg-gradient-to-br from-green-400 to-green-500 rounded-xl shadow-lg">
+                                <i class="bi bi-cash text-xl text-white"></i>
+                            </div>
+                            <p class="ml-3 text-sm font-medium text-gray-500">Pendapatan Cash</p>
+                        </div>
+                        <p class="text-2xl font-bold text-gray-800">Rp{{ isset($totalCashOrder) ? number_format($totalCashOrder, 0, ',', '.') : '0' }}</p>
+                        <div class="flex items-center mt-2">
+                            <i class="bi bi-currency-dollar text-xs text-green-400 mr-1"></i>
+                            <p class="text-xs text-gray-500">Total cash order</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="stats-card p-6 relative overflow-hidden">
+                    <div class="absolute right-0 top-0 w-32 h-32 opacity-10">
+                        <i class="bi bi-bank text-8xl text-blue-400 transform translate-x-8 -translate-y-8"></i>
+                    </div>
+                    <div class="relative">
+                        <div class="flex items-center mb-4">
+                            <div class="p-3 bg-gradient-to-br from-blue-400 to-blue-500 rounded-xl shadow-lg">
+                                <i class="bi bi-bank text-xl text-white"></i>
+                            </div>
+                            <p class="ml-3 text-sm font-medium text-gray-500">Pendapatan Transfer</p>
+                        </div>
+                        <p class="text-2xl font-bold text-gray-800">Rp{{ isset($totalTransferOrder) ? number_format($totalTransferOrder, 0, ',', '.') : '0' }}</p>
+                        <div class="flex items-center mt-2">
+                            <i class="bi bi-currency-dollar text-xs text-blue-400 mr-1"></i>
+                            <p class="text-xs text-gray-500">Total transfer order</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="stats-card p-6 relative overflow-hidden">
+                    <div class="absolute right-0 top-0 w-32 h-32 opacity-10">
+                        <i class="bi bi-credit-card-2-front text-8xl text-purple-400 transform translate-x-8 -translate-y-8"></i>
+                    </div>
+                    <div class="relative">
+                        <div class="flex items-center mb-4">
+                            <div class="p-3 bg-gradient-to-br from-purple-400 to-purple-500 rounded-xl shadow-lg">
+                                <i class="bi bi-credit-card-2-front text-xl text-white"></i>
+                            </div>
+                            <p class="ml-3 text-sm font-medium text-gray-500">Pendapatan Debit</p>
+                        </div>
+                        <p class="text-2xl font-bold text-gray-800">Rp{{ isset($totalDebitOrder) ? number_format($totalDebitOrder, 0, ',', '.') : '0' }}</p>
+                        <div class="flex items-center mt-2">
+                            <i class="bi bi-currency-dollar text-xs text-purple-400 mr-1"></i>
+                            <p class="text-xs text-gray-500">Total debit order</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="stats-card p-6 relative overflow-hidden">
+                    <div class="absolute right-0 top-0 w-32 h-32 opacity-10">
+                        <i class="bi bi-wallet2 text-8xl text-yellow-400 transform translate-x-8 -translate-y-8"></i>
+                    </div>
+                    <div class="relative">
+                        <div class="flex items-center mb-4">
+                            <div class="p-3 bg-gradient-to-br from-yellow-400 to-yellow-500 rounded-xl shadow-lg">
+                                <i class="bi bi-wallet2 text-xl text-white"></i>
+                            </div>
+                            <p class="ml-3 text-sm font-medium text-gray-500">Pendapatan E-Wallet</p>
+                        </div>
+                        <p class="text-2xl font-bold text-gray-800">Rp{{ isset($totalEwalletOrder) ? number_format($totalEwalletOrder, 0, ',', '.') : '0' }}</p>
+                        <div class="flex items-center mt-2">
+                            <i class="bi bi-currency-dollar text-xs text-yellow-400 mr-1"></i>
+                            <p class="text-xs text-gray-500">Total e-wallet order</p>
                         </div>
                     </div>
                 </div>

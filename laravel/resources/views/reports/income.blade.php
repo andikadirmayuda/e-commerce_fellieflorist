@@ -153,6 +153,7 @@
     <div class="py-8 gradient-bg min-h-screen">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <!-- Cards Statistik -->
+            <!-- Cards Statistik Metode Pembayaran -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                 <!-- Total Penjualan Card -->
                 <div class="stats-card p-6 relative overflow-hidden">
@@ -174,7 +175,6 @@
                         </div>
                     </div>
                 </div>
-
                 <!-- Total Pemesanan Card -->
                 <div class="stats-card p-6 relative overflow-hidden">
                     <div class="absolute right-0 top-0 w-32 h-32 opacity-10">
@@ -195,7 +195,6 @@
                         </div>
                     </div>
                 </div>
-
                 <!-- Total Pendapatan Card -->
                 <div class="stats-card p-6 relative overflow-hidden">
                     <div class="absolute right-0 top-0 w-32 h-32 opacity-10">
@@ -214,6 +213,173 @@
                             <i class="bi bi-check-circle text-xs text-purple-500 mr-1"></i>
                             <p class="text-xs text-gray-500">Gabungan semua</p>
                         </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Statistik Gabungan Metode Pembayaran (Sale + Order) -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+                <div class="stats-card p-6 relative overflow-hidden">
+                    <div class="absolute right-0 top-0 w-20 h-20 opacity-10">
+                        <i class="bi bi-cash text-6xl text-green-500"></i>
+                    </div>
+                    <div class="relative">
+                        <div class="flex items-center mb-2">
+                            <div class="p-2 bg-green-100 rounded-xl"><i class="bi bi-cash text-lg text-green-600"></i>
+                            </div>
+                            <p class="ml-2 text-sm font-medium text-gray-500">Total Cash (Sale + Order)</p>
+                        </div>
+                        <p class="text-xl font-bold text-gray-800">
+                            Rp{{ number_format(($totalCashSale ?? 0) + ($totalCashOrder ?? 0), 0, ',', '.') }}</p>
+                    </div>
+                </div>
+                <div class="stats-card p-6 relative overflow-hidden">
+                    <div class="absolute right-0 top-0 w-20 h-20 opacity-10">
+                        <i class="bi bi-bank text-6xl text-blue-500"></i>
+                    </div>
+                    <div class="relative">
+                        <div class="flex items-center mb-2">
+                            <div class="p-2 bg-blue-100 rounded-xl"><i class="bi bi-bank text-lg text-blue-600"></i>
+                            </div>
+                            <p class="ml-2 text-sm font-medium text-gray-500">Total Transfer (Sale + Order)</p>
+                        </div>
+                        <p class="text-xl font-bold text-gray-800">
+                            Rp{{ number_format(($totalTransferSale ?? 0) + ($totalTransferOrder ?? 0), 0, ',', '.') }}
+                        </p>
+                    </div>
+                </div>
+                <div class="stats-card p-6 relative overflow-hidden">
+                    <div class="absolute right-0 top-0 w-20 h-20 opacity-10">
+                        <i class="bi bi-credit-card text-6xl text-purple-500"></i>
+                    </div>
+                    <div class="relative">
+                        <div class="flex items-center mb-2">
+                            <div class="p-2 bg-purple-100 rounded-xl"><i
+                                    class="bi bi-credit-card text-lg text-purple-600"></i></div>
+                            <p class="ml-2 text-sm font-medium text-gray-500">Total Debit (Sale + Order)</p>
+                        </div>
+                        <p class="text-xl font-bold text-gray-800">
+                            Rp{{ number_format(($totalDebitSale ?? 0) + ($totalDebitOrder ?? 0), 0, ',', '.') }}</p>
+                    </div>
+                </div>
+                <div class="stats-card p-6 relative overflow-hidden">
+                    <div class="absolute right-0 top-0 w-20 h-20 opacity-10">
+                        <i class="bi bi-wallet2 text-6xl text-pink-500"></i>
+                    </div>
+                    <div class="relative">
+                        <div class="flex items-center mb-2">
+                            <div class="p-2 bg-pink-100 rounded-xl"><i class="bi bi-wallet2 text-lg text-pink-600"></i>
+                            </div>
+                            <p class="ml-2 text-sm font-medium text-gray-500">Total E-Wallet (Order)</p>
+                        </div>
+                        <p class="text-xl font-bold text-gray-800">
+                            Rp{{ number_format($totalEwalletOrder ?? 0, 0, ',', '.') }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Statistik Metode Pembayaran Sale -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <div class="stats-card p-6 relative overflow-hidden">
+                    <div class="absolute right-0 top-0 w-20 h-20 opacity-10">
+                        <i class="bi bi-cash text-6xl text-green-500"></i>
+                    </div>
+                    <div class="relative">
+                        <div class="flex items-center mb-2">
+                            <div class="p-2 bg-green-100 rounded-xl"><i class="bi bi-cash text-lg text-green-600"></i>
+                            </div>
+                            <p class="ml-2 text-sm font-medium text-gray-500">Total Cash Sale</p>
+                        </div>
+                        <p class="text-xl font-bold text-gray-800">
+                            Rp{{ number_format($totalCashSale ?? 0, 0, ',', '.') }}</p>
+                    </div>
+                </div>
+                <div class="stats-card p-6 relative overflow-hidden">
+                    <div class="absolute right-0 top-0 w-20 h-20 opacity-10">
+                        <i class="bi bi-bank text-6xl text-blue-500"></i>
+                    </div>
+                    <div class="relative">
+                        <div class="flex items-center mb-2">
+                            <div class="p-2 bg-blue-100 rounded-xl"><i class="bi bi-bank text-lg text-blue-600"></i>
+                            </div>
+                            <p class="ml-2 text-sm font-medium text-gray-500">Total Transfer Sale</p>
+                        </div>
+                        <p class="text-xl font-bold text-gray-800">
+                            Rp{{ number_format($totalTransferSale ?? 0, 0, ',', '.') }}</p>
+                    </div>
+                </div>
+                <div class="stats-card p-6 relative overflow-hidden">
+                    <div class="absolute right-0 top-0 w-20 h-20 opacity-10">
+                        <i class="bi bi-credit-card text-6xl text-purple-500"></i>
+                    </div>
+                    <div class="relative">
+                        <div class="flex items-center mb-2">
+                            <div class="p-2 bg-purple-100 rounded-xl"><i
+                                    class="bi bi-credit-card text-lg text-purple-600"></i></div>
+                            <p class="ml-2 text-sm font-medium text-gray-500">Total Debit Sale</p>
+                        </div>
+                        <p class="text-xl font-bold text-gray-800">
+                            Rp{{ number_format($totalDebitSale ?? 0, 0, ',', '.') }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Statistik Metode Pembayaran Public Order -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+                <div class="stats-card p-6 relative overflow-hidden">
+                    <div class="absolute right-0 top-0 w-20 h-20 opacity-10">
+                        <i class="bi bi-cash text-6xl text-green-500"></i>
+                    </div>
+                    <div class="relative">
+                        <div class="flex items-center mb-2">
+                            <div class="p-2 bg-green-100 rounded-xl"><i class="bi bi-cash text-lg text-green-600"></i>
+                            </div>
+                            <p class="ml-2 text-sm font-medium text-gray-500">Total Cash Order</p>
+                        </div>
+                        <p class="text-xl font-bold text-gray-800">
+                            Rp{{ number_format($totalCashOrder ?? 0, 0, ',', '.') }}</p>
+                    </div>
+                </div>
+                <div class="stats-card p-6 relative overflow-hidden">
+                    <div class="absolute right-0 top-0 w-20 h-20 opacity-10">
+                        <i class="bi bi-bank text-6xl text-blue-500"></i>
+                    </div>
+                    <div class="relative">
+                        <div class="flex items-center mb-2">
+                            <div class="p-2 bg-blue-100 rounded-xl"><i class="bi bi-bank text-lg text-blue-600"></i>
+                            </div>
+                            <p class="ml-2 text-sm font-medium text-gray-500">Total Transfer Order</p>
+                        </div>
+                        <p class="text-xl font-bold text-gray-800">
+                            Rp{{ number_format($totalTransferOrder ?? 0, 0, ',', '.') }}</p>
+                    </div>
+                </div>
+                <div class="stats-card p-6 relative overflow-hidden">
+                    <div class="absolute right-0 top-0 w-20 h-20 opacity-10">
+                        <i class="bi bi-credit-card text-6xl text-purple-500"></i>
+                    </div>
+                    <div class="relative">
+                        <div class="flex items-center mb-2">
+                            <div class="p-2 bg-purple-100 rounded-xl"><i
+                                    class="bi bi-credit-card text-lg text-purple-600"></i></div>
+                            <p class="ml-2 text-sm font-medium text-gray-500">Total Debit Order</p>
+                        </div>
+                        <p class="text-xl font-bold text-gray-800">
+                            Rp{{ number_format($totalDebitOrder ?? 0, 0, ',', '.') }}</p>
+                    </div>
+                </div>
+                <div class="stats-card p-6 relative overflow-hidden">
+                    <div class="absolute right-0 top-0 w-20 h-20 opacity-10">
+                        <i class="bi bi-wallet2 text-6xl text-pink-500"></i>
+                    </div>
+                    <div class="relative">
+                        <div class="flex items-center mb-2">
+                            <div class="p-2 bg-pink-100 rounded-xl"><i class="bi bi-wallet2 text-lg text-pink-600"></i>
+                            </div>
+                            <p class="ml-2 text-sm font-medium text-gray-500">Total E-Wallet Order</p>
+                        </div>
+                        <p class="text-xl font-bold text-gray-800">
+                            Rp{{ number_format($totalEwalletOrder ?? 0, 0, ',', '.') }}</p>
                     </div>
                 </div>
             </div>
@@ -244,49 +410,51 @@
                             </tr>
                         </thead>
                         <tbody class="bg-white divide-y divide-gray-200">
-                            @forelse($harian as $tgl => $row)
-                                <tr class="hover:bg-gray-50 transition-colors duration-200">
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <div class="flex items-center">
-                                            <div
-                                                class="flex items-center justify-center w-8 h-8 bg-blue-100 rounded-lg mr-3">
-                                                <i class="bi bi-calendar-event text-blue-600 text-sm"></i>
+                            @if(count($harian) > 0)
+                                @foreach($harian as $tgl => $row)
+                                    <tr class="hover:bg-gray-50 transition-colors duration-200">
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <div class="flex items-center">
+                                                <div
+                                                    class="flex items-center justify-center w-8 h-8 bg-blue-100 rounded-lg mr-3">
+                                                    <i class="bi bi-calendar-event text-blue-600 text-sm"></i>
+                                                </div>
+                                                <div class="text-sm font-medium text-gray-900">{{ $tgl }}</div>
                                             </div>
-                                            <div class="text-sm font-medium text-gray-900">{{ $tgl }}</div>
-                                        </div>
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <div class="flex items-center">
-                                            <i class="bi bi-shop text-green-500 mr-2"></i>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <div class="flex items-center">
+                                                <i class="bi bi-shop text-green-500 mr-2"></i>
+                                                <span
+                                                    class="text-sm text-gray-900">Rp{{ number_format($row['penjualan'], 0, ',', '.') }}</span>
+                                            </div>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <div class="flex items-center">
+                                                <i class="bi bi-laptop text-blue-500 mr-2"></i>
+                                                <span
+                                                    class="text-sm text-gray-900">Rp{{ number_format($row['pemesanan'], 0, ',', '.') }}</span>
+                                            </div>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
                                             <span
-                                                class="text-sm text-gray-900">Rp{{ number_format($row['penjualan'], 0, ',', '.') }}</span>
-                                        </div>
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <div class="flex items-center">
-                                            <i class="bi bi-laptop text-blue-500 mr-2"></i>
-                                            <span
-                                                class="text-sm text-gray-900">Rp{{ number_format($row['pemesanan'], 0, ',', '.') }}</span>
-                                        </div>
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <span
-                                            class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-purple-100 text-purple-800">
-                                            <i class="bi bi-cash-stack mr-1"></i>
-                                            Rp{{ number_format($row['penjualan'] + $row['pemesanan'], 0, ',', '.') }}
-                                        </span>
-                                    </td>
-                                </tr>
-                            @empty
+                                                class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-purple-100 text-purple-800">
+                                                <i class="bi bi-cash-stack mr-1"></i>
+                                                Rp{{ number_format($row['penjualan'] + $row['pemesanan'], 0, ',', '.') }}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            @else
                                 <tr>
                                     <td colspan="4" class="px-6 py-12 text-center">
                                         <div class="flex flex-col items-center">
                                             <i class="bi bi-calendar-x text-4xl text-gray-300 mb-4"></i>
-                                            <p class="text-gray-500 text-sm">Tidak ada data pendapatan harian</p>
+                                            <p class="text-gray-500 text-sm">Tidak ada transaksi pada periode ini</p>
                                         </div>
                                     </td>
                                 </tr>
-                            @endforelse
+                            @endif
                         </tbody>
                     </table>
                 </div>

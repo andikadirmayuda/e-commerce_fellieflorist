@@ -108,6 +108,17 @@
 
     <div class="summary">
         <div class="summary-item">Total Transaksi: <strong>{{ $totalTransaksi }}</strong> transaksi</div>
+
+        <div class="summary-item">Pendapatan Cash:
+            <strong>Rp{{ isset($totalCash) ? number_format($totalCash, 0, ',', '.') : '0' }}</strong>
+        </div>
+        <div class="summary-item">Pendapatan Transfer:
+            <strong>Rp{{ isset($totalTransfer) ? number_format($totalTransfer, 0, ',', '.') : '0' }}</strong>
+        </div>
+        <div class="summary-item">Pendapatan Debit:
+            <strong>Rp{{ isset($totalDebit) ? number_format($totalDebit, 0, ',', '.') : '0' }}</strong>
+        </div>
+        <br>
         <div class="summary-item">Total Pendapatan:
             <strong>Rp{{ number_format($totalPendapatan, 0, ',', '.') }}</strong>
         </div>

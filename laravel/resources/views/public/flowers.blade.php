@@ -19,6 +19,155 @@
     <!-- Tailwind CSS -->
     <link href="{{ asset('css/output.css') }}" rel="stylesheet">
     <script>
+        // --- GUIDE SLIDER LOGIC ---
+        document.addEventListener('DOMContentLoaded', function () {
+            // Modal open/close
+            const openGuideBtn = document.getElementById('openGuideBtn');
+            const guideModal = document.getElementById('guideModal');
+            const closeGuideModal = document.getElementById('closeGuideModal');
+            if (openGuideBtn) {
+                openGuideBtn.addEventListener('click', function () {
+                    guideModal.classList.remove('hidden');
+                    guideModal.classList.add('flex');
+                });
+            }
+            if (closeGuideModal) {
+                closeGuideModal.addEventListener('click', function () {
+                    guideModal.classList.add('hidden');
+                    guideModal.classList.remove('flex');
+                });
+            }
+
+            // Guide slider logic
+            const guideSlider = document.getElementById('guideSlider');
+            const guideSlides = guideSlider.querySelectorAll('img');
+            const guideDots = document.querySelectorAll('#guideSliderDots .guide-dot');
+            let guideIndex = 0;
+            let guideStartX = 0;
+            let guideIsDragging = false;
+            let guideDragDistance = 0;
+            let guideAutoSlideInterval;
+
+            function showGuideSlide(index, smooth = true) {
+                guideIndex = index;
+                guideSlider.style.transition = smooth ? 'transform 0.6s cubic-bezier(0.4,0,0.2,1)' : 'none';
+                guideSlider.style.transform = `translateX(-${index * 100}%)`;
+                guideDots.forEach((dot, i) => {
+                    dot.classList.toggle('opacity-100', i === index);
+                    dot.classList.toggle('opacity-70', i !== index);
+                    dot.classList.toggle('bg-rose-500', i === index);
+                    dot.classList.toggle('bg-rose-300', i !== index);
+                });
+            }
+            function nextGuideSlide() {
+                showGuideSlide((guideIndex + 1) % guideSlides.length);
+            }
+            function prevGuideSlide() {
+                showGuideSlide((guideIndex - 1 + guideSlides.length) % guideSlides.length);
+            }
+            guideDots.forEach(dot => {
+                dot.addEventListener('click', function () {
+                    showGuideSlide(parseInt(dot.dataset.index));
+                });
+            });
+            // Auto slide
+            function startGuideAutoSlide() {
+                guideAutoSlideInterval = setInterval(nextGuideSlide, 4000);
+            }
+            function stopGuideAutoSlide() {
+                clearInterval(guideAutoSlideInterval);
+            }
+            guideSlider.addEventListener('mouseenter', stopGuideAutoSlide);
+            guideSlider.addEventListener('mouseleave', startGuideAutoSlide);
+            showGuideSlide(0);
+            startGuideAutoSlide();
+            // Touch/drag support
+            guideSlider.addEventListener('touchstart', function (e) {
+                stopGuideAutoSlide();
+                guideIsDragging = true;
+                guideStartX = e.touches[0].clientX;
+                guideSlider.style.transition = 'none';
+            });
+            guideSlider.addEventListener('touchmove', function (e) {
+                if (!guideIsDragging) return;
+                guideDragDistance = e.touches[0].clientX - guideStartX;
+                guideSlider.style.transform = `translateX(calc(-${guideIndex * 100}% + ${guideDragDistance}px))`;
+            });
+            guideSlider.addEventListener('touchend', function (e) {
+                if (!guideIsDragging) return;
+                guideIsDragging = false;
+                if (guideDragDistance > 50) {
+                    prevGuideSlide();
+                } else if (guideDragDistance < -50) {
+                    nextGuideSlide();
+                } else {
+                    showGuideSlide(guideIndex);
+                }
+                guideDragDistance = 0;
+                startGuideAutoSlide();
+            });
+            // Mouse drag (optional)
+            guideSlider.addEventListener('mousedown', function (e) {
+                stopGuideAutoSlide();
+                guideIsDragging = true;
+                guideStartX = e.clientX;
+                guideSlider.style.transition = 'none';
+            });
+            guideSlider.addEventListener('mousemove', function (e) {
+                if (!guideIsDragging) return;
+                guideDragDistance = e.clientX - guideStartX;
+                guideSlider.style.transform = `translateX(calc(-${guideIndex * 100}% + ${guideDragDistance}px))`;
+            });
+            guideSlider.addEventListener('mouseup', function (e) {
+                if (!guideIsDragging) return;
+                guideIsDragging = false;
+                if (guideDragDistance > 50) {
+                    prevGuideSlide();
+                } else if (guideDragDistance < -50) {
+                    nextGuideSlide();
+                } else {
+                    showGuideSlide(guideIndex);
+                }
+                guideDragDistance = 0;
+                startGuideAutoSlide();
+            });
+            guideSlider.addEventListener('mouseleave', function () {
+                if (guideIsDragging) {
+                    guideIsDragging = false;
+                    showGuideSlide(guideIndex);
+                    guideDragDistance = 0;
+                    startGuideAutoSlide();
+                }
+            });
+        });
+        // --- BOUQUET SLIDER LOGIC ---
+        // Fungsi untuk toggle menu mobile
+        function toggleMobileMenu() {
+            const mobileMenu = document.getElementById('mobileMenu');
+            if (mobileMenu.classList.contains('hidden')) {
+                // Tampilkan menu
+                mobileMenu.classList.remove('hidden');
+                mobileMenu.classList.add('animate-fade-in-down');
+            } else {
+                // Sembunyikan menu
+                mobileMenu.classList.add('hidden');
+                mobileMenu.classList.remove('animate-fade-in-down');
+            }
+        }
+
+        // Tutup menu mobile ketika user klik di luar menu
+        document.addEventListener('click', function (event) {
+            const mobileMenu = document.getElementById('mobileMenu');
+            const hamburgerButton = event.target.closest('[onclick="toggleMobileMenu()"]');
+
+            if (!hamburgerButton && !mobileMenu.contains(event.target) && !mobileMenu.classList.contains('hidden')) {
+                mobileMenu.classList.add('hidden');
+            }
+        });
+
+        // ...existing code...
+    </script>
+    <script>
         // Helper function untuk format harga yang aman
         function safeFormatPrice(price) {
             // Ensure price is a number, remove any existing separators
@@ -983,9 +1132,15 @@
                     <li>Klik tombol <b>Tambah ke Keranjang</b>.</li>
                     <li>Lanjutkan ke halaman keranjang untuk checkout.</li>
                 </ul>
-                <a href="/tutorial"
-                    class="mt-2 inline-block bg-[#f25270] text-white px-4 py-2 rounded-lg font-semibold hover:bg-[#f25270] transition">Lihat
-                    Tutorial Lengkap</a>
+
+                <div class="flex gap-2 mt-2">
+                    <a href="/tutorial"
+                        class="inline-block bg-[#f25270] text-white px-4 py-2 rounded-lg font-semibold hover:bg-[#f25270] transition">Lihat
+                        Tutorial Lengkap</a>
+                    <button onclick="closeOrderTutorialPopup()"
+                        class="inline-block bg-gray-300 text-gray-700 px-4 py-2 rounded-lg font-semibold hover:bg-gray-400 transition">Tutup</button>
+                </div>
+
             </div>
         </div>
     </div>
@@ -1054,12 +1209,13 @@
                                 title="Lacak Pesanan">
                                 <i class="bi bi-truck text-xl"></i>
                             </a>
-                    
+
                             <!-- Order Detail - Muncul setelah checkout -->
                             @if(session('last_public_order_code'))
                                 <a href="{{ route('public.order.detail', ['public_code' => session('last_public_order_code')]) }}"
                                     class="relative text-white bg-[#59aaa1] hover:bg-[#59aaa1]/10 p-2 rounded-full hover:shadow-lg transition-all duration-200 order-detail-pulse"
-                                    title="Lihat Detail Pesanan Terbaru - Kode: {{ session('last_public_order_code') }}" style="background:#f25270">
+                                    title="Lihat Detail Pesanan Terbaru - Kode: {{ session('last_public_order_code') }}"
+                                    style="background:#f25270">
                                     <i class="bi bi-receipt-cutoff text-xl"></i>
                                     <span
                                         class="absolute -top-1 -right-1 bg-green-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold notification-badge">
@@ -1067,7 +1223,7 @@
                                     </span>
                                 </a>
                             @endif
-                    
+
                             <!-- Cart -->
                             <button onclick="toggleCart()"
                                 class="text-[#f25270] hover:text-[#172124] relative p-2 rounded-full hover:bg-[#f285a2]/10 transition-all duration-200"
@@ -1076,13 +1232,13 @@
                                 <span id="cartBadge"
                                     class="absolute -top-1 -right-1 w-4 h-4 bg-rose-500 text-white text-[10px] rounded-full flex items-center justify-center hidden">0</span>
                             </button>
-                    
+
                             <a href="{{ route('login') }}"
                                 class="text-[#f25270] hover:text-[#172124] p-2 rounded-full hover:bg-[#f285a2]/10 transition-all duration-200">
                                 <i class="bi bi-person-circle text-xl"></i>
                             </a>
                         </div>
-                    
+
                         <!-- Mobile Menu Button -->
                         <div class="md:hidden flex items-center space-x-2">
                             <!-- Cart Button - Always Visible -->
@@ -1093,7 +1249,7 @@
                                 <span id="cartBadgeMobile"
                                     class="absolute -top-1 -right-1 w-4 h-4 bg-rose-500 text-white text-[10px] rounded-full flex items-center justify-center hidden">0</span>
                             </button>
-                    
+
                             <!-- Hamburger Button -->
                             <button onclick="toggleMobileMenu()"
                                 class="text-gray-600 hover:text-rose-600 p-2 rounded-full hover:bg-rose-50 transition-all duration-200">
@@ -1101,16 +1257,17 @@
                             </button>
                         </div>
                     </div>
-                    
+
                     <!-- Mobile Menu Dropdown -->
-                    <div id="mobileMenu" class="hidden fixed top-[80px] right-0 w-48 bg-white shadow-lg rounded-bl-lg z-50">
+                    <div id="mobileMenu"
+                        class="hidden fixed top-[80px] right-0 w-48 bg-white shadow-lg rounded-bl-lg z-50">
                         <div class="py-2">
                             <a href="{{ route('public.order.track') }}"
                                 class="flex items-center px-4 py-2 text-gray-600 hover:bg-rose-50 hover:text-rose-600">
                                 <i class="bi bi-truck mr-2"></i>
                                 <span>Lacak Pesanan</span>
                             </a>
-                    
+
                             @if(session('last_public_order_code'))
                                 <a href="{{ route('public.order.detail', ['public_code' => session('last_public_order_code')]) }}"
                                     class="flex items-center px-4 py-2 text-gray-600 hover:bg-rose-50 hover:text-rose-600">
@@ -1118,7 +1275,7 @@
                                     <span>Pesanan Terakhir</span>
                                 </a>
                             @endif
-                    
+
                             <a href="{{ route('login') }}"
                                 class="flex items-center px-4 py-2 text-gray-600 hover:bg-rose-50 hover:text-rose-600">
                                 <i class="bi bi-person-circle mr-2"></i>
@@ -1161,6 +1318,87 @@
 
     <!-- Main Content -->
     <div class="w-full max-w-6xl mx-auto px-4 py-6">
+
+        <!-- Custom Bouquet Example Slider -->
+        <div class="w-full max-w-4xl mx-auto mt-2 mb-4">
+            <div class="relative overflow-hidden rounded-xl shadow-lg">
+                <div id="bouquetSlider" class="flex transition-transform duration-700 ease-in-out touch-pan-x">
+                    <img src="{{ asset('fellie01.png') }}" alt="Bouquet 2"
+                        class="w-full h-full object-cover flex-shrink-0">
+                    <img src="{{ asset('fellie02.png') }}" alt="Bouquet 3"
+                        class="w-full h-full object-cover flex-shrink-0">
+                    <img src="{{ asset('fellie03.png') }}" alt="Bouquet 4"
+                        class="w-full h-full object-cover flex-shrink-0">
+                    <img src="{{ asset('fellie04.png') }}" alt="Bouquet 4"
+                        class="w-full h-full object-cover flex-shrink-0">
+                    <img src="{{ asset('fellie05.png') }}" alt="Bouquet 4"
+                        class="w-full h-full object-cover flex-shrink-0">
+                </div>
+                <!-- Dots -->
+                <div id="sliderDots" class="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-2">
+                    <span class="slider-dot w-3 h-3 bg-[#172124] rounded-full opacity-70 cursor-pointer"
+                        data-index="0"></span>
+                    <span class="slider-dot w-3 h-3 bg-[#172124] rounded-full opacity-70 cursor-pointer"
+                        data-index="1"></span>
+                    <span class="slider-dot w-3 h-3 bg-[#172124] rounded-full opacity-70 cursor-pointer"
+                        data-index="2"></span>
+                    <span class="slider-dot w-3 h-3 bg-[#172124] rounded-full opacity-70 cursor-pointer"
+                        data-index="3"></span>
+                    <span class="slider-dot w-3 h-3 bg-[#172124] rounded-full opacity-70 cursor-pointer"
+                        data-index="4"></span>
+                </div>
+
+            </div>
+            <!-- Modal Panduan Slider -->
+            <div id="guideModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+                <div class="bg-white rounded-xl shadow-xl max-w-lg w-full mx-4 max-h-[90vh] overflow-y-auto relative">
+                    <button id="closeGuideModal"
+                        class="absolute top-3 right-3 text-gray-600 hover:text-[#f2527d] text-2xl">
+                        <i class="bi bi-x-lg"></i>
+                    </button>
+                    <div class="p-6">
+                        <h3 class="text-lg font-bold mb-4 text-[#f2527d] text-center">Panduan Custom Bouquet</h3>
+                        <div class="relative overflow-hidden rounded-lg">
+                            <div id="guideSlider" class="flex transition-transform duration-700 ease-in-out">
+                                <img src="{{ asset('fellie01.png') }}" alt="Panduan 1"
+                                    class="w-full h-full object-cover flex-shrink-0">
+                                <img src="{{ asset('fellie02.png') }}" alt="Panduan 2"
+                                    class="w-full h-full object-cover flex-shrink-0">
+                                <img src="{{ asset('fellie03.png') }}" alt="Panduan 3"
+                                    class="w-full h-full object-cover flex-shrink-0">
+                                <img src="{{ asset('fellie04.png') }}" alt="Panduan 3"
+                                    class="w-full h-full object-cover flex-shrink-0">
+                                <img src="{{ asset('fellie05.png') }}" alt="Panduan 3"
+                                    class="w-full h-full object-cover flex-shrink-0">
+                            </div>
+                            <div id="guideSliderDots" class="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-2">
+                                <span class="guide-dot w-3 h-3 bg-bg-[#172124] rounded-full opacity-70 cursor-pointer"
+                                    data-index="0"></span>
+                                <span class="guide-dot w-3 h-3 bg-bg-[#172124] rounded-full opacity-70 cursor-pointer"
+                                    data-index="1"></span>
+                                <span class="guide-dot w-3 h-3 bg-bg-[#172124] rounded-full opacity-70 cursor-pointer"
+                                    data-index="2"></span>
+                                <span class="guide-dot w-3 h-3 bg-bg-[#172124] rounded-full opacity-70 cursor-pointer"
+                                    data-index="3"></span>
+                                <span class="guide-dot w-3 h-3 bg-bg-[#172124] rounded-full opacity-70 cursor-pointer"
+                                    data-index="4"></span>
+                            </div>
+                        </div>
+                        {{-- <div class="mt-4 text-center text-sm text-gray-500">Geser gambar untuk melihat
+                            langkah-langkah
+                            panduan custom bouquet.</div> --}}
+                    </div>
+                </div>
+            </div>
+
+            {{-- <div class="flex justify-center mt-3 mb-2" style:baground-color="#ff0000">
+                <button id="openGuideBtn"
+                    class="bg-[#f2527d] hover:bg-[#f285a2] text-white font-semibold px-5 py-2 rounded-lg shadow transition-all duration-200">
+                    <i class="bi bi-cursor-fill"></i> Lihat Panduan Custom Bouquet
+                </button>
+            </div> --}}
+        </div>
+
         <!-- Tab Navigation (Duplicate removed, using header navigation) -->
 
         <!-- Search and Filters -->
@@ -1358,21 +1596,21 @@
                                 <!-- Price - Centered -->
                                 <div>
                                     @php
-        // Siapkan array harga untuk JS
-        $jsPrices = $flower->prices->map(function ($price) {
-            return [
-                'id' => $price->id,
-                'type' => $price->type,
-                'label' => __(ucwords(str_replace('_', ' ', $price->type))),
-                'price' => (int) $price->price // Pastikan price adalah integer
-            ];
-        });
+                                        // Siapkan array harga untuk JS
+                                        $jsPrices = $flower->prices->map(function ($price) {
+                                            return [
+                                                'id' => $price->id,
+                                                'type' => $price->type,
+                                                'label' => __(ucwords(str_replace('_', ' ', $price->type))),
+                                                'price' => (int) $price->price // Pastikan price adalah integer
+                                            ];
+                                        });
                                     @endphp
                                     <div class="text-center">
                                         <div class="text-price text-sm sm:text-lg font-bold text-rose-700 text-center">
                                             @php
-        $minPrice = $jsPrices->min('price');
-        $maxPrice = $jsPrices->max('price');
+                                                $minPrice = $jsPrices->min('price');
+                                                $maxPrice = $jsPrices->max('price');
                                             @endphp
                                             @if($minPrice === $maxPrice)
                                                 Rp {{ number_format($minPrice, 0, ',', '.') }}
@@ -1395,29 +1633,29 @@
                                         <span
                                             class="font-semibold sm:text-sm {{ $flower->current_stock > 10 ? 'text-gray-600' : ($flower->current_stock > 0 ? 'text-yellow-600' : 'text-red-600') }}">
                                             @php
-        // Cari harga ikat yang tersedia, prioritas ikat 3, ikat 5, ikat 10, ikat 20
-        $ikatPrice = $flower->prices->firstWhere('type', 'ikat_3')
-            ?: $flower->prices->firstWhere('type', 'ikat 3')
-            ?: $flower->prices->firstWhere('type', 'ikat_5')
-            ?: $flower->prices->firstWhere('type', 'ikat 5')
-            ?: $flower->prices->firstWhere('type', 'ikat_10')
-            ?: $flower->prices->firstWhere('type', 'ikat 10')
-            ?: $flower->prices->firstWhere('type', 'ikat_20')
-            ?: $flower->prices->firstWhere('type', 'ikat 20');
+                                                // Cari harga ikat yang tersedia, prioritas ikat 3, ikat 5, ikat 10, ikat 20
+                                                $ikatPrice = $flower->prices->firstWhere('type', 'ikat_3')
+                                                    ?: $flower->prices->firstWhere('type', 'ikat 3')
+                                                    ?: $flower->prices->firstWhere('type', 'ikat_5')
+                                                    ?: $flower->prices->firstWhere('type', 'ikat 5')
+                                                    ?: $flower->prices->firstWhere('type', 'ikat_10')
+                                                    ?: $flower->prices->firstWhere('type', 'ikat 10')
+                                                    ?: $flower->prices->firstWhere('type', 'ikat_20')
+                                                    ?: $flower->prices->firstWhere('type', 'ikat 20');
 
-        $ikatCount = 0;
-        $ikatLabel = '';
+                                                $ikatCount = 0;
+                                                $ikatLabel = '';
 
-        if ($ikatPrice && $ikatPrice->unit_equivalent > 0) {
-            $ikatCount = floor($flower->current_stock / $ikatPrice->unit_equivalent);
-            $unitSize = $ikatPrice->unit_equivalent;
-            $ikatLabel = " / {$ikatCount} ikat";
-        }
+                                                if ($ikatPrice && $ikatPrice->unit_equivalent > 0) {
+                                                    $ikatCount = floor($flower->current_stock / $ikatPrice->unit_equivalent);
+                                                    $unitSize = $ikatPrice->unit_equivalent;
+                                                    $ikatLabel = " / {$ikatCount} ikat";
+                                                }
 
-        // Gunakan base_unit dari database atau default ke 'tangkai'
-        $baseUnit = $flower->base_unit ?? 'tangkai';
+                                                // Gunakan base_unit dari database atau default ke 'tangkai'
+                                                $baseUnit = $flower->base_unit ?? 'tangkai';
                                             @endphp
-                                            <span id="stock-{{ $flower->id }}">{{ $flower->current_stock }} {{ $baseUnit }}{{ $ikatLabel }}</span>
+                                            {{ $flower->current_stock }} {{ $baseUnit }}{{ $ikatLabel }}
                                         </span>
                                     </div>
                                     <div class="w-full bg-gray-200 rounded-full h-1.5">
@@ -1544,8 +1782,8 @@
                                 <!-- Price Range - Left Aligned -->
                                 <div class="mb-1">
                                     @php
-        $minPrice = $bouquet->prices->min('price');
-        $maxPrice = $bouquet->prices->max('price');
+                                        $minPrice = $bouquet->prices->min('price');
+                                        $maxPrice = $bouquet->prices->max('price');
                                     @endphp
                                     <div class="text-left">
                                         <div class="text-price text-sm sm:text-lg font-bold text-rose-600">
@@ -1670,47 +1908,121 @@
 
     <script src="{{ asset('js/cart.js') }}?v={{ time() }}"></script>
     <script>
-        // Polling AJAX untuk update stok setiap 5 detik
+        // --- SLIDER LOGIC --- //
         document.addEventListener('DOMContentLoaded', function () {
-            function updateFlowerStock(flowerId, baseUnit, ikatPrice) {
-                fetch(`/api/flower-stock/${flowerId}`)
-                    .then(res => res.json())
-                    .then (data => {
-                        if (data.current_stock !== undefined) {
-                            let ikatLabel = '';
-                            if (ikatPrice && ikatPrice.unit_equivalent > 0) {
-                                const ikatCount = Math.floor(data.current_stock / ikatPrice.unit_equivalent);
-                                ikatLabel = ` / ${ikatCount} ikat`;
-                            }
-                            document.getElementById(`stock-${flowerId}`).textContent = `${data.current_stock} ${baseUnit}${ikatLabel}`;
-                        }
-                    });
-                }
+            const slider = document.getElementById('bouquetSlider');
+            const slides = slider ? slider.querySelectorAll('img') : [];
+            const dots = document.querySelectorAll('#sliderDots .slider-dot');
+            let currentIndex = 0;
+            let autoSlideInterval;
+            let startX = 0;
+            let isDragging = false;
+            let dragDistance = 0;
+            let sliderWidth = slider ? slider.offsetWidth : 0;
+            function showSlide(index, smooth = true) {
+                currentIndex = index; if (smooth) {
+                    slider.style.transition = 'transform 0.6s cubic-bezier(0.4,0,0.2,1)';
+                } else { slider.style.transition = 'none'; }
+                slider.style.transform = `translateX(-${index * 100}%)`; dots.forEach((dot, i) => {
+                    dot.classList.toggle('opacity-100', i === index);
+                    dot.classList.toggle('opacity-70', i !== index);
+                    dot.classList.toggle('bg-rose-500', i === index);
+                    dot.classList.toggle('bg-rose-300', i !== index);
+                });
+            }
 
-            // Siapkan polling untuk semua bunga yang ada di window.flowerPrices
-            @foreach($flowers as $flower)
-                (function () {
-                    const flowerId = {{ (int) $flower->id }};
-                    const baseUnit = "{{ $flower->base_unit ?? 'tangkai' }}";
-                    // Cari harga ikat yang tersedia
-                    let ikatPrice = null;
-                    @php
-    $ikatPrice = $flower->prices->firstWhere('type', 'ikat_3')
-        ?: $flower->prices->firstWhere('type', 'ikat 3')
-        ?: $flower->prices->firstWhere('type', 'ikat_5')
-        ?: $flower->prices->firstWhere('type', 'ikat 5')
-        ?: $flower->prices->firstWhere('type', 'ikat_10')
-        ?: $flower->prices->firstWhere('type', 'ikat 10')
-        ?: $flower->prices->firstWhere('type', 'ikat_20')
-        ?: $flower->prices->firstWhere('type', 'ikat 20');
-                    @endphp
-                    ikatPrice = @json($ikatPrice);
-                    setInterval(function () {
-                        updateFlowerStock(flowerId, baseUnit, ikatPrice);
-                    }, 3000);
-                })();
-            @endforeach
-    });
+            function nextSlide() {
+                showSlide((currentIndex + 1) % slides.length);
+            }
+            function prevSlide() {
+                showSlide((currentIndex - 1 + slides.length) % slides.length);
+            }
+
+            dots.forEach(dot => {
+                dot.addEventListener('click', function () {
+                    showSlide(parseInt(dot.dataset.index));
+                });
+            });
+
+            // Auto slide
+            function startAutoSlide() {
+                autoSlideInterval = setInterval(() => {
+                    nextSlide();
+                }, 3500);
+            }
+            function stopAutoSlide() {
+                clearInterval(autoSlideInterval);
+            }
+            slider.addEventListener('mouseenter', stopAutoSlide);
+            slider.addEventListener('mouseleave', startAutoSlide);
+            showSlide(0);
+            startAutoSlide();
+
+            // Touch/drag support (smooth swipe)
+            slider.addEventListener('touchstart', function (e) {
+                stopAutoSlide();
+                isDragging = true;
+                startX = e.touches[0].clientX;
+                slider.style.transition = 'none';
+            });
+            slider.addEventListener('touchmove', function (e) {
+                if (!isDragging) return;
+                dragDistance = e.touches[0].clientX - startX;
+                slider.style.transform = `translateX(calc(-${currentIndex * 100}% + ${dragDistance}px))`;
+            });
+            slider.addEventListener('touchend', function (e) {
+                if (!isDragging) return;
+                isDragging = false;
+                if (dragDistance > 50) {
+                    prevSlide();
+                } else if (dragDistance < -50) {
+                    nextSlide();
+                } else {
+                    showSlide(currentIndex);
+                }
+                dragDistance = 0;
+                startAutoSlide();
+            });
+
+            // Mouse drag (optional, for desktop)
+            slider.addEventListener('mousedown', function (e) {
+                stopAutoSlide();
+                isDragging = true;
+                startX = e.clientX;
+                slider.style.transition = 'none';
+            });
+            slider.addEventListener('mousemove', function (e) {
+                if (!isDragging) return;
+                dragDistance = e.clientX - startX;
+                slider.style.transform = `translateX(calc(-${currentIndex * 100}% + ${dragDistance}px))`;
+            });
+            slider.addEventListener('mouseup', function (e) {
+                if (!isDragging) return;
+                isDragging = false;
+                if (dragDistance > 50) {
+                    prevSlide();
+                } else if (dragDistance < -50) {
+                    nextSlide();
+                } else {
+                    showSlide(currentIndex);
+                }
+                dragDistance = 0;
+                startAutoSlide();
+            });
+            slider.addEventListener('mouseleave', function () {
+                if (isDragging) {
+                    isDragging = false;
+                    showSlide(currentIndex);
+                    dragDistance = 0;
+                    startAutoSlide();
+                }
+            });
+
+            window.addEventListener('resize', function () {
+                sliderWidth = slider.offsetWidth;
+            });
+        });
+        // --- END SLIDER LOGIC ---
     </script>
     <script>
         // Scroll to Bottom Button Logic

@@ -90,26 +90,70 @@
                     </div>
                 </div>
 
-                <!-- Total Pendapatan Card -->
+
+
+                <!-- Pendapatan Cash Card -->
                 <div class="stats-card p-6 relative overflow-hidden">
                     <div class="absolute right-0 top-0 w-32 h-32 opacity-10">
-                        <i class="bi bi-cash-stack text-8xl text-blue-500 transform translate-x-8 -translate-y-8"></i>
+                        <i class="bi bi-cash text-8xl text-blue-500 transform translate-x-8 -translate-y-8"></i>
                     </div>
                     <div class="relative">
                         <div class="flex items-center mb-4">
                             <div class="p-3 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl shadow-lg">
-                                <i class="bi bi-cash-stack text-xl text-white"></i>
+                                <i class="bi bi-cash text-xl text-white"></i>
                             </div>
-                            <p class="ml-3 text-sm font-medium text-gray-500">Total Pendapatan</p>
+                            <p class="ml-3 text-sm font-medium text-gray-500">Pendapatan Cash</p>
                         </div>
-                        <p class="text-2xl font-bold text-gray-800">Rp{{ number_format($totalRevenue, 0, ',', '.') }}
-                        </p>
+                        <p class="text-2xl font-bold text-gray-800">Rp{{ number_format($totalCash, 0, ',', '.') }}</p>
                         <div class="flex items-center mt-2">
-                            <i class="bi bi-graph-up text-xs text-blue-500 mr-1"></i>
-                            <p class="text-xs text-gray-500">Pendapatan kotor</p>
+                            <i class="bi bi-currency-dollar text-xs text-blue-500 mr-1"></i>
+                            <p class="text-xs text-gray-500">Total cash</p>
                         </div>
                     </div>
                 </div>
+
+                <!-- Pendapatan Transfer Card -->
+                <div class="stats-card p-6 relative overflow-hidden">
+                    <div class="absolute right-0 top-0 w-32 h-32 opacity-10">
+                        <i class="bi bi-bank text-8xl text-orange-500 transform translate-x-8 -translate-y-8"></i>
+                    </div>
+                    <div class="relative">
+                        <div class="flex items-center mb-4">
+                            <div class="p-3 bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl shadow-lg">
+                                <i class="bi bi-bank text-xl text-white"></i>
+                            </div>
+                            <p class="ml-3 text-sm font-medium text-orange-500">Pendapatan Transfer</p>
+                        </div>
+                        <p class="text-2xl font-bold text-orange-800">Rp{{ number_format($totalTransfer, 0, ',', '.') }}
+                        </p>
+                        <div class="flex items-center mt-2">
+                            <i class="bi bi-currency-dollar text-xs text-orange-500 mr-1"></i>
+                            <p class="text-xs text-gray-500">Total transfer</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Pendapatan Debit Card -->
+                <div class="stats-card p-6 relative overflow-hidden">
+                    <div class="absolute right-0 top-0 w-32 h-32 opacity-10">
+                        <i
+                            class="bi bi-credit-card-2-front text-8xl text-pink-400 transform translate-x-8 -translate-y-8"></i>
+                    </div>
+                    <div class="relative">
+                        <div class="flex items-center mb-4">
+                            <div class="p-3 bg-gradient-to-br from-pink-400 to-pink-500 rounded-xl shadow-lg">
+                                <i class="bi bi-credit-card-2-front text-xl text-white"></i>
+                            </div>
+                            <p class="ml-3 text-sm font-medium text-gray-500">Pendapatan Debit</p>
+                        </div>
+                        <p class="text-2xl font-bold text-gray-800">Rp{{ number_format($totalDebit, 0, ',', '.') }}</p>
+                        <div class="flex items-center mt-2">
+                            <i class="bi bi-currency-dollar text-xs text-pink-400 mr-1"></i>
+                            <p class="text-xs text-gray-500">Total debit</p>
+                        </div>
+                    </div>
+                </div>
+
 
                 <!-- Rata-rata Transaksi Card -->
                 <div class="stats-card p-6 relative overflow-hidden">
@@ -131,7 +175,31 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- Total Pendapatan Card -->
+                <div class="stats-card p-6 relative overflow-hidden">
+                    <div class="absolute right-0 top-0 w-32 h-32 opacity-10">
+                        <i class="bi bi-cash-stack text-8xl text-blue-500 transform translate-x-8 -translate-y-8"></i>
+                    </div>
+                    <div class="relative">
+                        <div class="flex items-center mb-4">
+                            <div class="p-3 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl shadow-lg">
+                                <i class="bi bi-cash-stack text-xl text-white"></i>
+                            </div>
+                            <p class="ml-3 text-sm font-bold text-White bg-red-500 rounded-lg shadow-lg py-3 px-3">Total
+                                Pendapatan</p>
+                        </div>
+                        <p class="text-2xl font-bold text-gray-800">Rp{{ number_format($totalRevenue, 0, ',', '.') }}
+                        </p>
+                        <div class="flex items-center mt-2">
+                            <i class="bi bi-graph-up text-xs text-blue-500 mr-1"></i>
+                            <p class="text-xs text-gray-500">Pendapatan kotor</p>
+                        </div>
+                    </div>
+                </div>
             </div>
+
+
 
             <!-- Tabel Penjualan -->
             <div class="section-card">
@@ -221,11 +289,11 @@
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
-                                                                    @if($sale->payment_method === 'cash')
-                                                                        bg-green-100 text-green-800
-                                                                    @else
-                                                                        bg-blue-100 text-blue-800
-                                                                    @endif">
+                                                                                    @if($sale->payment_method === 'cash')
+                                                                                        bg-green-100 text-green-800
+                                                                                    @else
+                                                                                        bg-blue-100 text-blue-800
+                                                                                    @endif">
                                             <i
                                                 class="bi {{ $sale->payment_method === 'cash' ? 'bi-cash' : 'bi-credit-card' }} mr-1"></i>
                                             {{ ucfirst($sale->payment_method) }}
@@ -248,12 +316,12 @@
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium 
-                                                                        @if($sale->status === 'completed')
-                                                                            bg-green-100 text-green-800
-                                                                        @else
-                                                                            bg-red-100 text-green-800
-                                                                        @endif
-                                                                    ">
+                                                                                        @if($sale->status === 'completed')
+                                                                                            bg-green-100 text-green-800
+                                                                                        @else
+                                                                                            bg-red-100 text-green-800
+                                                                                        @endif
+                                                                                    ">
                                             <i
                                                 class="bi {{ $sale->status === 'completed' ? 'bi-check-circle' : 'bi-check-circle' }} mr-1"></i>
                                             {{ $sale->status === 'completed' ? 'Selesai' : 'selesai' }}

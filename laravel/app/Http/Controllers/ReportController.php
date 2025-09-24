@@ -36,11 +36,19 @@ class ReportController extends Controller
         $totalRevenue = $query->sum('total');
         $averageTransaction = $totalSales > 0 ? ($totalRevenue / $totalSales) : 0;
 
+        // Statistik pendapatan berdasarkan metode pembayaran
+        $totalCash = (clone $query)->where('payment_method', 'cash')->sum('total');
+        $totalTransfer = (clone $query)->where('payment_method', 'transfer')->sum('total');
+        $totalDebit = (clone $query)->where('payment_method', 'debit')->sum('total');
+
         return view('reports.sales', compact(
             'sales',
             'totalSales',
             'totalRevenue',
             'averageTransaction',
+            'totalCash',
+            'totalTransfer',
+            'totalDebit',
             'start',
             'end'
         ));
@@ -97,8 +105,13 @@ class ReportController extends Controller
             $totalPendapatan = $sales->sum('total');
             $totalTransaksi = $sales->count();
 
+            // Statistik pendapatan berdasarkan metode pembayaran
+            $totalCash = $sales->where('payment_method', 'cash')->sum('total');
+            $totalTransfer = $sales->where('payment_method', 'transfer')->sum('total');
+            $totalDebit = $sales->where('payment_method', 'debit')->sum('total');
+
             // Load and render PDF using DomPDF
-            $pdf = Pdf::loadView('reports.sales_pdf', compact('sales', 'start', 'end', 'totalPendapatan', 'totalTransaksi'));
+            $pdf = Pdf::loadView('reports.sales_pdf', compact('sales', 'start', 'end', 'totalPendapatan', 'totalTransaksi', 'totalCash', 'totalTransfer', 'totalDebit'));
 
             // Set paper size and orientation
             $pdf->setPaper('a4', 'portrait');
@@ -137,7 +150,25 @@ class ReportController extends Controller
         $totalLunas = $orders->whereIn('status', $statusLunas)->count();
         $totalBelumLunas = $orders->whereIn('status', $statusBelumLunas)->count();
 
-        return view('reports.orders', compact('orders', 'start', 'end', 'totalOrder', 'totalNominal', 'totalLunas', 'totalBelumLunas'));
+        // Statistik pendapatan berdasarkan metode pembayaran
+        $totalCashOrder = $orders->where('payment_method', 'cash')->sum('total');
+        $totalTransferOrder = $orders->where('payment_method', 'transfer')->sum('total');
+        $totalDebitOrder = $orders->where('payment_method', 'debit')->sum('total');
+        $totalEwalletOrder = $orders->where('payment_method', 'e-wallet')->sum('total');
+
+        return view('reports.orders', compact(
+            'orders',
+            'start',
+            'end',
+            'totalOrder',
+            'totalNominal',
+            'totalLunas',
+            'totalBelumLunas',
+            'totalCashOrder',
+            'totalTransferOrder',
+            'totalDebitOrder',
+            'totalEwalletOrder'
+        ));
     }
 
     // Laporan Pelanggan
@@ -195,6 +226,11 @@ class ReportController extends Controller
         // Total pendapatan dari penjualan
         $totalPenjualan = Sale::whereBetween('created_at', [$start, $end])->sum('total');
 
+        // Total per metode pembayaran di sale
+        $totalCashSale = Sale::whereBetween('created_at', [$start, $end])->where('payment_method', 'cash')->sum('total');
+        $totalTransferSale = Sale::whereBetween('created_at', [$start, $end])->where('payment_method', 'transfer')->sum('total');
+        $totalDebitSale = Sale::whereBetween('created_at', [$start, $end])->where('payment_method', 'debit')->sum('total');
+
         // Total pendapatan dari pemesanan (hitung dari items menggunakan join)
         $totalPemesanan = DB::table('public_orders')
             ->join('public_order_items', 'public_orders.id', '=', 'public_order_items.public_order_id')
@@ -202,26 +238,67 @@ class ReportController extends Controller
             ->whereIn('public_orders.status', ['confirmed', 'processing', 'ready', 'completed'])
             ->sum(DB::raw('public_order_items.quantity * public_order_items.price'));
 
+        // Total per metode pembayaran di public order (hitung dari items)
+        $totalCashOrder = DB::table('public_orders')
+            ->join('public_order_items', 'public_orders.id', '=', 'public_order_items.public_order_id')
+            ->whereBetween('public_orders.created_at', [$start, $end])
+            ->where('public_orders.payment_method', 'cash')
+            ->whereIn('public_orders.status', ['confirmed', 'processing', 'ready', 'completed'])
+            ->sum(DB::raw('public_order_items.quantity * public_order_items.price'));
+
+        $totalTransferOrder = DB::table('public_orders')
+            ->join('public_order_items', 'public_orders.id', '=', 'public_order_items.public_order_id')
+            ->whereBetween('public_orders.created_at', [$start, $end])
+            ->where('public_orders.payment_method', 'transfer')
+            ->whereIn('public_orders.status', ['confirmed', 'processing', 'ready', 'completed'])
+            ->sum(DB::raw('public_order_items.quantity * public_order_items.price'));
+
+        $totalDebitOrder = DB::table('public_orders')
+            ->join('public_order_items', 'public_orders.id', '=', 'public_order_items.public_order_id')
+            ->whereBetween('public_orders.created_at', [$start, $end])
+            ->where('public_orders.payment_method', 'debit')
+            ->whereIn('public_orders.status', ['confirmed', 'processing', 'ready', 'completed'])
+            ->sum(DB::raw('public_order_items.quantity * public_order_items.price'));
+
+        $totalEwalletOrder = DB::table('public_orders')
+            ->join('public_order_items', 'public_orders.id', '=', 'public_order_items.public_order_id')
+            ->whereBetween('public_orders.created_at', [$start, $end])
+            ->where('public_orders.payment_method', 'e-wallet')
+            ->whereIn('public_orders.status', ['confirmed', 'processing', 'ready', 'completed'])
+            ->sum(DB::raw('public_order_items.quantity * public_order_items.price'));
+
         // Total pendapatan gabungan
         $totalPendapatan = $totalPenjualan + $totalPemesanan;
 
-        // Pendapatan harian
+        // Pendapatan harian: hanya tampilkan tanggal yang ada transaksi
         $harian = [];
-        foreach (range(0, now()->parse($end)->diffInDays(now()->parse($start))) as $i) {
-            $date = now()->parse($start)->copy()->addDays($i)->toDateString();
-
+        $saleDates = Sale::whereBetween('created_at', [$start, $end])
+            ->selectRaw('DATE(created_at) as date')
+            ->groupBy('date')
+            ->pluck('date')
+            ->toArray();
+        $orderDates = DB::table('public_orders')
+            ->whereBetween('created_at', [$start, $end])
+            ->whereIn('status', ['confirmed', 'processing', 'ready', 'completed'])
+            ->selectRaw('DATE(created_at) as date')
+            ->groupBy('date')
+            ->pluck('date')
+            ->toArray();
+        $allDates = array_unique(array_merge($saleDates, $orderDates));
+        sort($allDates);
+        foreach ($allDates as $date) {
             $dailyPenjualan = Sale::whereDate('created_at', $date)->sum('total');
-
             $dailyPemesanan = DB::table('public_orders')
                 ->join('public_order_items', 'public_orders.id', '=', 'public_order_items.public_order_id')
                 ->whereDate('public_orders.created_at', $date)
                 ->whereIn('public_orders.status', ['confirmed', 'processing', 'ready', 'completed'])
                 ->sum(DB::raw('public_order_items.quantity * public_order_items.price'));
-
-            $harian[$date] = [
-                'penjualan' => $dailyPenjualan,
-                'pemesanan' => $dailyPemesanan,
-            ];
+            if ($dailyPenjualan > 0 || $dailyPemesanan > 0) {
+                $harian[$date] = [
+                    'penjualan' => $dailyPenjualan,
+                    'pemesanan' => $dailyPemesanan,
+                ];
+            }
         }
 
         // Pendapatan mingguan
@@ -273,7 +350,23 @@ class ReportController extends Controller
             $currentMonth->addMonth();
         }
 
-        return view('reports.income', compact('start', 'end', 'totalPenjualan', 'totalPemesanan', 'totalPendapatan', 'harian', 'mingguan', 'bulanan'));
+        return view('reports.income', compact(
+            'start',
+            'end',
+            'totalPenjualan',
+            'totalPemesanan',
+            'totalPendapatan',
+            'harian',
+            'mingguan',
+            'bulanan',
+            'totalCashSale',
+            'totalTransferSale',
+            'totalDebitSale',
+            'totalCashOrder',
+            'totalTransferOrder',
+            'totalDebitOrder',
+            'totalEwalletOrder'
+        ));
     }
 
     // Ekspor laporan stok ke PDF
@@ -398,10 +491,29 @@ class ReportController extends Controller
                     return $item->quantity * $item->price;
                 });
             });
-            $totalLunas = $orders->where('payment_status', 'lunas')->count();
+            // Status yang dianggap "Lunas/Dibayar": paid, processed, completed
+            $statusLunas = ['paid', 'processed', 'completed'];
+            $totalLunas = $orders->whereIn('status', $statusLunas)->count();
+
+            // Statistik pendapatan berdasarkan metode pembayaran
+            $totalCashOrder = $orders->where('payment_method', 'cash')->sum('total');
+            $totalTransferOrder = $orders->where('payment_method', 'transfer')->sum('total');
+            $totalDebitOrder = $orders->where('payment_method', 'debit')->sum('total');
+            $totalEwalletOrder = $orders->where('payment_method', 'e-wallet')->sum('total');
 
             // Load and render PDF
-            $pdf = Pdf::loadView('reports.orders_pdf', compact('orders', 'start', 'end', 'totalOrder', 'totalNominal', 'totalLunas'));
+            $pdf = Pdf::loadView('reports.orders_pdf', compact(
+                'orders',
+                'start',
+                'end',
+                'totalOrder',
+                'totalNominal',
+                'totalLunas',
+                'totalCashOrder',
+                'totalTransferOrder',
+                'totalDebitOrder',
+                'totalEwalletOrder'
+            ));
             $pdf->setPaper('a4', 'portrait');
 
             $filename = "laporan_pesanan_{$start}_to_{$end}.pdf";
