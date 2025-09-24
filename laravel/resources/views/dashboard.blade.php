@@ -186,7 +186,8 @@
                         <div>
                             <p class="text-sm font-medium text-gray-500">Total Pendapatan</p>
                             <p class="text-m font-bold text-gray-800">Rp
-                                {{ number_format($totalRevenue ?? 0, 0, ',', '.') }}</p>
+                                {{ number_format($totalRevenue ?? 0, 0, ',', '.') }}
+                            </p>
                             <p class="text-xs text-orange-600 mt-1">Revenue</p>
                         </div>
                     </div>
@@ -541,7 +542,8 @@
                                                     </div>
                                                     <div>
                                                         <p class="font-medium text-gray-800">
-                                                            {{ data_get($product, 'name', '-') }}</p>
+                                                            {{ data_get($product, 'name', '-') }}
+                                                        </p>
                                                         <p class="text-xs text-gray-500">{{ data_get($product, 'code', '-') }}
                                                         </p>
                                                     </div>
@@ -658,6 +660,141 @@
                         </table>
                     </div>
                 </div>
+            <!-- Bouquet Ready Stock & Performance -->
+            <div class="notification-card p-6 form-enter mt-8">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-semibold text-pink-700 flex items-center">
+                        <i class="bi bi-flower2 mr-2 text-pink-600"></i>
+                        Bouquet Ready Stock & Performance
+                    </h3>
+                    <span class="text-xs bg-pink-100 text-pink-600 px-2 py-1 rounded">
+                        {{ count($bouquetReadyStock ?? []) }} Bouquet Tersedia
+                    </span>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="modern-table w-full">
+                        <thead>
+                            <tr>
+                                <th class="text-left">Nama Bouquet</th>
+                                <th class="text-left">Kategori</th>
+                                <th class="text-center">Stok Tersedia</th>
+                                <th class="text-center">Status</th>
+                                <th class="text-center">Penjualan</th>
+                                <th class="text-center">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @forelse(($bouquetReadyStock ?? []) as $bouquet)
+                                @if(is_object($bouquet))
+                                    <tr>
+                                        <td>
+                                            <div class="flex items-center">
+                                                <div class="w-10 h-10 bg-pink-100 rounded-lg flex items-center justify-center mr-3">
+                                                    <i class="bi bi-flower2 text-pink-600"></i>
+                                                </div>
+                                                <div>
+                                                    <p class="font-medium text-gray-800">
+                                                        {{ data_get($bouquet, 'name', '-') }}</p>
+                                                    <p class="text-xs text-gray-500">{{ data_get($bouquet, 'code', '-') }}</p>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <span class="inline-flex items-center px-2 py-1 bg-pink-50 text-pink-700 rounded text-xs">
+                                                {{ data_get($bouquet, 'category.name', '-') }}
+                                            </span>
+                                        </td>
+                                        <td class="text-center">
+                                            <div class="flex flex-col items-center">
+                                                <span class="text-lg font-bold text-gray-800">{{ data_get($bouquet, 'current_stock', 0) }}</span>
+                                                <span class="text-xs text-gray-500">{{ data_get($bouquet, 'base_unit', 'pcs') }}</span>
+                                            </div>
+                                        </td>
+                                        <td class="text-center">
+                                            @php
+                                                $stock = data_get($bouquet, 'current_stock', 0);
+                                                $minStock = data_get($bouquet, 'min_stock', 5);
+                                            @endphp
+                                            @if($stock > $minStock * 2)
+                                                <span class="inline-flex items-center px-2 py-1 bg-green-100 text-green-700 rounded text-xs">
+                                                    <i class="bi bi-check-circle mr-1"></i>
+                                                    Baik
+                                                </span>
+                                            @elseif($stock > $minStock)
+                                                <span class="inline-flex items-center px-2 py-1 bg-yellow-100 text-yellow-700 rounded text-xs">
+                                                    <i class="bi bi-exclamation-circle mr-1"></i>
+                                                    Sedang
+                                                </span>
+                                            @else
+                                                <span class="inline-flex items-center px-2 py-1 bg-red-100 text-red-700 rounded text-xs">
+                                                    <i class="bi bi-x-circle mr-1"></i>
+                                                    Menipis
+                                                </span>
+                                            @endif
+                                        </td>
+                                        <td class="text-center">
+                                            <div class="flex flex-col items-center">
+                                                @php
+                                                    $soldCount = $bouquet->total_sold ?? 0;
+                                                    if ($soldCount >= 20) {
+                                                        $performance = 'Laris';
+                                                        $percentage = 85;
+                                                        $color = 'pink';
+                                                        $icon = 'bi-fire';
+                                                    } elseif ($soldCount >= 10) {
+                                                        $performance = 'Normal';
+                                                        $percentage = 60;
+                                                        $color = 'blue';
+                                                        $icon = 'bi-graph-up';
+                                                    } else {
+                                                        $performance = 'Kurang';
+                                                        $percentage = 25;
+                                                        $color = 'gray';
+                                                        $icon = 'bi-graph-down';
+                                                    }
+                                                @endphp
+                                                <span class="text-xs text-{{ $color }}-600 font-medium">
+                                                    <i class="bi {{ $icon }} {{ $performance === 'Laris' ? 'text-orange-500' : '' }}"></i>
+                                                    {{ $performance }}
+                                                </span>
+                                                <div class="w-12 h-1 bg-gray-200 rounded-full mt-1">
+                                                    <div class="h-full bg-{{ $color }}-500 rounded-full" style="width: {{ $percentage }}%"></div>
+                                                </div>
+                                                <span class="text-xs text-gray-500 mt-1">
+                                                    {{ number_format($soldCount) }} terjual
+                                                </span>
+                                            </div>
+                                        </td>
+                                        <td class="text-center">
+                                            <div class="flex items-center justify-center space-x-2">
+                                                <a href="{{ route('products.show', $bouquet) }}"
+                                                    class="inline-flex items-center px-2 py-1 bg-pink-100 text-pink-700 rounded hover:bg-pink-200 transition-colors text-xs">
+                                                    <i class="bi bi-eye mr-1"></i>
+                                                    Detail
+                                                </a>
+                                                <a href="{{ route('inventory.history', $bouquet) }}"
+                                                    class="inline-flex items-center px-2 py-1 bg-gray-100 text-gray-700 rounded hover:bg-gray-200 transition-colors text-xs">
+                                                    <i class="bi bi-clock-history mr-1"></i>
+                                                    History
+                                                </a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                @endif
+                            @empty
+                                <tr>
+                                    <td colspan="6" class="text-center py-8">
+                                        <div class="flex flex-col items-center">
+                                            <i class="bi bi-inbox text-4xl text-gray-300 mb-2"></i>
+                                            <p class="text-gray-500">Tidak ada bouquet ready stock saat ini</p>
+                                        </div>
+                                    </td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+            </div>
             </div>
         </div>
 

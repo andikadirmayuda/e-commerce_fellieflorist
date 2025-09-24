@@ -20,6 +20,25 @@ class DashboardController extends Controller
 {
     public function index()
     {
+        // Bouquet Ready Stock & Performance
+        $bouquetReadyStock = \App\Models\Bouquet::with(['category'])
+            ->whereHas('components', function ($q) {
+                $q->whereHas('product', function ($q2) {
+                    $q2->where('current_stock', '>', 0);
+                });
+            })
+            ->get();
+
+        // Hitung total penjualan untuk setiap bouquet dari public_order_items
+        foreach ($bouquetReadyStock as $bouquet) {
+            $soldCount = \App\Models\PublicOrderItem::where('item_type', 'bouquet')
+                ->where('bouquet_id', $bouquet->id)
+                ->sum('quantity');
+            $bouquet->total_sold = $soldCount;
+        }
+
+        // Urutkan bouquetReadyStock berdasarkan total_sold (terlaris)
+        $bouquetReadyStock = $bouquetReadyStock->sortByDesc('total_sold')->values();
         // Enable query logging
         DB::enableQueryLog();
 
@@ -314,62 +333,41 @@ class DashboardController extends Controller
             })->toArray()
         ];
 
-        // Data untuk Performa Bouquet - Menggabungkan data dari public_orders dan sales
-        $bouquetCategorySales = DB::table('bouquet_categories')
-            ->select(
-                'bouquet_categories.name as category_name',
-                DB::raw('COALESCE(SUM(po.quantity), 0) + COALESCE(SUM(s.quantity), 0) as total_sold')
-            )
-            ->leftJoin('products', 'products.category_id', '=', 'bouquet_categories.id')
-            ->leftJoin(DB::raw('(
-                SELECT 
-                    public_order_items.product_id,
-                    SUM(public_order_items.quantity) as quantity
-                FROM public_order_items
-                JOIN public_orders ON public_orders.id = public_order_items.public_order_id
-                WHERE public_orders.status IN ("completed", "delivered")
-                GROUP BY public_order_items.product_id
-            ) as po'), 'products.id', '=', 'po.product_id')
-            ->leftJoin(DB::raw('(
-                SELECT 
-                    sale_items.product_id,
-                    SUM(sale_items.quantity) as quantity
-                FROM sale_items
-                JOIN sales ON sales.id = sale_items.sale_id
-                WHERE sales.deleted_at IS NULL
-                GROUP BY sale_items.product_id
-            ) as s'), 'products.id', '=', 's.product_id')
-            ->groupBy('bouquet_categories.id', 'bouquet_categories.name')
-            ->having(DB::raw('total_sold'), '>', 0)
-            ->orderByDesc('total_sold')
-            ->take(5)
-            ->get();
+        // Data untuk Performa Bouquet - penjualan dari public_order_items
+        $bouquetCategorySales = \App\Models\BouquetCategory::with(['bouquets'])->get()->map(function ($category) {
+            $totalSold = 0;
+            foreach ($category->bouquets as $bouquet) {
+                $sold = \App\Models\PublicOrderItem::where('item_type', 'bouquet')
+                    ->where('bouquet_id', $bouquet->id)
+                    ->sum('quantity');
+                $totalSold += $sold;
+            }
+            return [
+                'category_name' => $category->name,
+                'total_sold' => $totalSold
+            ];
+        })->filter(function ($item) {
+            return $item['total_sold'] > 0;
+        })->sortByDesc('total_sold')->take(5)->values();
 
         // Jika tidak ada data penjualan bouquet, fallback ke semua kategori yang tersedia
         if ($bouquetCategorySales->isEmpty()) {
-            // Jika tidak ada penjualan, tampilkan kategori dengan stok terbanyak
-            $bouquetCategorySales = DB::table('bouquet_categories')
-                ->select(
-                    'bouquet_categories.name as category_name',
-                    DB::raw('COALESCE(SUM(products.current_stock), 0) as total_stock')
-                )
-                ->leftJoin('products', function ($join) {
-                    $join->on('products.category_id', '=', 'bouquet_categories.id')
-                        ->where('products.current_stock', '>', 0);
-                })
-                ->groupBy('bouquet_categories.id', 'bouquet_categories.name')
-                ->orderByDesc('total_stock')
-                ->take(5)
-                ->get();
+            $bouquetCategorySales = \App\Models\BouquetCategory::with(['bouquets'])->get()->map(function ($category) {
+                $totalStock = $category->bouquets->count();
+                return [
+                    'category_name' => $category->name,
+                    'total_stock' => $totalStock
+                ];
+            })->sortByDesc('total_stock')->take(5)->values();
         }
 
         $bouquetChartData = [
             'labels' => $bouquetCategorySales->pluck('category_name')->toArray(),
-            'data' => $bouquetCategorySales->pluck(isset($bouquetCategorySales->first()->total_sold) ? 'total_sold' : 'total_stock')->toArray(),
+            'data' => $bouquetCategorySales->pluck(isset($bouquetCategorySales->first()['total_sold']) ? 'total_sold' : 'total_stock')->toArray(),
             'tooltip' => $bouquetCategorySales->map(function ($item) {
-                $metric = isset($item->total_sold) ? 'terjual' : 'stok';
-                $value = isset($item->total_sold) ? $item->total_sold : $item->total_stock;
-                return "{$item->category_name}: {$value} {$metric}";
+                $metric = isset($item['total_sold']) ? 'terjual' : 'stok';
+                $value = isset($item['total_sold']) ? $item['total_sold'] : $item['total_stock'];
+                return "{$item['category_name']}: {$value} {$metric}";
             })->toArray()
         ];
 
@@ -414,7 +412,8 @@ class DashboardController extends Controller
             'revenueChartData',
             'readyProducts',
             'productChartData',
-            'bouquetChartData'
+            'bouquetChartData',
+            'bouquetReadyStock'
         );
 
         // Selalu arahkan ke dashboard utama
