@@ -254,11 +254,33 @@ class DashboardController extends Controller
             ]],
         ];
 
-        // Produk ready stock (stok > 0)
+        // Produk ready stock (stok > 0), urutkan berdasarkan total_sold (terlaris)
         $readyProducts = Product::with(['category', 'prices'])
             ->where('current_stock', '>', 0)
-            ->orderByDesc('current_stock')
             ->get();
+
+        // Hitung penjualan untuk setiap produk
+        foreach ($readyProducts as $product) {
+            // Hitung total penjualan dari sale_items
+            $soldInSales = DB::table('sale_items')
+                ->join('sales', 'sales.id', '=', 'sale_items.sale_id')
+                ->where('sale_items.product_id', $product->id)
+                ->whereNull('sales.deleted_at')
+                ->sum('sale_items.quantity');
+
+            // Hitung total penjualan dari public_orders
+            $soldInOrders = DB::table('public_order_items')
+                ->join('public_orders', 'public_orders.id', '=', 'public_order_items.public_order_id')
+                ->where('public_order_items.product_id', $product->id)
+                ->whereIn('public_orders.status', ['completed', 'delivered'])
+                ->sum('public_order_items.quantity');
+
+            $totalSold = $soldInSales + $soldInOrders;
+            $product->total_sold = $totalSold;
+        }
+
+        // Urutkan readyProducts berdasarkan total_sold (terlaris)
+        $readyProducts = $readyProducts->sortByDesc('total_sold')->values();
 
         // Data untuk Performa Produk (berdasarkan kategori)
         $productPerformance = DB::table('categories')

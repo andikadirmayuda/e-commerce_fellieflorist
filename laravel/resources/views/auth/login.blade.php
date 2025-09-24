@@ -1,7 +1,8 @@
 <x-guest-layout>
     <div class="w-full max-w-md bg-white-800 rounded-sm shadow-lg p-10 flex flex-col items-center">
-        <img src="{{ asset('logo-fellie-florist.png') }}" alt="Logo" class="w-24 h-24 mb-1">
-        <h1 class="text-1xl font-bold text-rose mb-8 tracking-tight ">FELLIE FLORIST</h1>
+        <img src="{{ asset('logo-fellie-florist.png') }}" alt="Logo"
+            class="w-24 h-24 bg-white rounded-full p-2 shadow-lg scale-90 mb-4">
+        <h1 class="text-1xl font-bold text-rose mb-1 tracking-tight ">FELLIE FLORIST</h1>
         <form method="POST" action="{{ route('login') }}" class="w-full space-y-6">
             @csrf
             <div>
@@ -37,16 +38,13 @@
                 </div>
                 <x-input-error :messages="$errors->get('password')" class="mt-2" />
             </div>
-            <div class="flex items-center justify-between">
-                <div></div>
-                {{-- @if (Route::has('password.request'))
-                <a class="text-xs text-rose-400 hover:text-rose-500 transition" href="{{ route('password.request') }}">
-                    Forgot password?
-                </a>
-                @endif --}}
-            </div>
+
             <button type="submit"
-                class="w-full py-3 bg-gradient-to-r from-[#172124] to-[#f25270] text-white rounded-lg shadow-lg font-semibold hover:from-[#f25270] hover:to-[#172124]">LOGIN</button>
+                class="w-full py-3 bg-rose-500 rounded-lg shadow-lg font-bold text-white">LOGIN</button>
+            <div style="margin-top: 16px; text-align: center; color: #555; font-size: 14px;">
+                Login hanya untuk staf Fellie Florist.<br>
+                Pelanggan bisa langsung berbelanja tanpa perlu login
+            </div>
         </form>
         {{-- <div class="mt-2">
             <span class="text-xs text-gray-400">Or Sign Up with </span>
