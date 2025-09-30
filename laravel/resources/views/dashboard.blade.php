@@ -179,20 +179,77 @@
             @if(auth()->user()->hasRole(['owner']))
                 <!-- Total Revenue Card -->
                 <div class="stats-card p-6 mb-6 form-enter">
-                    <div class="flex items-center">
-                        <div class="p-3 bg-orange-100 rounded-lg mr-4">
-                            <i class="bi bi-cash-stack text-2xl text-orange-600"></i>
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center">
+                            <div class="p-3 bg-orange-100 rounded-lg mr-4">
+                                <i class="bi bi-cash-stack text-2xl text-orange-600"></i>
+                            </div>
+                            <div>
+                                <p class="text-sm font-medium text-gray-500">Total Pendapatan</p>
+                                <div class="flex items-center gap-2">
+                                    <p class="text-2xl font-bold text-gray-800">Rp {{ number_format($totalRevenue ?? 0, 0, ',', '.') }}</p>
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-green-100 text-green-700 animate-pulse">
+                                        <i class="bi bi-graph-up-arrow text-green-600 mr-1"></i>
+                                        +12.5%
+                                    </span>
+                                </div>
+                                <p class="text-xs text-orange-600 mt-1">Revenue</p>
+                            </div>
                         </div>
-                        <div>
-                            <p class="text-sm font-medium text-gray-500">Total Pendapatan</p>
-                            <p class="text-m font-bold text-gray-800">Rp
-                                {{ number_format($totalRevenue ?? 0, 0, ',', '.') }}
-                            </p>
-                            <p class="text-xs text-orange-600 mt-1">Revenue</p>
+                        <div class="hidden md:block">
+                            <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M8 32L20 20L28 28L40 16" stroke="#10B981" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M40 16V28H28" stroke="#10B981" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
                         </div>
                     </div>
                 </div>
             @endif
+
+
+            @if(auth()->user()->hasRole(['owner']))
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-8 form-enter">
+                    <!-- Pemasukan Lain Card -->
+                    <div class="stats-card p-4">
+                        <div class="flex items-center">
+                            <div class="p-3 bg-blue-100 rounded-lg mr-4">
+                                <i class="bi bi-wallet2 text-2xl text-blue-600"></i>
+                            </div>
+                            <div>
+                                <p class="text-sm font-medium text-gray-500">Pemasukan Lain</p>
+                                <p class="text-2xl font-bold text-blue-700">Rp {{ number_format($inflowLain ?? 0, 0, ',', '.') }}</p>
+                                <p class="text-xs text-blue-600 mt-1">Diluar penjualan toko</p>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Pengeluaran Card -->
+                    <div class="stats-card p-4">
+                        <div class="flex items-center">
+                            <div class="p-3 bg-red-100 rounded-lg mr-4">
+                                <i class="bi bi-arrow-down-circle text-2xl text-red-600"></i>
+                            </div>
+                            <div>
+                                <p class="text-sm font-medium text-gray-500">Total Pengeluaran</p>
+                                <p class="text-2xl font-bold text-red-700">Rp {{ number_format($totalOutflow ?? 0, 0, ',', '.') }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Saldo Bersih Card -->
+                    <div class="stats-card p-4">
+                        <div class="flex items-center">
+                            <div class="p-3 bg-green-100 rounded-lg mr-4">
+                                <i class="bi bi-cash-coin text-2xl text-green-600"></i>
+                            </div>
+                            <div>
+                                <p class="text-sm font-medium text-gray-500">Saldo Bersih</p>
+                                <p class="text-2xl font-bold {{ ($saldoBersih ?? 0) >= 0 ? 'text-green-700' : 'text-red-700' }}">Rp {{ number_format($saldoBersih ?? 0, 0, ',', '.') }}</p>
+                                <p class="text-xs text-gray-500 mt-1">Pendapatan + Pemasukan Lain - Pengeluaran</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            @endif
+
 
             @if(auth()->user()->hasRole(['owner']))
                 <!-- Dashboard Performance Section -->
@@ -279,6 +336,15 @@
                     </div>
                 </div>
             @endif
+
+            {{-- Grafik Arus Kas --}}
+            <!-- Grafik Cashflow -->
+            <div class="section-card p-6 mb-8">
+                <h2 class="text-lg font-bold text-gray-700 mb-4 flex items-center gap-2">
+                    <i class="bi bi-bar-chart-line text-pink-500"></i> Grafik Arus Kas Bulan Ini
+                </h2>
+                <canvas id="cashflowChart" height="80"></canvas>
+            </div>
 
             <!-- Business Intelligence Section -->
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8 form-enter">
@@ -565,8 +631,8 @@
                                             </td>
                                             <td class="text-center">
                                                 @php
-                                                    $stock = data_get($product, 'current_stock', 0);
-                                                    $minStock = data_get($product, 'min_stock', 5);
+        $stock = data_get($product, 'current_stock', 0);
+        $minStock = data_get($product, 'min_stock', 5);
                                                 @endphp
                                                 @if($stock > $minStock * 2)
                                                     <span
@@ -591,26 +657,26 @@
                                             <td class="text-center">
                                                 <div class="flex flex-col items-center">
                                                     @php
-                                                        // Dapatkan status performa dari atribut produk
-                                                        $soldCount = $product->total_sold ?? 0; // Pastikan ada field total_sold di tabel products
+        // Dapatkan status performa dari atribut produk
+        $soldCount = $product->total_sold ?? 0; // Pastikan ada field total_sold di tabel products
 
-                                                        // Kategorisasi performance berdasarkan penjualan
-                                                        if ($soldCount >= 20) {
-                                                            $performance = 'Laris';
-                                                            $percentage = 85;
-                                                            $color = 'green';
-                                                            $icon = 'bi-fire';
-                                                        } elseif ($soldCount >= 10) {
-                                                            $performance = 'Normal';
-                                                            $percentage = 60;
-                                                            $color = 'blue';
-                                                            $icon = 'bi-graph-up';
-                                                        } else {
-                                                            $performance = 'Kurang';
-                                                            $percentage = 25;
-                                                            $color = 'gray';
-                                                            $icon = 'bi-graph-down';
-                                                        }
+        // Kategorisasi performance berdasarkan penjualan
+        if ($soldCount >= 20) {
+            $performance = 'Laris';
+            $percentage = 85;
+            $color = 'green';
+            $icon = 'bi-fire';
+        } elseif ($soldCount >= 10) {
+            $performance = 'Normal';
+            $percentage = 60;
+            $color = 'blue';
+            $icon = 'bi-graph-up';
+        } else {
+            $performance = 'Kurang';
+            $percentage = 25;
+            $color = 'gray';
+            $icon = 'bi-graph-down';
+        }
                                                     @endphp
                                                     <span class="text-xs text-{{ $color }}-600 font-medium">
                                                         <i
@@ -712,8 +778,8 @@
                                         </td>
                                         <td class="text-center">
                                             @php
-                                                $stock = data_get($bouquet, 'current_stock', 0);
-                                                $minStock = data_get($bouquet, 'min_stock', 5);
+        $stock = data_get($bouquet, 'current_stock', 0);
+        $minStock = data_get($bouquet, 'min_stock', 5);
                                             @endphp
                                             @if($stock > $minStock * 2)
                                                 <span class="inline-flex items-center px-2 py-1 bg-green-100 text-green-700 rounded text-xs">
@@ -735,23 +801,23 @@
                                         <td class="text-center">
                                             <div class="flex flex-col items-center">
                                                 @php
-                                                    $soldCount = $bouquet->total_sold ?? 0;
-                                                    if ($soldCount >= 20) {
-                                                        $performance = 'Laris';
-                                                        $percentage = 85;
-                                                        $color = 'pink';
-                                                        $icon = 'bi-fire';
-                                                    } elseif ($soldCount >= 10) {
-                                                        $performance = 'Normal';
-                                                        $percentage = 60;
-                                                        $color = 'blue';
-                                                        $icon = 'bi-graph-up';
-                                                    } else {
-                                                        $performance = 'Kurang';
-                                                        $percentage = 25;
-                                                        $color = 'gray';
-                                                        $icon = 'bi-graph-down';
-                                                    }
+        $soldCount = $bouquet->total_sold ?? 0;
+        if ($soldCount >= 20) {
+            $performance = 'Laris';
+            $percentage = 85;
+            $color = 'pink';
+            $icon = 'bi-fire';
+        } elseif ($soldCount >= 10) {
+            $performance = 'Normal';
+            $percentage = 60;
+            $color = 'blue';
+            $icon = 'bi-graph-up';
+        } else {
+            $performance = 'Kurang';
+            $percentage = 25;
+            $color = 'gray';
+            $icon = 'bi-graph-down';
+        }
                                                 @endphp
                                                 <span class="text-xs text-{{ $color }}-600 font-medium">
                                                     <i class="bi {{ $icon }} {{ $performance === 'Laris' ? 'text-orange-500' : '' }}"></i>
@@ -1154,6 +1220,61 @@
                 const cards = document.querySelectorAll('.stats-card, .chart-card');
                 cards.forEach((card, index) => {
                     card.style.animationDelay = (index * 0.1) + 's';
+                });
+            });
+        </script>
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                // Data dari backend (pastikan variabel PHP sudah tersedia)
+                const pendapatanToko = {{ $totalPendapatanToko ?? 0 }};
+                const inflowLain = {{ $inflowLain ?? 0 }};
+                const pemasukan = pendapatanToko + inflowLain;
+                const pengeluaran = {{ $totalOutflow ?? 0 }};
+                const saldoBersih = {{ $saldoBersih ?? 0 }};
+
+                const ctx = document.getElementById('cashflowChart').getContext('2d');
+                new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Pendapatan Toko', 'Pemasukan Lain', 'Total Pemasukan', 'Pengeluaran', 'Saldo Bersih'],
+                        datasets: [{
+                            label: 'Nominal (Rp)',
+                            data: [pendapatanToko, inflowLain, pemasukan, pengeluaran, saldoBersih],
+                            backgroundColor: [
+                                'rgba(16, 185, 129, 0.7)', // green
+                                'rgba(59, 130, 246, 0.7)', // blue inflow lain
+                                'rgba(34,197,94,0.5)',      // total pemasukan (soft green)
+                                'rgba(239, 68, 68, 0.7)',  // red
+                                saldoBersih >= 0 ? 'rgba(59, 130, 246, 0.7)' : 'rgba(239, 68, 68, 0.7)'
+                            ],
+                            borderRadius: 10,
+                            maxBarThickness: 60
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: {
+                                callbacks: {
+                                    label: function (context) {
+                                        let val = context.parsed.y || context.parsed;
+                                        return 'Rp' + val.toLocaleString('id-ID');
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    callback: function (value) {
+                                        return 'Rp' + value.toLocaleString('id-ID');
+                                    }
+                                }
+                            }
+                        }
+                    }
                 });
             });
         </script>

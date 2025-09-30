@@ -12,6 +12,84 @@ use Barryvdh\DomPDF\Facade\Pdf;
 
 class ReportController extends Controller
 {
+    // Laporan Cashflow
+    public function cashflow(Request $request)
+    {
+        // Set Carbon locale ke Indonesia
+        \Carbon\Carbon::setLocale('id');
+        $startDate = $request->input('start_date');
+        $endDate = $request->input('end_date');
+        $categoryId = $request->input('category_id');
+
+        // Default: jika tidak ada filter tanggal, pakai bulan berjalan
+        if (!$startDate || !$endDate) {
+            $month = $request->input('month', now()->format('Y-m'));
+            $year = substr($month, 0, 4);
+            $mon = substr($month, 5, 2);
+            $startDate = "$year-$mon-01";
+            $endDate = date('Y-m-t', strtotime($startDate));
+        }
+
+        $query = \App\Models\CashFlow::with(['category', 'user'])
+            ->whereBetween('transaction_date', [$startDate, $endDate]);
+        if ($categoryId) {
+            $query->where('category_id', $categoryId);
+        }
+        $cashFlows = $query->orderBy('transaction_date', 'desc')->get();
+
+        // Pisahkan cashflow berdasarkan status user (owner vs selain owner)
+        $ownerName = 'Owner Florist';
+        $cashFlowsOwner = $cashFlows->filter(function ($cf) use ($ownerName) {
+            $name = $cf->user && $cf->user->name ? trim($cf->user->name) : '';
+            return strcasecmp($name, $ownerName) === 0;
+        });
+        $cashFlowsNonOwner = $cashFlows->filter(function ($cf) use ($ownerName) {
+            $name = $cf->user && $cf->user->name ? trim($cf->user->name) : '';
+            return strcasecmp($name, $ownerName) !== 0;
+        });
+
+        // Ringkasan Owner
+        $inflowLainOwner = $cashFlowsOwner->where('type', 'inflow')->sum('amount');
+        $totalOutflowOwner = $cashFlowsOwner->where('type', 'outflow')->sum('amount');
+
+        // Ringkasan Selain Owner
+        $inflowLainNonOwner = $cashFlowsNonOwner->where('type', 'inflow')->sum('amount');
+        $totalOutflowNonOwner = $cashFlowsNonOwner->where('type', 'outflow')->sum('amount');
+
+        // Ambil semua kategori untuk filter
+        $categories = \App\Models\CashFlowCategory::all();
+
+        // Hitung pendapatan toko dari Sale dan PublicOrder
+        $totalSale = \App\Models\Sale::whereBetween('created_at', [$startDate, $endDate])->sum('total');
+        $totalOrder = DB::table('public_orders')
+            ->join('public_order_items', 'public_orders.id', '=', 'public_order_items.public_order_id')
+            ->whereBetween('public_orders.created_at', [$startDate, $endDate])
+            ->whereIn('public_orders.status', ['confirmed', 'processing', 'ready', 'completed'])
+            ->sum(DB::raw('public_order_items.quantity * public_order_items.price'));
+        $totalPendapatanToko = $totalSale + $totalOrder;
+
+        // Saldo bersih Personal = (pendapatan toko + pemasukan lain personal + pemasukan lain bisnis) - (pengeluaran personal + pengeluaran bisnis)
+        $saldoBersihNonOwner = $totalPendapatanToko + $inflowLainNonOwner + $inflowLainOwner - ($totalOutflowNonOwner + $totalOutflowOwner);
+        // Saldo bersih Business (Owner) tetap seperti sebelumnya
+        $saldoBersihOwner = $totalPendapatanToko + $inflowLainOwner - $totalOutflowOwner;
+
+        return view('reports.cashflow', [
+            'cashFlowsOwner' => $cashFlowsOwner,
+            'cashFlowsNonOwner' => $cashFlowsNonOwner,
+            'categories' => $categories,
+            'totalPendapatanToko' => $totalPendapatanToko,
+            'totalSale' => $totalSale,
+            'totalOrder' => $totalOrder,
+            // Owner
+            'inflowLainOwner' => $inflowLainOwner,
+            'totalOutflowOwner' => $totalOutflowOwner,
+            'saldoBersihOwner' => $saldoBersihOwner,
+            // NonOwner
+            'inflowLainNonOwner' => $inflowLainNonOwner,
+            'totalOutflowNonOwner' => $totalOutflowNonOwner,
+            'saldoBersihNonOwner' => $saldoBersihNonOwner,
+        ]);
+    }
     // Laporan Penjualan
     public function sales(Request $request)
     {
@@ -521,5 +599,73 @@ class ReportController extends Controller
         } catch (\Exception $e) {
             return back()->withErrors(['error' => 'Gagal mengexport PDF: ' . $e->getMessage()]);
         }
+    }
+
+    // Export laporan cashflow ke PDF
+    public function cashflowPdf(Request $request)
+    {
+        \Carbon\Carbon::setLocale('id');
+        $month = $request->input('month', now()->format('Y-m'));
+        $categoryId = $request->input('category_id');
+
+        $query = \App\Models\CashFlow::with(['category', 'user'])
+            ->whereYear('transaction_date', substr($month, 0, 4))
+            ->whereMonth('transaction_date', substr($month, 5, 2));
+        if ($categoryId) {
+            $query->where('category_id', $categoryId);
+        }
+        $cashFlows = $query->orderBy('transaction_date', 'desc')->get();
+
+        $ownerName = 'Owner Florist';
+        $cashFlowsOwner = $cashFlows->filter(function ($cf) use ($ownerName) {
+            $name = $cf->user && $cf->user->name ? trim($cf->user->name) : '';
+            return strcasecmp($name, $ownerName) === 0;
+        });
+        $cashFlowsNonOwner = $cashFlows->filter(function ($cf) use ($ownerName) {
+            $name = $cf->user && $cf->user->name ? trim($cf->user->name) : '';
+            return strcasecmp($name, $ownerName) !== 0;
+        });
+
+        $inflowLainOwner = $cashFlowsOwner->where('type', 'inflow')->sum('amount');
+        $totalOutflowOwner = $cashFlowsOwner->where('type', 'outflow')->sum('amount');
+        $inflowLainNonOwner = $cashFlowsNonOwner->where('type', 'inflow')->sum('amount');
+        $totalOutflowNonOwner = $cashFlowsNonOwner->where('type', 'outflow')->sum('amount');
+
+        $year = substr($month, 0, 4);
+        $mon = substr($month, 5, 2);
+        $startDate = "$year-$mon-01";
+        $endDate = date('Y-m-t', strtotime($startDate));
+
+        $totalSale = \App\Models\Sale::whereBetween('created_at', [$startDate, $endDate])->sum('total');
+        $totalOrder = DB::table('public_orders')
+            ->join('public_order_items', 'public_orders.id', '=', 'public_order_items.public_order_id')
+            ->whereBetween('public_orders.created_at', [$startDate, $endDate])
+            ->whereIn('public_orders.status', ['confirmed', 'processing', 'ready', 'completed'])
+            ->sum(DB::raw('public_order_items.quantity * public_order_items.price'));
+        $totalPendapatanToko = $totalSale + $totalOrder;
+
+        // Saldo bersih Personal = (pendapatan toko + pemasukan lain personal + pemasukan lain bisnis) - (pengeluaran personal + pengeluaran bisnis)
+        $saldoBersihNonOwner = $totalPendapatanToko + $inflowLainNonOwner + $inflowLainOwner - ($totalOutflowNonOwner + $totalOutflowOwner);
+        // Saldo bersih Business (Owner)
+        $saldoBersihOwner = $totalPendapatanToko + $inflowLainOwner - $totalOutflowOwner;
+
+        // Untuk PDF, tampilkan ringkasan Personal Gabungan dan Business
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('reports.cashflow_pdf', [
+            'month' => $month,
+            'totalPendapatanToko' => $totalPendapatanToko,
+            'totalSale' => $totalSale,
+            'totalOrder' => $totalOrder,
+            'inflowLainOwner' => $inflowLainOwner,
+            'inflowLainNonOwner' => $inflowLainNonOwner,
+            'totalOutflowOwner' => $totalOutflowOwner,
+            'totalOutflowNonOwner' => $totalOutflowNonOwner,
+            'saldoBersihOwner' => $saldoBersihOwner,
+            'saldoBersihNonOwner' => $saldoBersihNonOwner,
+            'cashFlowsOwner' => $cashFlowsOwner,
+            'cashFlowsNonOwner' => $cashFlowsNonOwner,
+        ]);
+        $pdf->setPaper('a4', 'portrait');
+        $filename = 'laporan_cashflow_' . $month . '.pdf';
+        return $pdf->download($filename);
     }
 }

@@ -1,4 +1,3 @@
-
 <?php
 
 use App\Http\Controllers\OrderCustomBouquetController;
@@ -28,6 +27,8 @@ use App\Http\Controllers\BouquetSizeController;
 use App\Http\Controllers\BouquetComponentController;
 use App\Http\Controllers\PublicCartController;
 use App\Http\Controllers\PublicCheckoutController;
+use App\Http\Controllers\CashFlowController;
+use App\Http\Controllers\CashFlowCategoryController;
 
 
 use Illuminate\Support\Facades\Route;
@@ -148,6 +149,7 @@ Route::prefix('reports')->name('reports.')->group(function () {
     Route::get('/stock', [ReportController::class, 'stock'])->name('stock');
     Route::get('/orders', [ReportController::class, 'orders'])->name('orders'); // laporan pemesanan
     Route::get('/customers', [ReportController::class, 'customers'])->name('customers'); // laporan pelanggan
+    Route::get('/cashflow', [ReportController::class, 'cashflow'])->name('cashflow'); // laporan cash flow
     Route::get('/income', [ReportController::class, 'income'])->name('income'); // laporan pendapatan
 
     // PDF Export Routes
@@ -155,6 +157,7 @@ Route::prefix('reports')->name('reports.')->group(function () {
     Route::get('/stock/pdf', [ReportController::class, 'stockPdf'])->name('stock.pdf');
     Route::get('/orders/pdf', [ReportController::class, 'ordersPdf'])->name('orders.pdf');
     Route::get('/income/pdf', [ReportController::class, 'incomePdf'])->name('income.pdf');
+    Route::get('/cashflow/pdf', [ReportController::class, 'cashflowPdf'])->name('cashflow.pdf');
 
     // Route berikut bisa diaktifkan jika fitur Excel sudah tersedia
     // Route::get('/sales/excel', [ReportController::class, 'salesExcel'])->name('sales.excel');
@@ -230,3 +233,8 @@ Route::post('/voucher/validate', [VoucherController::class, 'validate'])->name('
 
 
 require __DIR__ . '/auth.php';
+
+Route::middleware(['auth'])->group(function () {
+    Route::resource('cashflow', CashFlowController::class);
+    Route::resource('cashflow-categories', CashFlowCategoryController::class);
+});

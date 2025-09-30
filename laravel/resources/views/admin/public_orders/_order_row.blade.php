@@ -59,7 +59,9 @@
             {{ $paymentMap[$order->payment_status] ?? ucfirst($order->payment_status) }}
         </span>
     </td>
-    <td class="px-4 py-2 border">
-        <a href="{{ route('admin.public-orders.show', $order->id) }}" class="text-blue-600 hover:underline">Detail</a>
-    </td>
+    @if(auth()->user()->hasRole(['owner', 'admin']))
+        <td class="px-4 py-2 border">
+            <a href="{{ route('admin.public-orders.show', $order->id) }}" class="text-blue-600 hover:underline">Detail</a>
+        </td>
+    @endif
 </tr>

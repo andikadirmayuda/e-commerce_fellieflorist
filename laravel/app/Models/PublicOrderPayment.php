@@ -7,7 +7,10 @@ use Illuminate\Database\Eloquent\Model;
 class PublicOrderPayment extends Model
 {
     protected $fillable = [
-        'public_order_id', 'amount', 'note', 'proof'
+        'public_order_id',
+        'amount',
+        'note',
+        'proof'
     ];
 
     public function order()

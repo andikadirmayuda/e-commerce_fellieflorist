@@ -176,27 +176,29 @@
                     </div>
                 </div>
 
-                <!-- Total Pendapatan Card -->
-                <div class="stats-card p-6 relative overflow-hidden">
-                    <div class="absolute right-0 top-0 w-32 h-32 opacity-10">
-                        <i class="bi bi-cash-stack text-8xl text-blue-500 transform translate-x-8 -translate-y-8"></i>
-                    </div>
-                    <div class="relative">
-                        <div class="flex items-center mb-4">
-                            <div class="p-3 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl shadow-lg">
-                                <i class="bi bi-cash-stack text-xl text-white"></i>
+                @if(auth()->user()->hasRole(['owner']))
+                    <!-- Total Pendapatan Card -->
+                    <div class="stats-card p-6 relative overflow-hidden">
+                        <div class="absolute right-0 top-0 w-32 h-32 opacity-10">
+                            <i class="bi bi-cash-stack text-8xl text-blue-500 transform translate-x-8 -translate-y-8"></i>
+                        </div>
+                        <div class="relative">
+                            <div class="flex items-center mb-4">
+                                <div class="p-3 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl shadow-lg">
+                                    <i class="bi bi-cash-stack text-xl text-white"></i>
+                                </div>
+                                <p class="ml-3 text-sm font-bold text-White bg-red-500 rounded-lg shadow-lg py-3 px-3">Total
+                                    Pendapatan</p>
                             </div>
-                            <p class="ml-3 text-sm font-bold text-White bg-red-500 rounded-lg shadow-lg py-3 px-3">Total
-                                Pendapatan</p>
-                        </div>
-                        <p class="text-2xl font-bold text-gray-800">Rp{{ number_format($totalRevenue, 0, ',', '.') }}
-                        </p>
-                        <div class="flex items-center mt-2">
-                            <i class="bi bi-graph-up text-xs text-blue-500 mr-1"></i>
-                            <p class="text-xs text-gray-500">Pendapatan kotor</p>
+                            <p class="text-2xl font-bold text-gray-800">Rp{{ number_format($totalRevenue, 0, ',', '.') }}
+                            </p>
+                            <div class="flex items-center mt-2">
+                                <i class="bi bi-graph-up text-xs text-blue-500 mr-1"></i>
+                                <p class="text-xs text-gray-500">Pendapatan kotor</p>
+                            </div>
                         </div>
                     </div>
-                </div>
+                @endif
             </div>
 
 
@@ -289,11 +291,11 @@
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
-                                                                                    @if($sale->payment_method === 'cash')
-                                                                                        bg-green-100 text-green-800
-                                                                                    @else
-                                                                                        bg-blue-100 text-blue-800
-                                                                                    @endif">
+                                                                                                @if($sale->payment_method === 'cash')
+                                                                                                    bg-green-100 text-green-800
+                                                                                                @else
+                                                                                                    bg-blue-100 text-blue-800
+                                                                                                @endif">
                                             <i
                                                 class="bi {{ $sale->payment_method === 'cash' ? 'bi-cash' : 'bi-credit-card' }} mr-1"></i>
                                             {{ ucfirst($sale->payment_method) }}
@@ -302,7 +304,12 @@
                                     <td class="px-6 py-4">
                                         <div class="text-sm text-gray-900">
                                             @foreach($sale->items as $item)
-                                                {{ $item->product->name }} ({{ $item->quantity }}x)
+                                                @if($item->product)
+                                                    {{ $item->product->name }} ({{ $item->quantity }}x)
+                                                @else
+                                                    <span class="text-red-500 italic">Produk tidak ditemukan</span>
+                                                    ({{ $item->quantity }}x)
+                                                @endif
                                                 @if(!empty($item->price_type))
                                                     {{ $item->price_type }}
                                                 @endif<br>
@@ -316,12 +323,12 @@
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium 
-                                                                                        @if($sale->status === 'completed')
-                                                                                            bg-green-100 text-green-800
-                                                                                        @else
-                                                                                            bg-red-100 text-green-800
-                                                                                        @endif
-                                                                                    ">
+                                                                                                    @if($sale->status === 'completed')
+                                                                                                        bg-green-100 text-green-800
+                                                                                                    @else
+                                                                                                        bg-red-100 text-green-800
+                                                                                                    @endif
+                                                                                                ">
                                             <i
                                                 class="bi {{ $sale->status === 'completed' ? 'bi-check-circle' : 'bi-check-circle' }} mr-1"></i>
                                             {{ $sale->status === 'completed' ? 'Selesai' : 'selesai' }}

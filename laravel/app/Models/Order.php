@@ -46,7 +46,7 @@ class Order extends Model
      */
     public function getDeliveryMethodLabelAttribute(): string
     {
-        return match($this->delivery_method) {
+        return match ($this->delivery_method) {
             'pickup' => 'Ambil Langsung',
             'gosend' => 'GoSend',
             'gocar' => 'GoCar',

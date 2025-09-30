@@ -181,7 +181,8 @@
                                                                 @endif
                                                                 <div class="flex flex-col flex-1 min-w-0">
                                                                     <span class="font-medium text-gray-900 truncate">{{ $product->name }}</span>
-                                                                    <span class="text-xs text-gray-500 truncate">Kode: {{ $product->code ?? '-' }}</span>
+                                                                    <span class="text-xs text-gray-500 truncate">{{ $product->code ?? '-' }}</span>
+                                                                    <span class="text-sm text-pink-600 font-semibold">{{ $product->category->name ?? 'Tanpa Kategori' }}</span>
                                                                 </div>
                                                                 <div class="flex flex-col items-end ml-2">
                                                                     @if($product->current_stock > 0)

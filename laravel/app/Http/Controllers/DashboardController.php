@@ -273,6 +273,37 @@ class DashboardController extends Controller
             ]],
         ];
 
+        // Data Grafik Alur Kas
+        // Perhitungan cashflow untuk dashboard
+        $totalSale = Sale::whereNull('deleted_at')
+            ->whereMonth('created_at', now()->month)
+            ->whereYear('created_at', now()->year)
+            ->sum('total');
+
+        $totalOrder = DB::table('public_orders')
+            ->join('public_order_items', 'public_orders.id', '=', 'public_order_items.public_order_id')
+            ->whereIn('public_orders.status', ['confirmed', 'processing', 'ready', 'completed'])
+            ->whereMonth('public_orders.created_at', now()->month)
+            ->whereYear('public_orders.created_at', now()->year)
+            ->sum(DB::raw('public_order_items.quantity * public_order_items.price'));
+
+        $totalPendapatanToko = $totalSale + $totalOrder;
+
+        $inflowLain = DB::table('cash_flows')
+            ->where('type', 'inflow')
+            ->whereMonth('transaction_date', now()->month)
+            ->whereYear('transaction_date', now()->year)
+            ->sum('amount');
+
+        $totalOutflow = DB::table('cash_flows')
+            ->where('type', 'outflow')
+            ->whereMonth('transaction_date', now()->month)
+            ->whereYear('transaction_date', now()->year)
+            ->sum('amount');
+
+        $saldoBersih = $totalPendapatanToko + $inflowLain - $totalOutflow;
+
+
         // Produk ready stock (stok > 0), urutkan berdasarkan total_sold (terlaris)
         $readyProducts = Product::with(['category', 'prices'])
             ->where('current_stock', '>', 0)
@@ -413,7 +444,13 @@ class DashboardController extends Controller
             'readyProducts',
             'productChartData',
             'bouquetChartData',
-            'bouquetReadyStock'
+            'bouquetReadyStock',
+            'totalPendapatanToko',
+            'totalSale',
+            'totalOrder',
+            'inflowLain',
+            'totalOutflow',
+            'saldoBersih'
         );
 
         // Selalu arahkan ke dashboard utama

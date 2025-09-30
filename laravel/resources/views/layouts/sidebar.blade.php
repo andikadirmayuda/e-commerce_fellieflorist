@@ -108,6 +108,7 @@
                 </x-sidebar-link>
             @endif
 
+
             <!-- MANAJEMEN BUKET -->
             <li class="mt-4 mb-1 text-xs font-bold uppercase tracking-wider text-pink-500 flex items-center gap-2"><i
                     class="bi bi-flower1"></i> Manajemen Buket</li>
@@ -141,6 +142,30 @@
                     Komponen Bouquet
                 </x-sidebar-link>
             @endif
+
+            <!-- CASH FLOW -->
+            <li class="mt-4 mb-1 text-xs font-bold uppercase tracking-wider text-pink-500 flex items-center gap-2"><i
+                    class="bi bi-flower1"></i> Cash Flow</li>
+
+            @if(auth()->user()->hasRole('owner') || auth()->user()->hasRole('admin'))
+                <x-sidebar-link :href="route('cashflow-categories.index')"
+                    :active="request()->routeIs('cashflow-categories.*')">
+                    <x-slot name="icon">
+                        <i class="bi bi-tags text-lg mr-1"></i>
+                    </x-slot>
+                    {{ __('Kategori Cash Flow') }}
+                </x-sidebar-link>
+            @endif
+
+            @if(auth()->user()->hasRole('owner') || auth()->user()->hasRole('admin') || auth()->user()->hasRole('kasir'))
+                <x-sidebar-link :href="route('cashflow.index')" :active="request()->routeIs('cashflow.*')">
+                    <x-slot name="icon">
+                        <i class="bi bi-wallet2 text-lg mr-1"></i>
+                    </x-slot>
+                    {{ __('Cash Flow') }}
+                </x-sidebar-link>
+            @endif
+
 
             <!-- LAPORAN -->
             <li class="mt-4 mb-1 text-xs font-bold uppercase tracking-wider text-pink-500 flex items-center gap-2"><i
@@ -177,6 +202,16 @@
                     Laporan Pelanggan
                 </x-sidebar-link>
             @endif
+
+            @if(auth()->user()->hasRole('owner') || auth()->user()->hasRole('admin') || auth()->user()->hasRole('kasir'))
+                <x-sidebar-link :href="route('reports.cashflow')" :active="request()->routeIs('reports.cashflow')">
+                    <x-slot name="icon">
+                        <i class="bi bi-wallet2 text-lg mr-1"></i>
+                    </x-slot>
+                    Laporan Cash Flow
+                </x-sidebar-link>
+            @endif
+
             @if(auth()->user()->hasRole('owner'))
                 <x-sidebar-link :href="route('reports.income')" :active="request()->routeIs('reports.income')">
                     <x-slot name="icon">
