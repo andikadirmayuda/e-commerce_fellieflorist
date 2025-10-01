@@ -970,6 +970,10 @@ $customBouquetItems = $order->items->filter(function ($item) {
                                                                                                                                             class="bg-blue-500 hover:bg-blue-600 text-white text-xs px-3 py-1 rounded-lg transition duration-200">
                                                                                                                                         <i class="bi bi-clipboard"></i> Salin No. Rekening
                                                                                                                                     </button>
+                                                                                                                                    <!-- Tombol Bayar dengan Midtrans Snap -->
+                                                                                                                                    <button id="pay-button" class="bg-pink-500 hover:bg-pink-600 text-white font-bold px-6 py-2 rounded-lg shadow transition inline-flex items-center gap-2 mt-3">
+                                                                                                                                        <i class="bi bi-credit-card"></i> Bayar Online (Midtrans)
+                                                                                                                                    </button>
                                                                                                                                 </div>
                                                                                                                             </div>
 
@@ -1427,6 +1431,59 @@ $customBouquetItems = $order->items->filter(function ($item) {
     
     <!-- Include cart.js for toast notifications -->
     <script src="{{ asset('js/cart.js') }}?v={{ time() }}"></script>
+    <script src="https://app.sandbox.midtrans.com/snap/snap.js" data-client-key="{{ config('midtrans.client_key') }}"></script>
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var payButton = document.getElementById('pay-button');
+        if (payButton) {
+            payButton.addEventListener('click', function() {
+                payButton.disabled = true;
+                payButton.innerHTML = '<i class="bi bi-arrow-repeat animate-spin"></i> Memproses...';
+                fetch('/payment/snap-token', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    },
+                    body: JSON.stringify({
+                        amount: {{ $sisa }},
+                        name: '{{ $order->customer_name }}',
+                        email: '{{ $order->customer_email ?? $order->wa_number . '@fellieflorist.com' }}',
+                        order_id: '{{ $order->public_code }}'
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    payButton.disabled = false;
+                    payButton.innerHTML = '<i class="bi bi-credit-card"></i> Bayar Online (Midtrans)';
+                    if (data.token) {
+                        snap.pay(data.token, {
+                            onSuccess: function(result) {
+                                window.location.reload();
+                            },
+                            onPending: function(result) {
+                                window.location.reload();
+                            },
+                            onError: function(result) {
+                                alert('Terjadi kesalahan pembayaran. Silakan coba lagi.');
+                            },
+                            onClose: function() {
+                                // User menutup popup
+                            }
+                        });
+                    } else {
+                        alert('Gagal mendapatkan token pembayaran. Silakan coba lagi.');
+                    }
+                })
+                .catch(() => {
+                    payButton.disabled = false;
+                    payButton.innerHTML = '<i class="bi bi-credit-card"></i> Bayar Online (Midtrans)';
+                    alert('Gagal memproses pembayaran. Silakan coba lagi.');
+                });
+            });
+        }
+    });
+    </script>
 </body>
 
 </html>

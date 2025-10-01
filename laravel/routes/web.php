@@ -37,7 +37,7 @@ Route::get('/', function () {
     return redirect()->route('public.flowers');
 });
 
-// Public API Routes untuk validasi kode reseller
+
 Route::post('/api/validate-reseller-code', [OnlineCustomerController::class, 'validateResellerCode'])->name('api.validate-reseller-code');
 Route::post('/api/mark-reseller-code-used', [OnlineCustomerController::class, 'markResellerCodeUsed'])->name('api.mark-reseller-code-used');
 
@@ -238,3 +238,7 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('cashflow', CashFlowController::class);
     Route::resource('cashflow-categories', CashFlowCategoryController::class);
 });
+
+use App\Http\Controllers\PaymentController;
+
+Route::post('/payment/snap-token', [PaymentController::class, 'getSnapToken']);
