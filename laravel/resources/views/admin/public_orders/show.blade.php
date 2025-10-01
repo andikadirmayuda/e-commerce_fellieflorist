@@ -655,10 +655,9 @@ $needsShippingFee = in_array($order->delivery_method, [
                     @csrf
                     <div class="flex flex-col sm:flex-row items-start sm:items-center gap-3">
                         <label class="text-sm font-medium text-gray-700 sm:w-24">Ongkir:</label>
-                        <input type="number" name="shipping_fee" min="0" step="1000" 
-                               value="{{ $order->shipping_fee ?? 0 }}"
-                               class="border border-gray-300 rounded-lg px-3 py-2 focus:ring-orange-500 focus:border-orange-500 w-full sm:w-48"
-                               placeholder="Masukkan biaya ongkir">
+                   <input type="text" name="shipping_fee" id="shippingFeeInput"
+                       value="{{ number_format($order->shipping_fee ?? 0, 0, ',', '.') }}"
+                       class="border border-gray-300 rounded-lg px-3 py-2 focus:ring-orange-500 focus:border-orange-500 w-full sm:w-48">
                         <button type="submit"
                                 class="bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-lg font-medium transition-colors duration-200 w-full sm:w-auto">
                             Update Ongkir
@@ -667,6 +666,24 @@ $needsShippingFee = in_array($order->delivery_method, [
                     <small class="text-gray-600 text-sm block">
                         Ongkir akan ditambahkan ke total pesanan. Current ongkir: Rp{{ number_format($order->shipping_fee ?? 0, 0, ',', '.') }}
                     </small>
+                    <script>
+                    document.addEventListener('DOMContentLoaded', function () {
+                        const input = document.getElementById('shippingFeeInput');
+                        if (input) {
+                            input.addEventListener('input', function (e) {
+                                let value = input.value.replace(/\D/g, '');
+                                if (value) {
+                                    value = value.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+                                }
+                                input.value = value;
+                            });
+                            input.form.addEventListener('submit', function (e) {
+                                // Bersihkan titik sebelum submit
+                                input.value = input.value.replace(/\./g, '');
+                            });
+                        }
+                    });
+                    </script>
                 </form>
             </div>
         @endif

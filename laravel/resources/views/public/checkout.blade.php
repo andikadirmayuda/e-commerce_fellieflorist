@@ -268,7 +268,7 @@
                                             <option value="Gosend (Pesan Dari Toko)">🛵 (4) Gosend (Pesan Via Toko, + Ongkir)
                                             </option>
                                             <option value="Gocar (Pesan Dari Toko)">🚕 (5) Gocar (Pesan Via Toko, + Ongkir)</option>
-                                            <option value="Travel (Di Pesan Sendiri)">🚌 (6) Travel (Luar Kota, Pesan Sendiri)
+                                            <option value="Travel (Di Pesan Sendiri - Khusus Luar Kota)">🚌 (6) Travel (Luar Kota, Pesan Sendiri)
                                             </option>
                                         </select>
                                     </div>

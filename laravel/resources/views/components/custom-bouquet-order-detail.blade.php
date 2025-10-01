@@ -182,7 +182,17 @@
                                             {{ $component->quantity }}
                                         </span>
                                         <span class="text-xs text-purple-600 font-medium order-1 sm:order-2">
-                                            {{ $component->product->base_unit ?? 'pcs' }}
+                                            @php
+                                                $unit = 'tangkai';
+                                                if ($component->price_type === 'custom_ikat') {
+                                                    $unit = 'ikat';
+                                                } elseif ($component->price_type === 'custom_tangkai') {
+                                                    $unit = 'tangkai';
+                                                } elseif ($component->price_type === 'custom_khusus') {
+                                                    $unit = 'Item';
+                                                }
+                                            @endphp
+                                            {{ $unit }}
                                         </span>
                                     </div>
                                 </div>
