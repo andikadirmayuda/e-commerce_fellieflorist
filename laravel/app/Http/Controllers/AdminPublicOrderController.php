@@ -824,6 +824,16 @@ class AdminPublicOrderController extends Controller
 
         $order->payment_status = $newStatus;
 
+        // Logging perubahan status pembayaran
+        \App\Models\PublicOrderPaymentLog::create([
+            'public_order_id' => $order->id,
+            'old_status' => $order->getOriginal('payment_status'),
+            'new_status' => $newStatus,
+            'changed_by' => Auth::user() ? Auth::user()->name : 'admin',
+            'source' => 'manual',
+            'note' => 'Update oleh admin',
+        ]);
+
         // Update amount_paid berdasarkan input admin atau otomatis untuk status paid
         if (in_array($newStatus, ['dp_paid', 'partial_paid'])) {
             // Untuk DP atau pembayaran sebagian, gunakan input dari admin

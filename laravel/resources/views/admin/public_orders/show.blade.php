@@ -624,6 +624,45 @@ $paymentBg = match ($order->payment_status) {
         </div>
 
         <!-- Update Ongkir Card -->
+            <!-- Riwayat Log Pembayaran -->
+            <div class="bg-white rounded-xl shadow-sm border border-green-200 p-6 mb-6">
+                <div class="flex items-center mb-4">
+                    <div class="bg-green-100 p-2 rounded-lg mr-3">
+                        <svg class="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M5 3a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V5a2 2 0 00-2-2H5zm0 2h10v12H5V5zm2 2v2h6V7H7zm0 4v2h6v-2H7z" />
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-semibold text-green-900">Riwayat Log Pembayaran</h3>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full text-sm">
+                        <thead>
+                            <tr class="bg-green-50">
+                                <th class="px-4 py-2 text-left">Waktu</th>
+                                <th class="px-4 py-2 text-left">Status Lama</th>
+                                <th class="px-4 py-2 text-left">Status Baru</th>
+                                <th class="px-4 py-2 text-left">Sumber</th>
+                                <th class="px-4 py-2 text-left">Oleh</th>
+                                <th class="px-4 py-2 text-left">Catatan</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @forelse($order->paymentLogs as $log)
+                                <tr class="border-b">
+                                    <td class="px-4 py-2">{{ $log->created_at->format('d-m-Y H:i') }}</td>
+                                    <td class="px-4 py-2">{{ $log->old_status ?? '-' }}</td>
+                                    <td class="px-4 py-2 font-bold text-green-700">{{ $log->new_status }}</td>
+                                    <td class="px-4 py-2">{{ ucfirst($log->source) }}</td>
+                                    <td class="px-4 py-2">{{ $log->changed_by }}</td>
+                                    <td class="px-4 py-2">{{ $log->note }}</td>
+                                </tr>
+                            @empty
+                                <tr><td colspan="6" class="px-4 py-2 text-center text-gray-500">Belum ada log pembayaran.</td></tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         @php
 $needsShippingFee = in_array($order->delivery_method, [
     'Gosend (Pesan Dari Toko)',

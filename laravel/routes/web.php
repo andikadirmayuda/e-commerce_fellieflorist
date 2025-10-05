@@ -29,16 +29,21 @@ use App\Http\Controllers\PublicCartController;
 use App\Http\Controllers\PublicCheckoutController;
 use App\Http\Controllers\CashFlowController;
 use App\Http\Controllers\CashFlowCategoryController;
+use App\Http\Controllers\PaymentController;
 
 
 use Illuminate\Support\Facades\Route;
+
 
 Route::get('/', function () {
     return redirect()->route('public.flowers');
 });
 
+// Endpoint untuk mendapatkan Snap Token Midtrans
+Route::post('/payment/snap-token', [PaymentController::class, 'createSnapTransaction'])->name('payment.snap_token');
 
-Route::post('/api/validate-reseller-code', [OnlineCustomerController::class, 'validateResellerCode'])->name('api.validate-reseller-code');
+
+Route::post('/api/validate-rese ller-code', [OnlineCustomerController::class, 'validateResellerCode'])->name('api.validate-reseller-code');
 Route::post('/api/mark-reseller-code-used', [OnlineCustomerController::class, 'markResellerCodeUsed'])->name('api.mark-reseller-code-used');
 
 use App\Http\Controllers\Api\NotificationController as ApiNotificationController;
@@ -62,6 +67,11 @@ Route::post('/checkout/remove-voucher', [PublicCheckoutController::class, 'remov
 Route::get('/dashboard', [DashboardController::class, 'index'])
     ->middleware(['auth', 'verified'])
     ->name('dashboard');
+
+// Halaman pembayaran setelah checkout
+Route::get('/payment/{order_code}', [PublicCheckoutController::class, 'paymentPage'])->name('public.payment');
+// Endpoint untuk notifikasi pembayaran dari Midtrans
+Route::post('/payment/notification', [PaymentController::class, 'notification']);
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -238,8 +248,3 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('cashflow', CashFlowController::class);
     Route::resource('cashflow-categories', CashFlowCategoryController::class);
 });
-
-use App\Http\Controllers\PaymentController;
-
-Route::post('/payment/snap-token', [PaymentController::class, 'getSnapToken']);
-Route::post('/payment/callback', [PaymentController::class, 'callback']);

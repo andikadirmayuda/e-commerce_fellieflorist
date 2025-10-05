@@ -176,6 +176,12 @@ class PublicOrder extends Model
         return $this->hasMany(PublicOrderPayment::class, 'public_order_id');
     }
 
+    // Relasi ke log pembayaran
+    public function paymentLogs()
+    {
+        return $this->hasMany(PublicOrderPaymentLog::class, 'public_order_id')->orderByDesc('id');
+    }
+
     public function customBouquet()
     {
         return $this->hasOne(CustomBouquet::class);

@@ -1294,6 +1294,27 @@ $customBouquetItems = $order->items->filter(function ($item) {
                 {{-- <p class="mt-1 sm:mt-2">Jika ada pertanyaan, silakan hubungi admin kami.</p> --}}
                 <p class="mt-2 sm:mt-4">© 2025 Fellie Florist. All rights reserved.</p>
 
+                    <!-- Info pembayaran berhasil Midtrans -->
+                    <div id="midtrans-success-info" style="display:none;" class="my-8 p-6 bg-green-50 border-2 border-green-400 rounded-xl text-center">
+                        <h3 class="text-xl font-bold text-green-700 mb-2"><i class="bi bi-check-circle-fill mr-2"></i>Pembayaran Berhasil!</h3>
+                        <p class="text-green-700 mb-2">Terima kasih, pembayaran Anda melalui Midtrans telah berhasil.</p>
+                        <div class="text-left mx-auto max-w-md bg-white rounded-lg shadow p-4 border border-green-200">
+                            <h4 class="font-semibold text-green-800 mb-2">Detail Pesanan:</h4>
+                            <ul class="text-gray-700 text-sm">
+                                <li><strong>Kode Pesanan:</strong> {{ $order->public_code }}</li>
+                                <li><strong>Nama Pemesan:</strong> {{ $order->customer_name }}</li>
+                                <li><strong>Produk:</strong>
+                                    <ul class="list-disc ml-4">
+                                        @foreach($order->items as $item)
+                                            <li>{{ $item->product_name }} x {{ $item->quantity }}</li>
+                                        @endforeach
+                                    </ul>
+                                </li>
+                                <li><strong>Total Dibayar:</strong> Rp{{ number_format($sisa, 0, ',', '.') }}</li>
+                            </ul>
+                        </div>
+                    </div>
+
                 {{-- <div class="w-100 h-0.5 bg-pink-400 mx-auto mb-3 mt-6"></div> --}}
                 <br>
                 {{-- <br> --}}
@@ -1456,10 +1477,13 @@ $customBouquetItems = $order->items->filter(function ($item) {
                 .then(data => {
                     payButton.disabled = false;
                     payButton.innerHTML = '<i class="bi bi-credit-card"></i> Bayar Online (Midtrans)';
-                    if (data.token) {
-                        snap.pay(data.token, {
+                        if (data.snap_token) {
+                            window.snap.pay(data.snap_token, {
                             onSuccess: function(result) {
-                                window.location.reload();
+                                    // Tampilkan info pembayaran berhasil
+                                    document.getElementById('midtrans-success-info').style.display = 'block';
+                                    // Scroll ke info
+                                    document.getElementById('midtrans-success-info').scrollIntoView({behavior: 'smooth'});
                             },
                             onPending: function(result) {
                                 window.location.reload();
