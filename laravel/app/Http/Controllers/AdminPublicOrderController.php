@@ -19,6 +19,53 @@ use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 
 class AdminPublicOrderController extends Controller
 {
+    /**
+     * Endpoint untuk menerima notifikasi pembayaran dari Midtrans
+     */
+    public function midtransNotification(Request $request)
+    {
+        // Ambil data notifikasi dari Midtrans
+        $json = $request->getContent();
+        $data = json_decode($json, true);
+        Log::info('Midtrans Notification Received', ['data' => $data]);
+
+        // Validasi order_id
+        $orderIdRaw = $data['order_id'] ?? null;
+        if (!$orderIdRaw) {
+            return response()->json(['error' => 'order_id not found'], 400);
+        }
+        // order_id format: {id}-{timestamp}, ambil id saja
+        $orderId = explode('-', $orderIdRaw)[0];
+        $order = \App\Models\PublicOrder::find($orderId);
+        if (!$order) {
+            return response()->json(['error' => 'Order not found'], 404);
+        }
+
+        // Cek status pembayaran dari Midtrans
+        $transactionStatus = $data['transaction_status'] ?? '';
+        $fraudStatus = $data['fraud_status'] ?? '';
+
+        // Mapping status Midtrans ke status sistem
+        if ($transactionStatus === 'capture' && $fraudStatus === 'accept') {
+            $order->payment_status = 'paid';
+            $order->amount_paid = $order->items()->sum(DB::raw('quantity * price'));
+        } elseif ($transactionStatus === 'settlement') {
+            $order->payment_status = 'paid';
+            $order->amount_paid = $order->items()->sum(DB::raw('quantity * price'));
+        } elseif (in_array($transactionStatus, ['pending', 'authorize'])) {
+            $order->payment_status = 'waiting_payment';
+        } elseif (in_array($transactionStatus, ['cancel', 'deny', 'expire'])) {
+            $order->payment_status = 'cancelled';
+        }
+
+        $order->save();
+        Log::info('Order payment status updated by Midtrans', [
+            'order_id' => $order->id,
+            'payment_status' => $order->payment_status
+        ]);
+
+        return response()->json(['success' => true]);
+    }
 
     /**
      * Update payment method for public order (admin only)

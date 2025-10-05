@@ -22,6 +22,11 @@
 
     <div class="py-8">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+            <!-- Search Filter -->
+            <div class="mb-6 flex justify-end">
+                <input type="text" id="searchInput" placeholder="Cari komponen bouquet..."
+                    class="w-full max-w-md px-4 py-2 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-pink-400" />
+            </div>
             <!-- Success Message -->
             @if (session('success'))
                 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -255,6 +260,26 @@
 
     <!-- JavaScript for Tabs -->
     <script>
+        // Search Filter Functionality
+        document.addEventListener('DOMContentLoaded', function () {
+            const searchInput = document.getElementById('searchInput');
+            searchInput.addEventListener('input', function () {
+                const query = this.value.toLowerCase();
+                const bouquetCards = document.querySelectorAll('.bouquet-card');
+                bouquetCards.forEach(card => {
+                    // Cari berdasarkan nama bouquet
+                    const name = card.querySelector('h3')?.textContent.toLowerCase() || '';
+                    // Cari juga berdasarkan kategori
+                    const category = card.getAttribute('data-category')?.toLowerCase() || '';
+                    // Jika query ditemukan di nama atau kategori, tampilkan
+                    if (name.includes(query) || category.includes(query)) {
+                        card.style.display = 'block';
+                    } else {
+                        card.style.display = 'none';
+                    }
+                });
+            });
+        });
         // Category Tab Functionality
         function showCategory(category) {
             // Get all bouquet cards

@@ -30,6 +30,17 @@ class PaymentController extends Controller
         }
 
         // Data transaksi
+        // Ambil detail item dari relasi order->items (pastikan relasi sudah ada di model PublicOrder)
+        $itemDetails = [];
+        foreach ($order->items as $item) {
+            $itemDetails[] = [
+                'id' => $item->product_id ?? $item->id,
+                'price' => $item->price,
+                'quantity' => $item->quantity,
+                'name' => $item->product_name ?? $item->name,
+            ];
+        }
+
         $params = [
             'transaction_details' => [
                 'order_id' => $order->public_code,
@@ -37,8 +48,17 @@ class PaymentController extends Controller
             ],
             'customer_details' => [
                 'first_name' => $order->customer_name,
+                'last_name' => $order->receiver_name ?? '',
                 'email' => $order->wa_number ? $order->wa_number . '@fellieflorist.com' : ($request->email ?? 'customer@fellieflorist.com'),
+                'phone' => $order->wa_number ?? ($request->phone ?? ''),
+                'shipping_address' => [
+                    'address' => $order->destination ?? '',
+                    'city' => $order->destination_city ?? '',
+                    'postal_code' => $order->destination_postal_code ?? '',
+                    'country_code' => 'IDN',
+                ],
             ],
+            'item_details' => $itemDetails,
         ];
 
         try {
@@ -52,76 +72,61 @@ class PaymentController extends Controller
     // Endpoint untuk menerima callback dari Midtrans
     public function callback(Request $request)
     {
+        // Konfigurasi Midtrans
+        Config::$serverKey = config('midtrans.server_key');
+        Config::$isProduction = config('midtrans.is_production');
+        Config::$isSanitized = config('midtrans.sanitized');
+        Config::$is3ds = config('midtrans.3ds');
 
-        // Ambil payload dari Midtrans
-        $payload = $request->all();
+        $notif = new \Midtrans\Notification();
 
-        $orderId = $payload['order_id'] ?? null;
-        $statusCode = $payload['status_code'] ?? null;
-        $grossAmount = $payload['gross_amount'] ?? null;
-        $signatureKey = $payload['signature_key'] ?? null;
-        $transactionStatus = $payload['transaction_status'] ?? null;
-        $paymentType = $payload['payment_type'] ?? null;
-        $transactionId = $payload['transaction_id'] ?? null;
+        $transaction = $notif->transaction_status;
+        $type = $notif->payment_type;
+        $order_id = $notif->order_id;
+        $fraud = $notif->fraud_status;
 
-        if (!$orderId) {
-            return response()->json(['error' => 'Order ID tidak ditemukan'], 400);
-        }
-
-        // Validasi signature Midtrans
-        $serverKey = config('midtrans.server_key');
-        $localSignature = hash('sha512', $orderId . $statusCode . $grossAmount . $serverKey);
-        if ($signatureKey !== $localSignature) {
-            Log::warning('Signature Midtrans tidak valid', [
-                'order_id' => $orderId,
-                'signature_key' => $signatureKey,
-                'local_signature' => $localSignature,
-            ]);
-            return response()->json(['error' => 'Signature tidak valid'], 403);
-        }
-
-        // Cari order di database (gunakan public_code atau id sesuai implementasi)
-        $order = \App\Models\PublicOrder::where('public_code', $orderId)->first();
+        // Cari order di database
+        $order = \App\Models\PublicOrder::where('public_code', $order_id)->first();
         if (!$order) {
-            // Coba cari berdasarkan id jika public_code tidak ditemukan
-            $order = \App\Models\PublicOrder::find($orderId);
+            $order = \App\Models\PublicOrder::find($order_id);
         }
         if (!$order) {
+            Log::warning('Order tidak ditemukan untuk callback Midtrans', ['order_id' => $order_id]);
             return response()->json(['error' => 'Order tidak ditemukan'], 404);
         }
 
         // Mapping status Midtrans ke status pembayaran di sistem
         $statusMap = [
+            'capture'    => ($type == 'credit_card' && $fraud == 'accept') ? 'paid' : 'waiting_payment',
             'settlement' => 'paid',
-            'capture' => 'paid',
-            'pending' => 'waiting_payment',
-            'deny' => 'rejected',
-            'cancel' => 'cancelled',
-            'expire' => 'cancelled',
+            'pending'    => 'waiting_payment',
+            'deny'       => 'rejected',
+            'expire'     => 'cancelled',
+            'cancel'     => 'cancelled',
         ];
-        $newPaymentStatus = $statusMap[$transactionStatus] ?? 'waiting_payment';
+        $newPaymentStatus = $statusMap[$transaction] ?? 'waiting_payment';
 
         $order->payment_status = $newPaymentStatus;
         if ($newPaymentStatus === 'paid') {
-            // Untuk status lunas, set amount_paid = total pesanan
             $totalOrder = $order->items()->sum(DB::raw('quantity * price'));
             $order->amount_paid = $totalOrder;
             $order->status = 'confirmed';
         }
-        // Simpan data transaksi (opsional, tambahkan field jika perlu)
-        $order->midtrans_transaction_id = $transactionId;
-        $order->midtrans_payment_type = $paymentType;
+        $order->midtrans_transaction_id = $notif->transaction_id ?? null;
+        $order->midtrans_payment_type = $type;
         $order->save();
 
-        // Log untuk audit
         Log::info('Midtrans callback processed', [
-            'order_id' => $orderId,
-            'transaction_status' => $transactionStatus,
+            'order_id' => $order_id,
+            'transaction_status' => $transaction,
             'payment_status' => $newPaymentStatus,
-            'transaction_id' => $transactionId,
-            'payment_type' => $paymentType,
+            'payment_type' => $type,
         ]);
 
-        return response()->json(['status' => 'success', 'payment_status' => $newPaymentStatus]);
+        return response()->json([
+            'status' => 'success',
+            'payment_status' => $newPaymentStatus,
+            'order_id' => $order_id,
+        ]);
     }
 }

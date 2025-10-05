@@ -242,3 +242,4 @@ Route::middleware(['auth'])->group(function () {
 use App\Http\Controllers\PaymentController;
 
 Route::post('/payment/snap-token', [PaymentController::class, 'getSnapToken']);
+Route::post('/payment/callback', [PaymentController::class, 'callback']);
