@@ -6,12 +6,144 @@ use App\Models\PublicOrder;
 use App\Models\PublicOrderItem;
 use App\Models\Product;
 use App\Services\PushNotificationService;
+use App\Services\MidtransService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class PublicOrderController extends Controller
 {
+    /**
+     * Callback endpoint untuk notifikasi pembayaran dari Midtrans
+     */
+    public function midtransCallback(Request $request)
+    {
+        $notif = $request->all();
+        $orderId = $notif['order_id'] ?? null;
+        $transactionStatus = $notif['transaction_status'] ?? null;
+        $paymentType = $notif['payment_type'] ?? null;
+        $fraudStatus = $notif['fraud_status'] ?? null;
+
+        if (!$orderId) {
+            return response()->json(['success' => false, 'message' => 'Order ID not found'], 400);
+        }
+
+        $order = \App\Models\PublicOrder::where('public_code', $orderId)->first();
+        if (!$order) {
+            return response()->json(['success' => false, 'message' => 'Order not found'], 404);
+        }
+
+        // Default: tidak mengubah status jika tidak dikenali
+        $newPaymentStatus = $order->payment_status;
+        // $newOrderStatus = $order->status;
+
+        // Pemetaan status Midtrans ke sistem
+        switch ($transactionStatus) {
+            case 'capture':
+            case 'settlement':
+                $newPaymentStatus = \App\Models\PublicOrder::PAYMENT_PAID;
+                $newOrderStatus = \App\Models\PublicOrder::STATUS_PROCESSED;
+                break;
+            case 'pending':
+                $newPaymentStatus = \App\Models\PublicOrder::PAYMENT_WAITING_PAYMENT;
+                $newOrderStatus = \App\Models\PublicOrder::STATUS_PENDING;
+                break;
+            case 'deny':
+            case 'cancel':
+            case 'expire':
+                $newPaymentStatus = \App\Models\PublicOrder::PAYMENT_CANCELLED;
+                $newOrderStatus = \App\Models\PublicOrder::STATUS_CANCELLED;
+                break;
+            case 'refund':
+                $newPaymentStatus = \App\Models\PublicOrder::PAYMENT_CANCELLED;
+                $newOrderStatus = \App\Models\PublicOrder::STATUS_CANCELLED;
+                break;
+            case 'partial_refund':
+                $newPaymentStatus = \App\Models\PublicOrder::PAYMENT_PARTIAL_PAID;
+                $newOrderStatus = \App\Models\PublicOrder::STATUS_PROCESSED;
+                break;
+        }
+
+        $order->payment_status = $newPaymentStatus;
+        // $order->status = $newOrderStatus;
+        $order->save();
+
+        return response()->json(['success' => true, 'message' => 'Status updated', 'payment_status' => $newPaymentStatus]);
+    }
+    /**
+     * Generate Midtrans Snap Token untuk pembayaran
+     */
+    public function payWithMidtrans(Request $request, $public_code)
+    {
+        $order = PublicOrder::where('public_code', $public_code)->with('items')->firstOrFail();
+        $midtrans = new MidtransService();
+
+        // Hitung total item, voucher, dan ongkir
+        $itemsTotal = 0;
+        foreach ($order->items as $item) {
+            $itemsTotal += $item->price * $item->quantity;
+        }
+        $voucherAmount = isset($order->voucher_amount) ? $order->voucher_amount : 0;
+        $shippingFee = isset($order->shipping_fee) ? $order->shipping_fee : 0;
+        $grossAmount = $itemsTotal - $voucherAmount + $shippingFee;
+
+        // Siapkan parameter transaksi untuk Midtrans
+        $params = [
+            'transaction_details' => [
+                'order_id' => $order->public_code,
+                'gross_amount' => $grossAmount,
+            ],
+            'customer_details' => [
+                'first_name' => $order->customer_name,
+                'email' => $order->wa_number . '@fellieflorist.com', // Email dummy dari WA
+                'phone' => $order->wa_number,
+            ],
+            'item_details' => [],
+        ];
+
+        foreach ($order->items as $item) {
+            $params['item_details'][] = [
+                'id' => $item->product_id,
+                'price' => $item->price,
+                'quantity' => $item->quantity,
+                'name' => $item->product_name,
+            ];
+        }
+        // Tambahkan voucher sebagai item diskon jika ada
+        if ($voucherAmount > 0) {
+            $params['item_details'][] = [
+                'id' => 'voucher',
+                'price' => -abs($voucherAmount),
+                'quantity' => 1,
+                'name' => 'Voucher Discount',
+            ];
+        }
+        // Tambahkan ongkir sebagai item jika ada
+        if ($shippingFee > 0) {
+            $params['item_details'][] = [
+                'id' => 'shipping',
+                'price' => $shippingFee,
+                'quantity' => 1,
+                'name' => 'Shipping Fee',
+            ];
+        }
+
+        try {
+            $snapToken = $midtrans->createSnapToken($params);
+            // Simpan snap_token ke database
+            $order->snap_token = $snapToken;
+            $order->save();
+            return response()->json([
+                'success' => true,
+                'snap_token' => $snapToken,
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], 500);
+        }
+    }
     /**
      * Proses pembayaran DP atau pelunasan untuk PublicOrder
      */
@@ -46,6 +178,7 @@ class PublicOrderController extends Controller
             'amount_paid' => $order->amount_paid,
         ]);
     }
+    // ...existing code...
     public function store(Request $request)
     {
         $validated = $request->validate([

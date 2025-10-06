@@ -17,7 +17,6 @@ class VerifyCsrfToken extends Middleware
         '/cart/remove/*',
         '/cart/clear',
         '/cart/get',
-        '/payment/callback',
-        'payment/callback',
+        '/midtrans/callback',
     ];
 }

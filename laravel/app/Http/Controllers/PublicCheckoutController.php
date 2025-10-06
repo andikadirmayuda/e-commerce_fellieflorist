@@ -19,14 +19,7 @@ use App\Services\VoucherService;
 
 class PublicCheckoutController extends Controller
 {
-    /**
-     * Tampilkan halaman pembayaran setelah checkout
-     */
-    public function paymentPage($order_code)
-    {
-        $order = \App\Models\PublicOrder::where('public_code', $order_code)->firstOrFail();
-        return view('public.payment', compact('order'));
-    }
+
     /**
      * Remove applied voucher from session
      */
@@ -404,7 +397,7 @@ class PublicCheckoutController extends Controller
             session(['last_public_order_code' => $publicCode]);
 
             return redirect()
-                ->route('public.payment', ['order_code' => $publicCode])
+                ->to("/order/{$publicCode}")
                 ->with('success', 'Pesanan berhasil dibuat!');
         } catch (\Exception $e) {
             DB::rollBack();

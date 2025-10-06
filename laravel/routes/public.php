@@ -31,6 +31,9 @@ Route::post('/custom-bouquet/{customBouquet}/add-to-cart', [CustomBouquetControl
 // Public order detail only (view only)
 Route::get('/public-order/{public_code}', [PublicOrderController::class, 'show'])->name('public.order.show');
 
+// Endpoint untuk mendapatkan Snap Token pembayaran Midtrans
+Route::post('/public-order/{public_code}/pay-midtrans', [PublicOrderController::class, 'payWithMidtrans'])->name('public.order.pay-midtrans');
+
 // Checkout routes
 Route::get('/checkout', [PublicCheckoutController::class, 'show'])->name('public.checkout');
 Route::post('/checkout', [PublicCheckoutController::class, 'process'])->name('public.checkout.process');

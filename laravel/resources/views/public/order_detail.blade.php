@@ -47,6 +47,9 @@
     }
 
 </style>
+<!-- Midtrans Snap JS -->
+<script src="https://app.sandbox.midtrans.com/snap/snap.js"
+    data-client-key="{{ config('midtrans.client_key') }}"></script>
 
 <body class="bg-gray-100 min-h-screen">
     <div
@@ -970,10 +973,6 @@ $customBouquetItems = $order->items->filter(function ($item) {
                                                                                                                                             class="bg-blue-500 hover:bg-blue-600 text-white text-xs px-3 py-1 rounded-lg transition duration-200">
                                                                                                                                         <i class="bi bi-clipboard"></i> Salin No. Rekening
                                                                                                                                     </button>
-                                                                                                                                    <!-- Tombol Bayar dengan Midtrans Snap -->
-                                                                                                                                    <button id="pay-button" class="bg-pink-500 hover:bg-pink-600 text-white font-bold px-6 py-2 rounded-lg shadow transition inline-flex items-center gap-2 mt-3">
-                                                                                                                                        <i class="bi bi-credit-card"></i> Bayar Online (Midtrans)
-                                                                                                                                    </button>
                                                                                                                                 </div>
                                                                                                                             </div>
 
@@ -1007,47 +1006,47 @@ $customBouquetItems = $order->items->filter(function ($item) {
 
                                                                                                                                 <div class="mt-4 text-center">
                                                                                                                                     @php
-                $waMessage = "🌸 *Halo, Fellie Florist*\n\n";
-                // $waMessage .= "══════════\n\n";
-                $waMessage .= "Saya ingin mengirim bukti pembayaran untuk:\n\n";
-                $waMessage .= "📋 *Pesanan :* {$order->public_code}\n";
-                $waMessage .= "🔗 *Link :* " . url("/order/{$order->public_code}") . "\n\n";
-                $waMessage .= "👤 *Nama Pemesan :* {$order->customer_name}\n";
-                $waMessage .= "📱 *WhatsApp Pemesan :* {$order->wa_number}\n\n";
-                // if ($order->receiver_name) {
-                //     $waMessage .= "👥 *Nama Penerima :* {$order->receiver_name}\n";
-                // }
-                // if ($order->receiver_wa) {
-                //     $waMessage .= "📲 *WhatsApp Penerima :* {$order->receiver_wa}\n";
-                // }
-                // $waMessage .= "📅 *Tanggal :* " . \Carbon\Carbon::parse($order->pickup_date)->format('d-m-Y') . "\n";
-                // $waMessage .= "⏰ *Waktu :* {$order->pickup_time}\n";
-                // $waMessage .= "🚚 *Pengiriman :* {$order->delivery_method}\n";
-                // $waMessage .= "📍 *Tujuan :* {$order->destination}\n\n";
+    $waMessage = "🌸 *Halo, Fellie Florist*\n\n";
+    // $waMessage .= "══════════\n\n";
+    $waMessage .= "Saya ingin mengirim bukti pembayaran untuk:\n\n";
+    $waMessage .= "📋 *Pesanan :* {$order->public_code}\n";
+    $waMessage .= "🔗 *Link :* " . url("/order/{$order->public_code}") . "\n\n";
+    $waMessage .= "👤 *Nama Pemesan :* {$order->customer_name}\n";
+    $waMessage .= "📱 *WhatsApp Pemesan :* {$order->wa_number}\n\n";
+    // if ($order->receiver_name) {
+    //     $waMessage .= "👥 *Nama Penerima :* {$order->receiver_name}\n";
+    // }
+    // if ($order->receiver_wa) {
+    //     $waMessage .= "📲 *WhatsApp Penerima :* {$order->receiver_wa}\n";
+    // }
+    // $waMessage .= "📅 *Tanggal :* " . \Carbon\Carbon::parse($order->pickup_date)->format('d-m-Y') . "\n";
+    // $waMessage .= "⏰ *Waktu :* {$order->pickup_time}\n";
+    // $waMessage .= "🚚 *Pengiriman :* {$order->delivery_method}\n";
+    // $waMessage .= "📍 *Tujuan :* {$order->destination}\n\n";
 
-                // Tambahkan breakdown harga dengan ongkir
-                $waMessage .= "💰 *Detail Harga:*\n";
-                $waMessage .= "• Total Produk: Rp " . number_format($itemsTotal, 0, ',', '.') . "\n";
-                if ($shippingFee > 0) {
-                    $waMessage .= "• Ongkir: Rp " . number_format($shippingFee, 0, ',', '.') . "\n";
-                }
-                if ($order->voucher_amount > 0) {
-                    $waMessage .= "• Potongan Voucher: -Rp " . number_format($order->voucher_amount, 0, ',', '.') . "\n";
-                }
-                $waMessage .= "• *Total Keseluruhan: Rp " . number_format($grandTotal, 0, ',', '.') . "*\n\n";
+    // Tambahkan breakdown harga dengan ongkir
+    $waMessage .= "💰 *Detail Harga:*\n";
+    $waMessage .= "• Total Produk: Rp " . number_format($itemsTotal, 0, ',', '.') . "\n";
+    if ($shippingFee > 0) {
+        $waMessage .= "• Ongkir: Rp " . number_format($shippingFee, 0, ',', '.') . "\n";
+    }
+    if ($order->voucher_amount > 0) {
+        $waMessage .= "• Potongan Voucher: -Rp " . number_format($order->voucher_amount, 0, ',', '.') . "\n";
+    }
+    $waMessage .= "• *Total Keseluruhan: Rp " . number_format($grandTotal, 0, ',', '.') . "*\n\n";
 
-                if ($showGrandTotal) {
-                    $waMessage .= "💰 *Total Pesanan :* Rp " . number_format($grandTotal, 0, ',', '.') . "\n\n";
-                    // $waMessage .= "═══════════\n";
-                    $waMessage .= "Mohon konfirmasi pembayaran 🙏\n";
-                } else {
-                    $waMessage .= "⏳ *Status :* Menunggu admin menghitung ongkir\n\n";
-                    // $waMessage .= "═══════════\n";
-                    $waMessage .= "Mohon tunggu info total final dari admin 🙏\n";
-                }
+    if ($showGrandTotal) {
+        $waMessage .= "💰 *Total Pesanan :* Rp " . number_format($grandTotal, 0, ',', '.') . "\n\n";
+        // $waMessage .= "═══════════\n";
+        $waMessage .= "Mohon konfirmasi pembayaran 🙏\n";
+    } else {
+        $waMessage .= "⏳ *Status :* Menunggu admin menghitung ongkir\n\n";
+        // $waMessage .= "═══════════\n";
+        $waMessage .= "Mohon tunggu info total final dari admin 🙏\n";
+    }
 
-                $waMessage .= "Terima kasih 😊";
-                $encodedMessage = urlencode($waMessage);
+    $waMessage .= "Terima kasih 😊";
+    $encodedMessage = urlencode($waMessage);
                                                                                                                                     @endphp
                                                                                                                                     <a href="https://wa.me/+6282177929879?text={{ $encodedMessage }}" 
                                                                                                                                        target="_blank"
@@ -1065,6 +1064,15 @@ $customBouquetItems = $order->items->filter(function ($item) {
                                                                                                                                     class="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-bold py-3 px-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 inline-flex items-center gap-3">
                                                                                                                                 <i class="bi bi-info-circle-fill text-xl"></i>
                                                                                                                                 <span class="text-base">Lihat Petunjuk Pembayaran Lengkap</span>
+                                                                                                                            </button>
+                                                                                                                        </div>
+
+                                                                                                                        {{-- button untuk midtrans --}}
+                                                                                                                        <div class="mt-6 text-center">
+                                                                                                                            <button id="payMidtransBtn"
+                                                                                                                                class="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white font-bold py-3 px-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 inline-flex items-center gap-3">
+                                                                                                                                <i class="bi bi-credit-card-fill text-xl"></i>
+                                                                                                                                <span class="text-base">Bayar dengan Midtrans</span>
                                                                                                                             </button>
                                                                                                                         </div>
                                                                                                                     </div>
@@ -1448,66 +1456,46 @@ $customBouquetItems = $order->items->filter(function ($item) {
             </div>
         </div>
     </div>
-    </script>
-    
-    <!-- Include cart.js for toast notifications -->
-    <script src="{{ asset('js/cart.js') }}?v={{ time() }}"></script>
-    <script src="https://app.sandbox.midtrans.com/snap/snap.js" data-client-key="{{ config('midtrans.client_key') }}"></script>
-    <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        var payButton = document.getElementById('pay-button');
-        if (payButton) {
-            payButton.addEventListener('click', function() {
-                payButton.disabled = true;
-                payButton.innerHTML = '<i class="bi bi-arrow-repeat animate-spin"></i> Memproses...';
-                fetch('/payment/snap-token', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                    },
-                    body: JSON.stringify({
-                        amount: {{ $sisa }},
-                        name: '{{ $order->customer_name }}',
-                        email: '{{ $order->customer_email ?? $order->wa_number . '@fellieflorist.com' }}',
-                        order_id: '{{ $order->public_code }}'
-                    })
-                })
-                .then(response => response.json())
-                .then(data => {
-                    payButton.disabled = false;
-                    payButton.innerHTML = '<i class="bi bi-credit-card"></i> Bayar Online (Midtrans)';
-                        if (data.snap_token) {
-                            window.snap.pay(data.snap_token, {
-                            onSuccess: function(result) {
-                                    // Tampilkan info pembayaran berhasil
-                                    document.getElementById('midtrans-success-info').style.display = 'block';
-                                    // Scroll ke info
-                                    document.getElementById('midtrans-success-info').scrollIntoView({behavior: 'smooth'});
-                            },
-                            onPending: function(result) {
-                                window.location.reload();
-                            },
-                            onError: function(result) {
-                                alert('Terjadi kesalahan pembayaran. Silakan coba lagi.');
-                            },
-                            onClose: function() {
-                                // User menutup popup
-                            }
-                        });
-                    } else {
-                        alert('Gagal mendapatkan token pembayaran. Silakan coba lagi.');
-                    }
-                })
-                .catch(() => {
-                    payButton.disabled = false;
-                    payButton.innerHTML = '<i class="bi bi-credit-card"></i> Bayar Online (Midtrans)';
-                    alert('Gagal memproses pembayaran. Silakan coba lagi.');
-                });
-            });
-        }
-    });
-    </script>
 </body>
+
+<!-- Midtrans Snap JS -->
+<script>
+    document.getElementById('payMidtransBtn').addEventListener('click', function() {
+        fetch(`/public-order/{{ $order->public_code }}/pay-midtrans`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+            },
+            body: JSON.stringify({})
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success && data.snap_token) {
+                window.snap.pay(data.snap_token, {
+                    onSuccess: function(result) {
+                        alert('Pembayaran berhasil!');
+                        location.reload();
+                    },
+                    onPending: function(result) {
+                        alert('Pembayaran pending.');
+                        location.reload();
+                    },
+                    onError: function(result) {
+                        alert('Pembayaran gagal!');
+                    },
+                    onClose: function() {
+                        // User menutup popup tanpa membayar
+                    }
+                });
+            } else {
+                alert('Gagal mendapatkan token pembayaran: ' + (data.message || 'Unknown error'));
+            }
+        })
+        .catch(err => {
+            alert('Terjadi kesalahan: ' + err);
+        });
+    });
+</script>
 
 </html>

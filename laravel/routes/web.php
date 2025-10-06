@@ -39,9 +39,6 @@ Route::get('/', function () {
     return redirect()->route('public.flowers');
 });
 
-// Endpoint untuk mendapatkan Snap Token Midtrans
-Route::post('/payment/snap-token', [PaymentController::class, 'createSnapTransaction'])->name('payment.snap_token');
-
 
 Route::post('/api/validate-rese ller-code', [OnlineCustomerController::class, 'validateResellerCode'])->name('api.validate-reseller-code');
 Route::post('/api/mark-reseller-code-used', [OnlineCustomerController::class, 'markResellerCodeUsed'])->name('api.mark-reseller-code-used');
@@ -69,9 +66,7 @@ Route::get('/dashboard', [DashboardController::class, 'index'])
     ->name('dashboard');
 
 // Halaman pembayaran setelah checkout
-Route::get('/payment/{order_code}', [PublicCheckoutController::class, 'paymentPage'])->name('public.payment');
-// Endpoint untuk notifikasi pembayaran dari Midtrans
-Route::post('/payment/notification', [PaymentController::class, 'notification']);
+// Route::get('/payment/{order_code}', [PublicCheckoutController::class, 'paymentPage'])->name('public.payment');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -248,3 +243,6 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('cashflow', CashFlowController::class);
     Route::resource('cashflow-categories', CashFlowCategoryController::class);
 });
+
+// Midtrans callback route
+Route::post('/midtrans/callback', [\App\Http\Controllers\PublicOrderController::class, 'midtransCallback'])->withoutMiddleware(['web', 'csrf']);
