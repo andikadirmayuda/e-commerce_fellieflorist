@@ -1090,7 +1090,7 @@
             padding: 4px 10px;
             border: 1px solid rgba(255, 255, 255, 0.3);
             border-radius: 6px;
-            background: rgba(245, 9, 158, 0.05);
+            background: rgba(255, 255, 255, 0.05);
             transition: all 0.3s ease;
             color: #fff;
             text-decoration: none;
@@ -1473,11 +1473,11 @@
 
             @if($activeTab === 'flowers')
                 <div class="flex flex-wrap gap-3 justify-center">
-                    {{-- <button type="button"
+                    <button type="button"
                         class="chip-btn px-6 py-3 rounded-full border-2 border-[#f25270] bg-white text-gray-700 text-sm font-semibold shadow-md hover:shadow-lg hover:bg-[#172124]/10 transition-all duration-200"
                         data-category="" onclick="selectCategory(this)">
                         <span class="mr-2">🌸</span>Semua
-                    </button> --}}
+                    </button>
                     <button type="button"
                         class="chip-btn px-6 py-3 rounded-full border-2 border-[#f25270] bg-white text-gray-700 text-sm font-semibold shadow-md hover:shadow-lg hover:bg-[#172124]/10 transition-all duration-200 active"
                         data-category="Fresh Flowers" onclick="selectCategory(this)">
@@ -1531,8 +1531,7 @@
                             <div class="relative h-48 md:h-80 sm:h-40 mb-3 sm:mb-4 rounded-xl overflow-hidden">
                                 @if($flower->image)
                                     <img src="{{ asset('storage/' . $flower->image) }}" alt="{{ $flower->name }}"
-                                        class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                                        loading="lazy">
+                                        class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
                                 @else
                                     <div
                                         class="w-full h-full flex items-center justify-center bg-gradient-to-br from-[#f25270]/10 to-[#172124]/10 rounded-xl">

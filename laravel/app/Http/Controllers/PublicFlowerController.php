@@ -17,16 +17,10 @@ class PublicFlowerController extends Controller
         // Urutkan: yang ada stok dulu, lalu habis, kemudian berdasarkan nama.
 
         $flowers = Product::with(['category', 'prices'])
+            ->orderByRaw('(current_stock > 0) desc')
             ->get()
             ->sortBy(function ($flower) {
-                // 1. Produk dengan harga promo tampil paling atas
-                $hasPromo = $flower->prices->where('type', 'promo')->isNotEmpty() ? 0 : 1;
-                // 2. Stok tersedia (current_stock > 0) tampil sebelum stok habis
-                $stockOrder = $flower->current_stock > 0 ? 0 : 1;
-                // 3. Harga termurah
-                $minPrice = $flower->prices->min('price') ?? 999999999;
-                // Gabungkan jadi array untuk multi-level sorting
-                return [$hasPromo, $stockOrder, $minPrice];
+                return $flower->prices->min('price') ?? 999999999;
             })->values();
 
         $lastUpdated = Product::max('updated_at') ?? now();
