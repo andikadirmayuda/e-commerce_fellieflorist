@@ -292,17 +292,18 @@ $timeOfDay = match (true) {
                         </div>
                         <div class="mb-1 sm:mb-2">
                             <span class="text-gray-500">Tujuan Pengiriman</span><br>
-                            <span class="font-bold text-gray-800 break-words">{{ $order->destination }}</span>
+                         P<span class="font-bold text-gray-800 break-words">{{ $order->destination }}</span>
                         </div>
                     </div>
                     <!-- Kanan: Informasi Penting -->
                     <div class="flex-1 min-w-0 max-w-full flex flex-col justify-center items-center">
                         <div
                             class="w-full h-full flex flex-col justify-center items-center border-2 border-gray-300 rounded-xl p-3 sm:p-4 bg-white shadow-sm text-xs sm:text-sm">
-                            <div class="text-center font-bold text-red-600 text-xs sm:text-base mb-1 sm:mb-2">Informasi
-                                Penting !!!</div>
+                            <div class="text-center font-bold text-red-600 text-xs sm:text-base mb-1 sm:mb-2"
+                            >Informasi Penting !!!</div>
                             <div class="text-xs sm:text-sm text-gray-700 leading-relaxed text-center break-words">
-                                {{ $order->info ?? 'Harap Dibaca seluruh informasinya, Jika ada pertanyaan silahkan hubungi kami' }}
+                                {{ $order->info ?? 'Harap membaca seluruh informasi dengan saksama.
+                            Jika Anda memiliki pertanyaan, jangan ragu untuk menghubungi kami. 😊🙏' }}
                             </div>
                         </div>
                     </div>
@@ -311,32 +312,33 @@ $timeOfDay = match (true) {
             
             <!-- Catatan Pesanan -->
             @if(!empty($order->notes))
-                <div class="mb-4 sm:mb-6">
-                    <div class="bg-gradient-to-br from-blue-50 via-indigo-50 to-blue-100 border border-blue-200 rounded-lg sm:rounded-xl shadow-sm overflow-hidden">
-                        <!-- Header -->
-                        <div class="bg-gradient-to-r from-blue-500 to-indigo-600 px-3 sm:px-6 py-2 sm:py-3" style="background:#f25270">
-                            <div class="flex items-center">
-                                <div class="flex items-center justify-center w-6 h-6 sm:w-8 sm:h-8 bg-white bg-opacity-20 rounded-full mr-2 sm:mr-3">
-                                    <i class="bi bi-chat-left-text text-white text-xs sm:text-sm"></i>
-                                </div>
-                                <h3 class="font-bold text-white text-sm sm:text-base lg:text-lg">Catatan Pesanan</h3>
-                            </div>
-                        </div>
-                        <!-- Content -->
-                        <div class="p-3 sm:p-4 lg:p-6">
-                            <div class="bg-white rounded-lg p-3 sm:p-4 lg:p-5 border border-gray-100 shadow-sm">
-                                <div class="items-start">
-                                    <div class=" min-w-0">
-                                        <div class="text-gray-800 text-xs sm:text-sm lg:text-base leading-relaxed whitespace-pre-wrap break-words break-all font-medium italic">
-                                            {{ $order->notes }}
+                                <div class="mb-4 sm:mb-6">
+                                    <div class="bg-gradient-to-br from-blue-50 via-indigo-50 to-blue-100 border border-blue-200 rounded-lg sm:rounded-xl shadow-sm overflow-hidden">
+                                        <!-- Header -->
+                                        <div class="bg-gradient-to-r from-blue-500 to-indigo-600 px-3 sm:px-6 py-2 sm:py-3" style="background:#f25270">
+                                            <div class="flex items-center">
+                                                <div class="flex items-center justify-center w-6 h-6 sm:w-8 sm:h-8 bg-white bg-opacity-20 rounded-full mr-2 sm:mr-3">
+                                                    <i class="bi bi-chat-left-text text-white text-xs sm:text-sm"></i>
+                                                </div>
+                                                <h3 class="font-bold text-white text-sm sm:text-base lg:text-lg">Catatan Pesanan</h3>
+                                            </div>
+                                        </div>
+                                        <!-- Content -->
+                                            <div class="p-3 sm:p-4 lg:p-6">
+    <div class="bg-white rounded-lg p-3 sm:p-4 lg:p-5 border border-gray-100 shadow-sm">
+        <div class="items-start">
+            <div class="min-w-0">
+                <div class="text-gray-800 text-xs sm:text-sm lg:text-base leading-relaxed whitespace-pre-wrap break-words break-all font-medium italic text-left">
+                    {{ $order->notes }}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
                                         </div>
                                     </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            @endif
+                                @endif
             
             <h2 class="text-base sm:text-lg font-semibold mb-4 mt-2 flex items-center gap-2">
                 <i class="bi bi-box-seam"></i> Produk Dipesan
@@ -925,87 +927,87 @@ $customBouquetItems = $order->items->filter(function ($item) {
 
             <!-- Informasi Pembayaran Section -->
             @if($showGrandTotal && $sisa > 0 && $order->payment_status !== 'paid')
-                                                                                                                <div "my-8">
-                                                                                                                    <div class="bg-gradient-to-r from-orange-50 to-yellow-50 border-2 border-orange-200 rounded-2xl p-4 sm:p-6">
-                                                                                                                        <div class="flex items-center justify-center mb-4">
-                                                                                                                            <div class="bg-orange-500 rounded-full p-2 mr-3">
-                                                                                                                                <i class="bi bi-credit-card-2-front text-white text-lg"></i>
-                                                                                                                            </div>
-                                                                                                                            <h3 class="text-lg sm:text-xl font-bold text-orange-800">Informasi Pembayaran</h3>
-                                                                                                                        </div>
+            <div class="my-8">
+            <div class="bg-gradient-to-r from-orange-50 to-yellow-50 border-2 border-orange-200 rounded-2xl p-4 sm:p-6">
+                <div class="flex items-center justify-center mb-4">
+                    <div class="bg-orange-500 rounded-full p-2 mr-3">
+                        <i class="bi bi-credit-card-2-front text-white text-lg"></i>
+                    </div>
+                    <h3 class="text-lg sm:text-xl font-bold text-orange-800">Informasi Pembayaran</h3>
+                </div>
 
-                                                                                                                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                                                                                                                            <!-- Transfer Bank BCA -->
-                                                                                                                            <div class="bg-white rounded-xl border-2 border-blue-200 p-4 shadow-sm">
-                                                                                                                                <div class="flex items-center mb-3">
-                                                                                                                                    <div class="bg-blue-600 rounded-lg p-2 mr-3">
-                                                                                                                                        <i class="bi bi-bank text-white"></i>
-                                                                                                                                    </div>
-                                                                                                                                    <h4 class="font-bold text-blue-800 text-sm sm:text-base">Transfer Bank BCA</h4>
-                                                                                                                                </div>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <!-- Metode Pembayaran Otomatis -->
+                    <div class="bg-white rounded-xl border-2 border-blue-200 p-4 shadow-sm">
+                        <div class="flex items-center mb-3">
+                            <div class="bg-blue-600 rounded-lg p-2 mr-3">
+                                <i class="bi bi-bank text-white"></i>
+                            </div>
+                            <h4 class="font-bold text-blue-800 text-sm sm:text-base">Metode Pembayaran</h4>
+                        </div>
 
-                                                                                                                                <div class="space-y-2 text-xs sm:text-sm">
-                                                                                                                                    <div class="flex justify-between">
-                                                                                                                                        <span class="text-gray-600">No. Rekening:</span>
-                                                                                                                                        <span class="font-bold text-blue-800">0213341089</span>
-                                                                                                                                    </div>
-                                                                                                                                    <div class="flex justify-between">
-                                                                                                                                        <span class="text-gray-600">Atas Nama:</span>
-                                                                                                                                        <span class="font-bold text-blue-800">TIA HANIFAH ALBARIDAH</span>
-                                                                                                                                    </div>
-                                                                                                                                    <div class="flex justify-between">
-                                                                                                                                        <span class="text-gray-600">Bank:</span>
-                                                                                                                                        <span class="font-bold text-blue-800">BCA (Bank Central Asia)</span>
-                                                                                                                                    </div>
-                                                                                                                                </div>
+                        <div class="space-y-2 text-xs sm:text-sm text-gray-700">
+                            <p>Pembayaran Anda akan diproses secara otomatis melalui sistem Fellie Florist.</p>
+                            <p>Anda dapat memilih berbagai metode seperti Transfer Bank, QRIS, atau E-Wallet.</p>
+                        </div>
 
-                                                                                                                                <div class="mt-4 bg-green-50 border border-green-200 rounded-lg p-3">
-                                                                                                                                    <div class="text-center">
-                                                                                                                                        <span class="text-xs text-gray-600">Jumlah Transfer:</span>
-                                                                                                                                        <div class="text-lg sm:text-xl font-bold text-green-600">
-                                                                                                                                            Rp{{ number_format($sisa, 0, ',', '.') }}
-                                                                                                                                        </div>
-                                                                                                                                    </div>
-                                                                                                                                </div>
+                        <div class="mt-4 bg-green-50 border border-green-200 rounded-lg p-3 text-center">
+                            <span class="text-xs text-gray-600">Total yang harus dibayar:</span>
+                            <div class="text-lg sm:text-xl font-bold text-green-600">
+                                Rp{{ number_format($sisa, 0, ',', '.') }}
+                            </div>
+                        </div>
+                    </div>
 
-                                                                                                                                <div class="mt-3 text-center">
-                                                                                                                                    <button onclick="copyToClipboard('0213341089')" 
-                                                                                                                                            class="bg-blue-500 hover:bg-blue-600 text-white text-xs px-3 py-1 rounded-lg transition duration-200">
-                                                                                                                                        <i class="bi bi-clipboard"></i> Salin No. Rekening
+                    <!-- Petunjuk Pembayaran Otomatis -->
+                    <div class="bg-white rounded-xl border-2 border-green-200 p-4 shadow-sm">
+                        <div class="flex items-center mb-3">
+                            <div class="bg-green-600 rounded-lg p-2 mr-3">
+                                <i class="bi bi-list-check text-white"></i>
+                            </div>
+                            <h4 class="font-bold text-green-800 text-sm sm:text-base">Petunjuk Pembayaran:</h4>
+                        </div>
+
+                        <ol class="text-xs sm:text-sm space-y-2 text-gray-700">
+                            <li class="flex items-start">
+                                <span class="bg-green-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs mr-2 mt-0.5 flex-shrink-0">1</span>
+                                <span>Klik tombol <b>Lanjutkan Pembayaran</b> di bawah.</span>
+                            </li>
+                            <li class="flex items-start">
+                                <span class="bg-green-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs mr-2 mt-0.5 flex-shrink-0">2</span>
+                                <span>Pilih metode pembayaran yang Anda inginkan (Bank, QRIS, atau E-Wallet).</span>
+                            </li>
+                            <li class="flex items-start">
+                                <span class="bg-green-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs mr-2 mt-0.5 flex-shrink-0">3</span>
+                                <span>Lakukan pembayaran sesuai instruksi pada halaman tersebut.</span>
+                            </li>
+                            <li class="flex items-start">
+                                <span class="bg-green-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs mr-2 mt-0.5 flex-shrink-0">4</span>
+                                <span>Status pembayaran Anda akan diperbarui otomatis setelah berhasil melakukan pembayaran.</span>
+                            </li>
+                        </ol>
+
+                        {{-- <div class="mt-4 text-center">
+                            <button 
+                                class="bg-green-600 hover:bg-green-700 text-white text-xs sm:text-sm px-4 py-2 rounded-lg transition duration-200">
+                                <i class="bi bi-credit-card"></i> Lanjutkan Pembayaran
+                            </button>
+                        </div> --}}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {{-- button untuk midtrans --}}
+                                                                                                                            @if($order->payment_status !== 'paid' || $sisa != 0)
+                                                                                                                                <div class="mt-6 text-center mb-4">
+                                                                                                                                    <button id="payMidtransBtn"
+                                                                                                                                        class="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white font-bold py-3 px-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 inline-flex items-center gap-3">
+                                                                                                                                        <i class="bi bi-credit-card-fill text-xl"></i>
+                                                                                                                                        <span class="text-base">Lanjutkan Pembayaran</span>
                                                                                                                                     </button>
                                                                                                                                 </div>
-                                                                                                                            </div>
-
-                                                                                                                            <!-- Petunjuk Pembayaran -->
-                                                                                                                            <div class="bg-white rounded-xl border-2 border-green-200 p-4 shadow-sm">
-                                                                                                                                <div class="flex items-center mb-3">
-                                                                                                                                    <div class="bg-green-600 rounded-lg p-2 mr-3">
-                                                                                                                                        <i class="bi bi-list-check text-white"></i>
-                                                                                                                                    </div>
-                                                                                                                                    <h4 class="font-bold text-green-800 text-sm sm:text-base">Petunjuk Pembayaran:</h4>
-                                                                                                                                </div>
-
-                                                                                                                                <ol class="text-xs sm:text-sm space-y-2 text-gray-700">
-                                                                                                                                    <li class="flex items-start">
-                                                                                                                                        <span class="bg-green-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs mr-2 mt-0.5 flex-shrink-0">1</span>
-                                                                                                                                        <span>Transfer sesuai jumlah yang bertanda</span>
-                                                                                                                                    </li>
-                                                                                                                                    <li class="flex items-start">
-                                                                                                                                        <span class="bg-green-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs mr-2 mt-0.5 flex-shrink-0">2</span>
-                                                                                                                                        <span>Foto bukti transfer</span>
-                                                                                                                                    </li>
-                                                                                                                                    <li class="flex items-start">
-                                                                                                                                        <span class="bg-green-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs mr-2 mt-0.5 flex-shrink-0">3</span>
-                                                                                                                                        <span>Kirim bukti transfer via WhatsApp</span>
-                                                                                                                                    </li>
-                                                                                                                                    <li class="flex items-start">
-                                                                                                                                        <span class="bg-green-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs mr-2 mt-0.5 flex-shrink-0">4</span>
-                                                                                                                                        <span>Tunggu konfirmasi dari admin</span>
-                                                                                                                                    </li>
-                                                                                                                                </ol>
-
-                                                                                                                                <div class="mt-4 text-center">
-                                                                                                                                    @php
+                                                                                                                            @endif
+        @php
     $waMessage = "🌸 *Halo, Fellie Florist*\n\n";
     // $waMessage .= "══════════\n\n";
     $waMessage .= "Saya ingin mengirim bukti pembayaran untuk:\n\n";
@@ -1047,65 +1049,58 @@ $customBouquetItems = $order->items->filter(function ($item) {
 
     $waMessage .= "Terima kasih 😊";
     $encodedMessage = urlencode($waMessage);
-                                                                                                                                    @endphp
-                                                                                                                                    <a href="https://wa.me/+6282177929879?text={{ $encodedMessage }}" 
-                                                                                                                                       target="_blank"
-                                                                                                                                       class="bg-green-500 hover:bg-green-600 text-white text-xs px-4 py-2 rounded-lg transition duration-200 inline-flex items-center gap-2 shadow-md hover:shadow-lg">
-                                                                                                                                        <i class="bi bi-whatsapp text-lg"></i> 
-                                                                                                                                        <span class="font-medium">Kirim Bukti Transfer</span>
-                                                                                                                                    </a>
+                                                                                                                                                @endphp
+                                                                                                                                                {{-- <a href="https://wa.me/+6282177929879?text={{ $encodedMessage }}" 
+                                                                                                                                                   target="_blank"
+                                                                                                                                                   class="bg-green-500 hover:bg-green-600 text-white text-xs px-4 py-2 rounded-lg transition duration-200 inline-flex items-center gap-2 shadow-md hover:shadow-lg">
+                                                                                                                                                    <i class="bi bi-whatsapp text-lg"></i> 
+                                                                                                                                                    <span class="font-medium">Kirim Bukti Transfer</span>
+                                                                                                                                                </a> --}}
+                                                                                                                                            </div>
+                                                                                                                                        </div>
+                                                                                                                                    </div>
+
+                                                                                                                                    <!-- Button Petunjuk Pembayaran yang Prominent -->
+                                                                                                                                    {{-- <div class="mt-6 text-center">
+                                                                                                                                        <button onclick="scrollToPetunjukPembayaran()" 
+                                                                                                                                                class="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-bold py-3 px-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 inline-flex items-center gap-3">
+                                                                                                                                            <i class="bi bi-info-circle-fill text-xl"></i>
+                                                                                                                                            <span class="text-base">Lihat Petunjuk Pembayaran Lengkap</span>
+                                                                                                                                        </button>
+                                                                                                                                    </div> --}}
+
+                                                                                                                                    
                                                                                                                                 </div>
                                                                                                                             </div>
-                                                                                                                        </div>
 
-                                                                                                                        <!-- Button Petunjuk Pembayaran yang Prominent -->
-                                                                                                                        <div class="mt-6 text-center">
-                                                                                                                            <button onclick="scrollToPetunjukPembayaran()" 
-                                                                                                                                    class="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-bold py-3 px-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 inline-flex items-center gap-3">
-                                                                                                                                <i class="bi bi-info-circle-fill text-xl"></i>
-                                                                                                                                <span class="text-base">Lihat Petunjuk Pembayaran Lengkap</span>
-                                                                                                                            </button>
-                                                                                                                        </div>
+                                                                                                                            <script>
+                                                                                                                            function scrollToPetunjukPembayaran() {
+                                                                                                                                // Cari element yang berisi "Petunjuk Pembayaran"
+                                                                                                                                const elements = document.querySelectorAll('h4');
+                                                                                                                                for (let element of elements) {
+                                                                                                                                    if (element.textContent.includes('Petunjuk Pembayaran')) {
+                                                                                                                                        element.scrollIntoView({ 
+                                                                                                                                            behavior: 'smooth', 
+                                                                                                                                            block: 'center' 
+                                                                                                                                        });
 
-                                                                                                                        {{-- button untuk midtrans --}}
-                                                                                                                        <div class="mt-6 text-center">
-                                                                                                                            <button id="payMidtransBtn"
-                                                                                                                                class="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white font-bold py-3 px-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 inline-flex items-center gap-3">
-                                                                                                                                <i class="bi bi-credit-card-fill text-xl"></i>
-                                                                                                                                <span class="text-base">Bayar dengan Midtrans</span>
-                                                                                                                            </button>
-                                                                                                                        </div>
-                                                                                                                    </div>
-                                                                                                                </div>
+                                                                                                                                        // Highlight effect
+                                                                                                                                        const parentCard = element.closest('.bg-white');
+                                                                                                                                        if (parentCard) {
+                                                                                                                                            parentCard.style.transition = 'all 0.3s ease';
+                                                                                                                                            parentCard.style.transform = 'scale(1.02)';
+                                                                                                                                            parentCard.style.boxShadow = '0 8px 25px rgba(0,0,0,0.15)';
 
-                                                                                                                <script>
-                                                                                                                function scrollToPetunjukPembayaran() {
-                                                                                                                    // Cari element yang berisi "Petunjuk Pembayaran"
-                                                                                                                    const elements = document.querySelectorAll('h4');
-                                                                                                                    for (let element of elements) {
-                                                                                                                        if (element.textContent.includes('Petunjuk Pembayaran')) {
-                                                                                                                            element.scrollIntoView({ 
-                                                                                                                                behavior: 'smooth', 
-                                                                                                                                block: 'center' 
-                                                                                                                            });
-
-                                                                                                                            // Highlight effect
-                                                                                                                            const parentCard = element.closest('.bg-white');
-                                                                                                                            if (parentCard) {
-                                                                                                                                parentCard.style.transition = 'all 0.3s ease';
-                                                                                                                                parentCard.style.transform = 'scale(1.02)';
-                                                                                                                                parentCard.style.boxShadow = '0 8px 25px rgba(0,0,0,0.15)';
-
-                                                                                                                                setTimeout(() => {
-                                                                                                                                    parentCard.style.transform = 'scale(1)';
-                                                                                                                                    parentCard.style.boxShadow = '';
-                                                                                                                                }, 1000);
+                                                                                                                                            setTimeout(() => {
+                                                                                                                                                parentCard.style.transform = 'scale(1)';
+                                                                                                                                                parentCard.style.boxShadow = '';
+                                                                                                                                            }, 1000);
+                                                                                                                                        }
+                                                                                                                                        break;
+                                                                                                                                    }
+                                                                                                                                }
                                                                                                                             }
-                                                                                                                            break;
-                                                                                                                        }
-                                                                                                                    }
-                                                                                                                }
-                                                                                                                </script>
+                                                                                                                            </script>
             @endif
             
             <!-- Pesan untuk pesanan yang sudah lunas -->
@@ -1474,8 +1469,8 @@ $customBouquetItems = $order->items->filter(function ($item) {
             if (data.success && data.snap_token) {
                 window.snap.pay(data.snap_token, {
                     onSuccess: function(result) {
-                        alert('Pembayaran berhasil!');
-                        location.reload();
+                            showPaymentSuccessModal();
+                            setTimeout(() => { location.reload(); }, 3500);
                     },
                     onPending: function(result) {
                         alert('Pembayaran pending.');
@@ -1496,6 +1491,39 @@ $customBouquetItems = $order->items->filter(function ($item) {
             alert('Terjadi kesalahan: ' + err);
         });
     });
+    </script>
+
+    <!-- Custom Payment Success Modal -->
+    <div id="paymentSuccessModal" style="display:none;" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
+        <div class="bg-white rounded-2xl shadow-2xl border-2 border-green-400 px-8 py-8 max-w-sm w-full text-center animate-fade-in">
+            <div class="flex justify-center mb-4">
+                <div class="bg-green-500 rounded-full p-4 flex items-center justify-center">
+                    <i class="bi bi-check-circle-fill text-white text-3xl"></i>
+                </div>
+            </div>
+            <h3 class="text-xl font-bold text-green-700 mb-2">Pembayaran Berhasil!</h3>
+            <p class="text-green-700 mb-2">Terima kasih, pembayaran Anda telah berhasil.<br>Pesanan akan segera diproses.</p>
+        </div>
+    </div>
+    <style>
+    @keyframes fadeInModal {
+      from { opacity: 0; transform: translateY(30px) scale(0.98); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    .animate-fade-in {
+      animation: fadeInModal 0.4s cubic-bezier(.4,2,.6,1) both;
+    }
+    </style>
+    <script>
+    function showPaymentSuccessModal() {
+        const modal = document.getElementById('paymentSuccessModal');
+        if (modal) {
+            modal.style.display = 'flex';
+            setTimeout(() => {
+                modal.style.display = 'none';
+            }, 2200);
+        }
+    }
 </script>
 
 </html>

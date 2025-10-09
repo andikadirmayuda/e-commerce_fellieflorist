@@ -78,6 +78,14 @@ class PublicOrderController extends Controller
         $order = PublicOrder::where('public_code', $public_code)->with('items')->firstOrFail();
         $midtrans = new MidtransService();
 
+        // Jika status pembayaran masih pending/menunggu, gunakan snap_token lama
+        if (in_array($order->payment_status, ['pending', 'waiting_payment', 'waiting_confirmation', 'ready_to_pay', 'waiting_verification']) && $order->snap_token) {
+            return response()->json([
+                'success' => true,
+                'snap_token' => $order->snap_token,
+            ]);
+        }
+
         // Hitung total item, voucher, dan ongkir
         $itemsTotal = 0;
         foreach ($order->items as $item) {
