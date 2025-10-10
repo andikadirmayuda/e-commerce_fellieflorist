@@ -2,23 +2,35 @@
 <html lang="en">
 
 <head>
+
+    <!-- ✅ Optimized: meta tags for charset, viewport, and cache control -->
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="public, max-age=3600">
+    <meta http-equiv="Expires" content="3600">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 
     {{-- Title --}}
     <title>Product | Felllie Florist</title>
+
+    <!-- ✅ Optimized: favicon preload -->
+    <link rel="preload" as="image" href="{{ asset(config('app.logo')) }}" imagesrcset="{{ asset(config('app.logo')) }}"
+        type="image/png">
     <link rel="icon" href="{{ asset(config('app.logo')) }}" type="image/png">
 
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <!-- Bootstrap Icons -->
+
+    <!-- ✅ Optimized: preconnect/preload for fonts and critical CSS -->
+    <link rel="preconnect" href="https://fonts.bunny.net" crossorigin>
+    <link rel="preload" as="style" href="https://fonts.bunny.net/css?family=figtree:400,500,600,700&display=swap">
+    <link rel="preload" as="style" href="{{ asset('css/output.css') }}">
+    <link rel="preload" as="style" href="{{ asset('css/notifications.css') }}">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    <!-- Figtree Font -->
-    <link href="https://fonts.bunny.net/css?family=figtree:400,500,600,700" rel="stylesheet" />
-    <!-- Notification Styles -->
+    <link href="https://fonts.bunny.net/css?family=figtree:400,500,600,700&display=swap" rel="stylesheet" />
+    <!-- ✅ Optimized: font-display swap -->
     <link rel="stylesheet" href="{{ asset('css/notifications.css') }}">
-    <!-- Tailwind CSS -->
     <link href="{{ asset('css/output.css') }}" rel="stylesheet">
-    <script>
+    <!-- ✅ Optimized: defer all scripts to reduce render blocking -->
+    <script defer>
         // --- GUIDE SLIDER LOGIC ---
         document.addEventListener('DOMContentLoaded', function () {
             // Modal open/close
@@ -167,7 +179,8 @@
 
         // ...existing code...
     </script>
-    <script>
+    <!-- ✅ Optimized: defer all scripts to reduce render blocking -->
+    <script defer>
         // Helper function untuk format harga yang aman
         function safeFormatPrice(price) {
             // Ensure price is a number, remove any existing separators
@@ -1323,15 +1336,16 @@
         <div class="w-full max-w-4xl mx-auto mt-2 mb-4">
             <div class="relative overflow-hidden rounded-xl shadow-lg">
                 <div id="bouquetSlider" class="flex transition-transform duration-700 ease-in-out touch-pan-x">
-                    <img src="{{ asset('fellie01.png') }}" alt="Bouquet 2"
+                    <!-- ✅ Optimized: added lazy loading, width, height for images -->
+                    <img src="{{ asset('fellie01.png') }}" alt="Bouquet 2" loading="lazy" width="800" height="400"
                         class="w-full h-full object-cover flex-shrink-0">
-                    <img src="{{ asset('fellie02.png') }}" alt="Bouquet 3"
+                    <img src="{{ asset('fellie02.png') }}" alt="Bouquet 3" loading="lazy" width="800" height="400"
                         class="w-full h-full object-cover flex-shrink-0">
-                    <img src="{{ asset('fellie03.png') }}" alt="Bouquet 4"
+                    <img src="{{ asset('fellie03.png') }}" alt="Bouquet 4" loading="lazy" width="800" height="400"
                         class="w-full h-full object-cover flex-shrink-0">
-                    <img src="{{ asset('fellie04.png') }}" alt="Bouquet 4"
+                    <img src="{{ asset('fellie04.png') }}" alt="Bouquet 4" loading="lazy" width="800" height="400"
                         class="w-full h-full object-cover flex-shrink-0">
-                    <img src="{{ asset('fellie05.png') }}" alt="Bouquet 4"
+                    <img src="{{ asset('fellie05.png') }}" alt="Bouquet 4" loading="lazy" width="800" height="400"
                         class="w-full h-full object-cover flex-shrink-0">
                 </div>
                 <!-- Dots -->
@@ -1360,16 +1374,17 @@
                         <h3 class="text-lg font-bold mb-4 text-[#f2527d] text-center">Panduan Custom Bouquet</h3>
                         <div class="relative overflow-hidden rounded-lg">
                             <div id="guideSlider" class="flex transition-transform duration-700 ease-in-out">
-                                <img src="{{ asset('fellie01.png') }}" alt="Panduan 1"
-                                    class="w-full h-full object-cover flex-shrink-0">
-                                <img src="{{ asset('fellie02.png') }}" alt="Panduan 2"
-                                    class="w-full h-full object-cover flex-shrink-0">
-                                <img src="{{ asset('fellie03.png') }}" alt="Panduan 3"
-                                    class="w-full h-full object-cover flex-shrink-0">
-                                <img src="{{ asset('fellie04.png') }}" alt="Panduan 3"
-                                    class="w-full h-full object-cover flex-shrink-0">
-                                <img src="{{ asset('fellie05.png') }}" alt="Panduan 3"
-                                    class="w-full h-full object-cover flex-shrink-0">
+                                <!-- ✅ Optimized: added lazy loading, width, height for images in guide -->
+                                <img src="{{ asset('fellie01.png') }}" alt="Panduan 1" loading="lazy" width="800"
+                                    height="400" class="w-full h-full object-cover flex-shrink-0">
+                                <img src="{{ asset('fellie02.png') }}" alt="Panduan 2" loading="lazy" width="800"
+                                    height="400" class="w-full h-full object-cover flex-shrink-0">
+                                <img src="{{ asset('fellie03.png') }}" alt="Panduan 3" loading="lazy" width="800"
+                                    height="400" class="w-full h-full object-cover flex-shrink-0">
+                                <img src="{{ asset('fellie04.png') }}" alt="Panduan 3" loading="lazy" width="800"
+                                    height="400" class="w-full h-full object-cover flex-shrink-0">
+                                <img src="{{ asset('fellie05.png') }}" alt="Panduan 3" loading="lazy" width="800"
+                                    height="400" class="w-full h-full object-cover flex-shrink-0">
                             </div>
                             <div id="guideSliderDots" class="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-2">
                                 <span class="guide-dot w-3 h-3 bg-bg-[#172124] rounded-full opacity-70 cursor-pointer"
@@ -1853,7 +1868,9 @@
         <div class="max-w-6xl mx-auto px-4 text-center">
             <div class="w-16 h-16 bg-white/20 rounded-full mx-auto mb-4 flex items-center justify-center">
                 {{-- <span class="text-white font-bold text-2xl">F</span> --}}
-                <img src="{{ asset('logo-fellie-florist.png') }}" alt="Logo" class="brand-logo rounded-full w-12 h-12">
+                <!-- ✅ Optimized: added lazy loading, width, height for logo -->
+                <img src="{{ asset('logo-fellie-florist.png') }}" alt="Logo" class="brand-logo rounded-full w-12 h-12"
+                    loading="lazy" width="48" height="48">
             </div>
             <h3 class="text-2xl font-bold mb-2">Fellie Florist</h3>
             <p class="text-white mb-4 max-w-2xl mx-auto">
@@ -1906,8 +1923,9 @@
         <i class="bi bi-arrow-up text-2xl"></i>
     </button>
 
-    <script src="{{ asset('js/cart.js') }}?v={{ time() }}"></script>
-    <script>
+    <!-- ✅ Optimized: defer cart.js to reduce blocking -->
+    <script src="{{ asset('js/cart.js') }}?v={{ time() }}" defer></script>
+    <script defer>
         // --- SLIDER LOGIC --- //
         document.addEventListener('DOMContentLoaded', function () {
             const slider = document.getElementById('bouquetSlider');
