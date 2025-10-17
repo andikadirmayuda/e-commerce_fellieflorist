@@ -195,7 +195,52 @@
                         </div>
                     </div>
                 </div>
-                <!-- Total Pendapatan Card -->
+                <!-- Total Pemasukan Cash Flow Card -->
+                <div class="stats-card p-6 relative overflow-hidden">
+                    <div class="absolute right-0 top-0 w-32 h-32 opacity-10">
+                        <i
+                            class="bi bi-arrow-down-circle text-8xl text-green-400 transform translate-x-8 -translate-y-8"></i>
+                    </div>
+                    <div class="relative">
+                        <div class="flex items-center mb-4">
+                            <div class="p-3 bg-gradient-to-br from-green-400 to-green-600 rounded-xl shadow-lg">
+                                <i class="bi bi-arrow-down-circle text-xl text-white"></i>
+                            </div>
+                            <p class="ml-3 text-sm font-medium text-gray-500">Total Pemasukan Cash Flow</p>
+                        </div>
+                        <p class="text-2xl font-bold text-gray-800">
+                            Rp{{ number_format($totalInflow ?? 0, 0, ',', '.') }}</p>
+                        <div class="flex items-center mt-2">
+                            <i class="bi bi-plus-circle text-xs text-green-500 mr-1"></i>
+                            <p class="text-xs text-gray-500">Semua pemasukan cash flow</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Baris kedua: Pengeluaran Cash Flow & Total Pendapatan -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                <!-- Total Pengeluaran Cash Flow Card -->
+                <div class="stats-card p-6 relative overflow-hidden">
+                    <div class="absolute right-0 top-0 w-32 h-32 opacity-10">
+                        <i
+                            class="bi bi-arrow-up-circle text-8xl text-red-400 transform translate-x-8 -translate-y-8"></i>
+                    </div>
+                    <div class="relative">
+                        <div class="flex items-center mb-4">
+                            <div class="p-3 bg-gradient-to-br from-red-400 to-red-600 rounded-xl shadow-lg">
+                                <i class="bi bi-arrow-up-circle text-xl text-white"></i>
+                            </div>
+                            <p class="ml-3 text-sm font-medium text-gray-500">Total Pengeluaran Cash Flow</p>
+                        </div>
+                        <p class="text-2xl font-bold text-gray-800">
+                            Rp{{ number_format($totalOutflow ?? 0, 0, ',', '.') }}</p>
+                        <div class="flex items-center mt-2">
+                            <i class="bi bi-dash-circle text-xs text-red-500 mr-1"></i>
+                            <p class="text-xs text-gray-500">Semua pengeluaran cash flow</p>
+                        </div>
+                    </div>
+                </div>
+                <!-- Total Pendapatan Card Gabungan -->
                 <div class="stats-card p-6 relative overflow-hidden">
                     <div class="absolute right-0 top-0 w-32 h-32 opacity-10">
                         <i class="bi bi-cash-stack text-8xl text-purple-500 transform translate-x-8 -translate-y-8"></i>
@@ -211,7 +256,7 @@
                         </p>
                         <div class="flex items-center mt-2">
                             <i class="bi bi-check-circle text-xs text-purple-500 mr-1"></i>
-                            <p class="text-xs text-gray-500">Gabungan semua</p>
+                            <p class="text-xs text-gray-500">Penjualan + Pemesanan + Cash Flow</p>
                         </div>
                     </div>
                 </div>
@@ -227,10 +272,11 @@
                         <div class="flex items-center mb-2">
                             <div class="p-2 bg-green-100 rounded-xl"><i class="bi bi-cash text-lg text-green-600"></i>
                             </div>
-                            <p class="ml-2 text-sm font-medium text-gray-500">Total Cash (Sale + Order)</p>
+                            <p class="ml-2 text-sm font-medium text-gray-500">Total Cash (Sale + Order + Cash Flow)</p>
                         </div>
                         <p class="text-xl font-bold text-gray-800">
-                            Rp{{ number_format(($totalCashSale ?? 0) + ($totalCashOrder ?? 0), 0, ',', '.') }}</p>
+                            Rp{{ number_format($totalCash ?? 0, 0, ',', '.') }}</p>
+                        <div class="text-xs text-gray-400 mt-1">(Sale + Order + Inflow - Outflow)</div>
                     </div>
                 </div>
                 <div class="stats-card p-6 relative overflow-hidden">
@@ -241,11 +287,12 @@
                         <div class="flex items-center mb-2">
                             <div class="p-2 bg-blue-100 rounded-xl"><i class="bi bi-bank text-lg text-blue-600"></i>
                             </div>
-                            <p class="ml-2 text-sm font-medium text-gray-500">Total Transfer (Sale + Order)</p>
+                            <p class="ml-2 text-sm font-medium text-gray-500">Total Transfer (Sale + Order + Cash Flow)
+                            </p>
                         </div>
                         <p class="text-xl font-bold text-gray-800">
-                            Rp{{ number_format(($totalTransferSale ?? 0) + ($totalTransferOrder ?? 0), 0, ',', '.') }}
-                        </p>
+                            Rp{{ number_format($totalTransfer ?? 0, 0, ',', '.') }}</p>
+                        <div class="text-xs text-gray-400 mt-1">(Sale + Order + Inflow - Outflow)</div>
                     </div>
                 </div>
                 <div class="stats-card p-6 relative overflow-hidden">
@@ -256,10 +303,11 @@
                         <div class="flex items-center mb-2">
                             <div class="p-2 bg-purple-100 rounded-xl"><i
                                     class="bi bi-credit-card text-lg text-purple-600"></i></div>
-                            <p class="ml-2 text-sm font-medium text-gray-500">Total Debit (Sale + Order)</p>
+                            <p class="ml-2 text-sm font-medium text-gray-500">Total Debit (Sale + Order + Cash Flow)</p>
                         </div>
                         <p class="text-xl font-bold text-gray-800">
-                            Rp{{ number_format(($totalDebitSale ?? 0) + ($totalDebitOrder ?? 0), 0, ',', '.') }}</p>
+                            Rp{{ number_format($totalDebit ?? 0, 0, ',', '.') }}</p>
+                        <div class="text-xs text-gray-400 mt-1">(Sale + Order + Inflow - Outflow)</div>
                     </div>
                 </div>
                 <div class="stats-card p-6 relative overflow-hidden">
@@ -270,10 +318,11 @@
                         <div class="flex items-center mb-2">
                             <div class="p-2 bg-pink-100 rounded-xl"><i class="bi bi-wallet2 text-lg text-pink-600"></i>
                             </div>
-                            <p class="ml-2 text-sm font-medium text-gray-500">Total E-Wallet (Order)</p>
+                            <p class="ml-2 text-sm font-medium text-gray-500">Total E-Wallet (Order + Cash Flow)</p>
                         </div>
                         <p class="text-xl font-bold text-gray-800">
-                            Rp{{ number_format($totalEwalletOrder ?? 0, 0, ',', '.') }}</p>
+                            Rp{{ number_format($totalEwallet ?? 0, 0, ',', '.') }}</p>
+                        <div class="text-xs text-gray-400 mt-1">(Order + Inflow - Outflow)</div>
                     </div>
                 </div>
             </div>

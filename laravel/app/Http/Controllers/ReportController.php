@@ -345,8 +345,33 @@ class ReportController extends Controller
             ->whereIn('public_orders.status', ['confirmed', 'processing', 'ready', 'completed'])
             ->sum(DB::raw('public_order_items.quantity * public_order_items.price'));
 
-        // Total pendapatan gabungan
-        $totalPendapatan = $totalPenjualan + $totalPemesanan;
+
+        // Ambil data cash flow (inflow dan outflow) pada periode yang sama
+        $totalInflow = \App\Models\CashFlow::where('type', 'inflow')
+            ->whereBetween('transaction_date', [$start, $end])
+            ->sum('amount');
+        $totalOutflow = \App\Models\CashFlow::where('type', 'outflow')
+            ->whereBetween('transaction_date', [$start, $end])
+            ->sum('amount');
+
+        // Breakdown per metode pembayaran untuk cash flow
+        $totalCashInflow = \App\Models\CashFlow::where('type', 'inflow')->where('payment_method', 'cash')->whereBetween('transaction_date', [$start, $end])->sum('amount');
+        $totalCashOutflow = \App\Models\CashFlow::where('type', 'outflow')->where('payment_method', 'cash')->whereBetween('transaction_date', [$start, $end])->sum('amount');
+        $totalTransferInflow = \App\Models\CashFlow::where('type', 'inflow')->where('payment_method', 'transfer')->whereBetween('transaction_date', [$start, $end])->sum('amount');
+        $totalTransferOutflow = \App\Models\CashFlow::where('type', 'outflow')->where('payment_method', 'transfer')->whereBetween('transaction_date', [$start, $end])->sum('amount');
+        $totalDebitInflow = \App\Models\CashFlow::where('type', 'inflow')->where('payment_method', 'debit')->whereBetween('transaction_date', [$start, $end])->sum('amount');
+        $totalDebitOutflow = \App\Models\CashFlow::where('type', 'outflow')->where('payment_method', 'debit')->whereBetween('transaction_date', [$start, $end])->sum('amount');
+        $totalEwalletInflow = \App\Models\CashFlow::where('type', 'inflow')->where('payment_method', 'e-wallet')->whereBetween('transaction_date', [$start, $end])->sum('amount');
+        $totalEwalletOutflow = \App\Models\CashFlow::where('type', 'outflow')->where('payment_method', 'e-wallet')->whereBetween('transaction_date', [$start, $end])->sum('amount');
+
+        // Total pendapatan gabungan (penjualan + pemesanan + pemasukan cash flow - pengeluaran cash flow)
+        $totalPendapatan = ($totalPenjualan + $totalPemesanan + $totalInflow) - $totalOutflow;
+
+        // Breakdown total cash, transfer, debit, e-wallet (sale + order + inflow - outflow)
+        $totalCash = ($totalCashSale + $totalCashOrder + $totalCashInflow) - $totalCashOutflow;
+        $totalTransfer = ($totalTransferSale + $totalTransferOrder + $totalTransferInflow) - $totalTransferOutflow;
+        $totalDebit = ($totalDebitSale + $totalDebitOrder + $totalDebitInflow) - $totalDebitOutflow;
+        $totalEwallet = ($totalEwalletOrder + $totalEwalletInflow) - $totalEwalletOutflow;
 
         // Pendapatan harian: hanya tampilkan tanggal yang ada transaksi
         $harian = [];
@@ -443,7 +468,23 @@ class ReportController extends Controller
             'totalCashOrder',
             'totalTransferOrder',
             'totalDebitOrder',
-            'totalEwalletOrder'
+            'totalEwalletOrder',
+            // cash flow summary
+            'totalInflow',
+            'totalOutflow',
+            'totalCashInflow',
+            'totalCashOutflow',
+            'totalTransferInflow',
+            'totalTransferOutflow',
+            'totalDebitInflow',
+            'totalDebitOutflow',
+            'totalEwalletInflow',
+            'totalEwalletOutflow',
+            // new breakdown
+            'totalCash',
+            'totalTransfer',
+            'totalDebit',
+            'totalEwallet'
         ));
     }
 

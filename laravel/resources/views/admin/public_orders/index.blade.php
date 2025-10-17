@@ -146,6 +146,7 @@
                                     <th class="px-4 py-2 border font-semibold text-gray-700">ID</th>
                                     <th class="px-4 py-2 border font-semibold text-gray-700">Nama Pelanggan</th>
                                     <th class="px-4 py-2 border font-semibold text-gray-700">Tanggal Ambil/Kirim</th>
+                                    <th class="px-4 py-2 border font-semibold text-gray-700">Waktu Ambil/Kirim</th>
                                     <th class="px-4 py-2 border font-semibold text-gray-700">Metode Pengiriman</th>
                                     <th class="px-4 py-2 border font-semibold text-gray-700">Status Pesanan</th>
                                     <th class="px-4 py-2 border font-semibold text-gray-700">Status Bayar</th>
@@ -166,7 +167,13 @@
                                                 </div>
                                             </td>
                                         @endif
+                                        {{-- Kolom ID, Nama, Tanggal, dst --}}
+                                        @php
+                                            // Pastikan field waktu ambil/kirim sesuai field di model Anda
+                                            $waktu = $order->pickup_time ?? $order->delivery_time ?? '-';
+                                        @endphp
                                         @include('admin.public_orders._order_row', ['order' => $order])
+                                        {{-- <td class="px-4 py-2 border text-center">{{ $waktu }}</td> --}}
                                     </tr>
                                 @endforeach
                             </tbody>

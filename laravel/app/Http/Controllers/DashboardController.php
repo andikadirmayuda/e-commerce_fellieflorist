@@ -18,7 +18,7 @@ use Illuminate\Support\Facades\Log;
 
 class DashboardController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         // Bouquet Ready Stock & Performance
         $bouquetReadyStock = \App\Models\Bouquet::with(['category'])
@@ -58,13 +58,17 @@ class DashboardController extends Controller
         $totalOrders = PublicOrder::whereIn('status', ['pending', 'confirmed', 'processing', 'ready', 'completed'])->count();
         $totalSales = Sale::count(); // Sales menggunakan SoftDeletes, count() otomatis exclude yang deleted
 
-        // Total pendapatan dari Sales dan PublicOrder 
-        $salesRevenue = Sale::sum('total'); // Ambil semua sales yang tidak di-soft delete
+        // Total pendapatan dari Sales dan PublicOrder (hanya bulan & tahun berjalan)
+        $salesRevenue = Sale::whereMonth('created_at', now()->month)
+            ->whereYear('created_at', now()->year)
+            ->sum('total');
 
-        // Hitung pendapatan dari PublicOrder melalui items (quantity * price)
+        // Hitung pendapatan dari PublicOrder melalui items (quantity * price) hanya bulan & tahun berjalan
         $ordersRevenue = DB::table('public_orders')
             ->join('public_order_items', 'public_orders.id', '=', 'public_order_items.public_order_id')
             ->whereIn('public_orders.status', ['confirmed', 'processing', 'ready', 'completed'])
+            ->whereMonth('public_orders.created_at', now()->month)
+            ->whereYear('public_orders.created_at', now()->year)
             ->sum(DB::raw('public_order_items.quantity * public_order_items.price'));
 
         $totalRevenue = $salesRevenue + $ordersRevenue;
@@ -76,7 +80,7 @@ class DashboardController extends Controller
             ->get();
 
         // Pesanan terbaru
-        $recentOrders = PublicOrder::latest()->take(5)->get();
+        $recentOrders = PublicOrder::latest()->take(6)->get();
 
         // Data grafik penjualan (7 hari terakhir) - PERBAIKAN
         $sales = Sale::selectRaw('DATE(created_at) as date, COUNT(*) as count, SUM(total) as total')
@@ -122,6 +126,30 @@ class DashboardController extends Controller
             ->groupBy('date')
             ->orderBy('date')
             ->get();
+
+        // Buat array 7 hari terakhir untuk memastikan semua tanggal tampil pada chart pesanan
+        $last7DaysOrders = collect();
+        for ($i = 6; $i >= 0; $i--) {
+            $date = now()->subDays($i)->format('Y-m-d');
+            $dateFormatted = now()->subDays($i)->format('d M');
+            $orderData = $ordersQuery->where('date', $date)->first();
+            $count = $orderData->order_count ?? 0;
+            $last7DaysOrders->push([
+                'date' => $dateFormatted,
+                'count' => $count
+            ]);
+        }
+
+        $ordersChartData = [
+            'labels' => $last7DaysOrders->pluck('date')->toArray(),
+            'datasets' => [[
+                'label' => 'Jumlah Pesanan',
+                'data' => $last7DaysOrders->pluck('count')->toArray(),
+                'backgroundColor' => '#A21CAF',
+                'borderColor' => '#A21CAF',
+                'fill' => false,
+            ]],
+        ];
 
         // Data untuk Performa Produk (berdasarkan kategori)
         // Hitung penjualan dari sales
@@ -217,56 +245,66 @@ class DashboardController extends Controller
             'data' => $productsByCategory->pluck('total_sold')->toArray()
         ];
 
-        // Hitung revenue terpisah dari items
+
+        // Filter date range for revenue chart
+        $startDate = $request->input('start_date');
+        $endDate = $request->input('end_date');
+        $month = $request->input('month');
+        $year = $request->input('year');
+
+        if ($startDate && $endDate) {
+            $start = \Carbon\Carbon::parse($startDate)->startOfDay();
+            $end = \Carbon\Carbon::parse($endDate)->endOfDay();
+        } elseif ($month && $year) {
+            $start = \Carbon\Carbon::createFromDate($year, $month, 1)->startOfMonth();
+            $end = \Carbon\Carbon::createFromDate($year, $month, 1)->endOfMonth();
+        } else {
+            $start = now()->copy()->startOfMonth();
+            $end = now()->copy()->endOfMonth();
+        }
+
+        $days = $start->diffInDays($end) + 1;
+
+        // Query sales per hari (filtered)
+        $sales = Sale::selectRaw('DATE(created_at) as date, SUM(total) as total')
+            ->whereBetween('created_at', [$start, $end])
+            ->groupBy('date')
+            ->orderBy('date')
+            ->get();
+
+        // Query revenue public orders per hari (filtered)
         $revenueQuery = DB::table('public_orders')
             ->join('public_order_items', 'public_orders.id', '=', 'public_order_items.public_order_id')
             ->selectRaw('DATE(public_orders.created_at) as date, SUM(public_order_items.quantity * public_order_items.price) as revenue')
-            ->where('public_orders.created_at', '>=', now()->subDays(6))
+            ->whereBetween('public_orders.created_at', [$start, $end])
             ->whereIn('public_orders.status', ['pending', 'confirmed', 'processing', 'ready', 'completed'])
             ->groupBy('date')
             ->orderBy('date')
             ->get();
 
-        // Buat array 7 hari terakhir untuk memastikan semua tanggal tampil
-        $last7DaysOrders = collect();
-        for ($i = 6; $i >= 0; $i--) {
-            $date = now()->subDays($i)->format('Y-m-d');
-            $dateFormatted = now()->subDays($i)->format('d M');
+        // Buat array seluruh hari di rentang yang dipilih
+        $filteredRevenue = collect();
+        for ($i = 0; $i < $days; $i++) {
+            $date = $start->copy()->addDays($i)->format('Y-m-d');
+            $dateFormatted = $start->copy()->addDays($i)->format('d M');
 
-            // Ambil data count dari ordersQuery (gunakan order_count, bukan total)
-            $orderData = $ordersQuery->where('date', $date)->first();
-            $count = $orderData->order_count ?? 0;
+            $salesData = $sales->where('date', $date)->first();
+            $salesTotal = $salesData->total ?? 0;
 
-            // Ambil data revenue dari revenueQuery  
             $revenueData = $revenueQuery->where('date', $date)->first();
             $revenue = $revenueData->revenue ?? 0;
 
-            $last7DaysOrders->push([
+            $filteredRevenue->push([
                 'date' => $dateFormatted,
-                'count' => $count,
-                'revenue' => $revenue
+                'total' => $salesTotal + $revenue
             ]);
         }
 
-        $ordersChartData = [
-            'labels' => $last7DaysOrders->pluck('date')->toArray(),
-            'datasets' => [[
-                'label' => 'Pesanan Online',
-                'data' => $last7DaysOrders->pluck('count')->toArray(),
-                'backgroundColor' => '#8B5CF6',
-            ]],
-        ];
-
-        // Data grafik pendapatan (7 hari terakhir) - TAMBAHAN BARU
-        // Gabungkan pendapatan dari Sales dan PublicOrder
         $revenueChartData = [
-            'labels' => $last7DaysOrders->pluck('date')->toArray(),
+            'labels' => $filteredRevenue->pluck('date')->toArray(),
             'datasets' => [[
                 'label' => 'Pendapatan Harian',
-                'data' => $last7DaysOrders->map(function ($orderDay) use ($last7DaysSales) {
-                    $salesRevenue = $last7DaysSales->where('date', $orderDay['date'])->first()['total'] ?? 0;
-                    return $salesRevenue + $orderDay['revenue'];
-                })->toArray(),
+                'data' => $filteredRevenue->pluck('total')->toArray(),
                 'backgroundColor' => '#10B981',
                 'borderColor' => '#10B981',
                 'fill' => false,
@@ -403,6 +441,43 @@ class DashboardController extends Controller
         ];
 
         // Debug: Uncomment untuk debugging
+        // Performa Pendapatan Pertahun (per bulan)
+        $year = now()->year;
+        $monthlySales = Sale::selectRaw('MONTH(created_at) as month, SUM(total) as total')
+            ->whereYear('created_at', $year)
+            ->groupBy('month')
+            ->get();
+
+        $monthlyOrders = DB::table('public_orders')
+            ->join('public_order_items', 'public_orders.id', '=', 'public_order_items.public_order_id')
+            ->selectRaw('MONTH(public_orders.created_at) as month, SUM(public_order_items.quantity * public_order_items.price) as revenue')
+            ->whereYear('public_orders.created_at', $year)
+            ->whereIn('public_orders.status', ['pending', 'confirmed', 'processing', 'ready', 'completed'])
+            ->groupBy('month')
+            ->get();
+
+        $months = collect(range(1, 12));
+        $monthLabels = $months->map(function ($m) {
+            return \Carbon\Carbon::create()->month($m)->translatedFormat('F');
+        })->toArray();
+        $monthlyTotals = $months->map(function ($m) use ($monthlySales, $monthlyOrders) {
+            $sales = $monthlySales->where('month', $m)->first();
+            $orders = $monthlyOrders->where('month', $m)->first();
+            $salesTotal = $sales->total ?? 0;
+            $ordersTotal = $orders->revenue ?? 0;
+            return $salesTotal + $ordersTotal;
+        })->toArray();
+
+        $yearlyRevenueChartData = [
+            'labels' => $monthLabels,
+            'datasets' => [[
+                'label' => 'Pendapatan Bulanan',
+                'data' => $monthlyTotals,
+                'backgroundColor' => '#F472B6',
+                'borderColor' => '#EC4899',
+                'fill' => true,
+            ]],
+        ];
         // dd([
         //     'bouquet_category_sales' => $bouquetCategorySales,
         //     'bouquet_chart_data' => $bouquetChartData,
@@ -450,7 +525,8 @@ class DashboardController extends Controller
             'totalOrder',
             'inflowLain',
             'totalOutflow',
-            'saldoBersih'
+            'saldoBersih',
+            'yearlyRevenueChartData'
         );
 
         // Selalu arahkan ke dashboard utama

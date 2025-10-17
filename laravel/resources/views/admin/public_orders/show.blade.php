@@ -647,7 +647,7 @@ $paymentBg = match ($order->payment_status) {
                             </tr>
                         </thead>
                         <tbody>
-                            @forelse($order->paymentLogs as $log)
+                        @forelse(($order->paymentLogs ?? []) as $log)
                                 <tr class="border-b">
                                     <td class="px-4 py-2">{{ $log->created_at->format('d-m-Y H:i') }}</td>
                                     <td class="px-4 py-2">{{ $log->old_status ?? '-' }}</td>
@@ -1442,6 +1442,29 @@ $customBouquetItems = $order->items->filter(function ($item) {
                                 <path d="M16 0C7.163 0 0 7.163 0 16c0 8.837 7.163 16 16 16s16-7.163 16-16c0-8.837-7.163-16-16-16zm8.363 23.363c-.363.363-1.45.693-2.025.787-.55.088-1.275.163-2.075-.163-.475-.188-1.025-.375-1.75-.725-2.975-1.375-4.875-4.125-5.025-4.325-.15-.2-1.2-1.6-1.2-3.075 0-1.475.75-2.175 1.025-2.475.275-.3.6-.375.8-.375.2 0 .4.013.575.025.175.013.425.013.65.525.225.513.725 1.75.788 1.875.063.125.1.275.025.45-.075.175-.113.275-.225.425-.113.15-.225.325-.325.425-.1.1-.2.2-.088.375.113.175.5.825 1.025 1.338.525.513 1.025.675 1.225.75.2.075.325.063.45-.038.125-.1.575-.7.725-.938.15-.238.3-.2.5-.125.2.075 1.275.6 1.775.825.5.225.85.375.975.575.125.2.125 1.15-.238 1.513z" />
                             </svg>
                             Kirim Status Pesanan "Selesai" ke WhatsApp Customer
+                         </a>
+                       @elseif(strtolower($order->status) === 'ready')
+                        @php
+                            $customer_name = $order->customer_name ?? ($order->customer->name ?? 'Pelanggan');
+                        @endphp
+                        @php
+                            $detailUrl = route('public.order.detail', ['public_code' => $order->public_code]);
+                            $invoiceUrl = route('public.order.invoice', ['public_code' => $order->public_code]);
+                            $waMessage = "Halo! " . $customer_name . ",\n"
+                                . "\nPesanan Anda sudah *SIAP DIAMBIL / DIKIRIM*.\n"
+                                . "\n*Lihat detail pesanan:*\n" . $detailUrl . "\n\n"
+                                . "*Lihat invoice:*\n" . $invoiceUrl . "\n\n"
+                                . "\nSilakan hubungi kami jika ada pertanyaan.\n"
+                                . "\nTerima kasih.\n";
+                            $waMessage = str_replace(["\r\n", "\r", "\n"], "\n", $waMessage);
+                        @endphp
+                                            <a href="https://wa.me/{{ preg_replace('/^0/', '62', preg_replace('/[^0-9]/', '', $order->wa_number)) }}?text={{ urlencode($waMessage) }}"
+                                                target="_blank"
+                                                class="inline-flex items-center justify-center px-4 py-3 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition-colors duration-200 shadow-sm">
+                            <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 32 32">
+                                <path d="M16 0C7.163 0 0 7.163 0 16c0 8.837 7.163 16 16 16s16-7.163 16-16c0-8.837-7.163-16-16-16zm8.363 23.363c-.363.363-1.45.693-2.025.787-.55.088-1.275.163-2.075-.163-.475-.188-1.025-.375-1.75-.725-2.975-1.375-4.875-4.125-5.025-4.325-.15-.2-1.2-1.6-1.2-3.075 0-1.475.75-2.175 1.025-2.475.275-.3.6-.375.8-.375.2 0 .4.013.575.025.175.013.425.013.65.525.225.513.725 1.75.788 1.875.063.125.1.275.025.45-.075.175-.113.275-.225.425-.113.15-.225.325-.325.425-.1.1-.2.2-.088.375.113.175.5.825 1.025 1.338.525.513 1.025.675 1.225.75.2.075.325.063.45-.038.125-.1.575-.7.725-.938.15-.238.3-.2.5-.125.2.075 1.275.6 1.775.825.5.225.85.375.975.575.125.2.125 1.15-.238 1.513z" />
+                            </svg>
+                            Kirim Status Pesanan "Siap Diambil/Dikirim" ke WhatsApp Customer
                          </a>
                     @endif
 

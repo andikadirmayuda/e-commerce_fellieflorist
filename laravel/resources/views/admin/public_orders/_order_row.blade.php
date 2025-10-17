@@ -33,6 +33,17 @@
             -
         @endif
     </td>
+    <td class="px-4 py-2 border text-center">
+        @php
+            // Ganti field sesuai kebutuhan jika field waktu berbeda
+            $waktu = $order->pickup_time ?? $order->delivery_time ?? null;
+        @endphp
+        @if($waktu)
+            {{ $waktu }}
+        @else
+            -
+        @endif
+    </td>
     <td class="px-4 py-2 border">{{ $order->delivery_method }}</td>
     <td class="px-4 py-2 border">
         <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full

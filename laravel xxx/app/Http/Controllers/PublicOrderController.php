@@ -229,8 +229,8 @@ class PublicOrderController extends Controller
 
         DB::beginTransaction();
         try {
-            // Generate kode unik invoice publik
-            $publicCode = bin2hex(random_bytes(8));
+            // Generate kode unik invoice publik: tiga huruf + 6 digit angka
+            $publicCode = 'ORD' . str_pad(random_int(0, 999999), 6, '0', STR_PAD_LEFT);
             $order = PublicOrder::create([
                 'public_code' => $publicCode,
                 'customer_name' => $validated['customer_name'],

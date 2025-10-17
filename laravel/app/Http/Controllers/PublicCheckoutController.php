@@ -381,13 +381,33 @@ class PublicCheckoutController extends Controller
                     'customer_name' => $order->customer_name,
                     'public_code' => $publicCode,
                     'total' => $totalAmount,
-                    'pickup_date' => $validated['pickup_date']
+                    'pickup_date' => $validated['pickup_date'],
+                    'pickup_time' => $validated['pickup_time'],
+                    'delivery_method' => $validated['delivery_method'],
+                    'destination' => $validated['destination'],
+
                 ]);
-            } catch (\Exception $e) {
-                Log::warning('Failed to send notification', [
-                    'error' => $e->getMessage(),
+
+                // Kirim WhatsApp ke admin via Fonnte
+                $waAdmin = '085119990901'; // Ganti dengan nomor admin yang diinginkan
+                // Pastikan format internasional tanpa +, misal: 6283865425936
+                if (strpos($waAdmin, '0') === 0) {
+                    $waAdmin = '62' . substr($waAdmin, 1);
+                }
+                $orderDetailUrl = url("/order/{$publicCode}");
+                $waMessage = "*PESANAN BARU🌸*\n\nNama: {$order->customer_name}\nKode: {$publicCode}\nTotal: Rp" . number_format($totalAmount, 0, ',', '.') . "\nTanggal Ambil/Kirim: {$validated['pickup_date']}\nWaktu Ambil: {$validated['pickup_time']}\nMetode: {$validated['delivery_method']}\nTujuan: " . ($validated['destination'] ?? 'N/A') . "
+                \n*Detail Pemesanan:* {$orderDetailUrl}\n
+                \n*Detail Admin Panel:* " . url('/admin/public-orders/' . $order->id) . "\n
+                \n\n⚠️Mohon segera diproses!";
+                $waResponse = send_fonnte_wa($waAdmin, $waMessage);
+                Log::info('Fonnte WA response', [
+                    'wa_number' => $waAdmin,
+                    'message' => $waMessage,
+                    'response' => $waResponse,
                     'order_id' => $order->id
                 ]);
+            } catch (\Exception $e) {
+                // Log error pengiriman notifikasi WA
             }
 
             DB::commit();
@@ -419,9 +439,8 @@ class PublicCheckoutController extends Controller
     private function generateUniqueOrderCode()
     {
         do {
-            $code = strtoupper(bin2hex(random_bytes(4)));
+            $code = 'ORD' . str_pad(random_int(0, 999999), 6, '0', STR_PAD_LEFT);
         } while (PublicOrder::where('public_code', $code)->exists());
-
         return $code;
     }
 

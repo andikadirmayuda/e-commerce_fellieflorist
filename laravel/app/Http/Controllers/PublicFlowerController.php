@@ -16,12 +16,18 @@ class PublicFlowerController extends Controller
         // Tampilkan semua produk bunga, termasuk yang stoknya 0.
         // Urutkan: yang ada stok dulu, lalu habis, kemudian berdasarkan nama.
 
+        // Urutkan: kategori 'Fresh Flowers' dulu, lalu stok, lalu harga termurah
         $flowers = Product::with(['category', 'prices'])
-            ->orderByRaw('(current_stock > 0) desc')
             ->get()
             ->sortBy(function ($flower) {
-                return $flower->prices->min('price') ?? 999999999;
-            })->values();
+                // Prioritaskan kategori 'Fresh Flowers' (atau sesuaikan nama kategorinya)
+                $isFresh = strtolower(optional($flower->category)->name) === 'fresh flowers' ? 0 : 1;
+                $hasStock = $flower->current_stock > 0 ? 0 : 1;
+                $minPrice = $flower->prices->min('price') ?? 999999999;
+                // Gabungkan prioritas: fresh, stok, harga
+                return [$isFresh, $hasStock, $minPrice];
+            })
+            ->values();
 
         $lastUpdated = Product::max('updated_at') ?? now();
 

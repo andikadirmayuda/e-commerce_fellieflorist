@@ -13,7 +13,8 @@ class PublicBouquetController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Bouquet::with(['category', 'components.product', 'sizes', 'prices.size']);
+        $query = Bouquet::with(['category', 'components.product', 'sizes', 'prices.size'])
+            ->withMin('prices', 'price');
 
         // Filter berdasarkan kategori
         if ($request->filled('category_id')) {
@@ -37,7 +38,8 @@ class PublicBouquetController extends Controller
             $query->where('name', 'like', '%' . $request->search . '%');
         }
 
-        $bouquets = $query->orderBy('name')->get();
+        // Urutkan berdasarkan harga termurah (min_price) ascending
+        $bouquets = $query->orderBy('prices_min_price')->get();
 
         // Ambil kategori bouquet untuk filter
         $bouquetCategories = BouquetCategory::orderBy('name')->get();
@@ -133,7 +135,7 @@ class PublicBouquetController extends Controller
     {
         // Add simple server-side caching
         $cacheKey = "bouquet_components_{$bouquetId}_{$sizeId}";
-        
+
         // Try to get from cache first
         if (cache()->has($cacheKey)) {
             return response()->json(cache()->get($cacheKey));
@@ -143,9 +145,9 @@ class PublicBouquetController extends Controller
         $components = BouquetComponent::where('bouquet_id', $bouquetId)
             ->where('size_id', $sizeId)
             ->whereHas('product') // Hanya komponen dengan produk yang masih ada
-            ->with(['product' => function($query) {
+            ->with(['product' => function ($query) {
                 $query->select('id', 'name', 'category_id', 'base_unit', 'current_stock', 'price');
-            }, 'product.category' => function($query) {
+            }, 'product.category' => function ($query) {
                 $query->select('id', 'name');
             }])
             ->select('id', 'bouquet_id', 'size_id', 'product_id', 'quantity')

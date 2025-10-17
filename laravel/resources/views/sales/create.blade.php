@@ -1,3 +1,21 @@
+    <!-- Modal Popup Pilih Produk -->
+    <div id="productModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-30 hidden">
+        <div class="bg-white rounded-xl shadow-lg w-full max-w-md p-6 relative">
+            <button id="closeProductModal" class="absolute top-3 right-3 text-gray-400 hover:text-pink-600 text-xl">&times;</button>
+            <h3 class="text-lg font-bold mb-2" id="modalProductName">Pilih Produk</h3>
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-1">Tipe Harga</label>
+                <select id="modalPriceType" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500">
+                    <option value="">-- Pilih Tipe Harga --</option>
+                </select>
+            </div>
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-1">Jumlah</label>
+                <input type="number" id="modalQuantity" min="1" value="1" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500">
+            </div>
+            <button id="modalAddToCart" class="w-full py-2 bg-pink-600 hover:bg-pink-700 text-white font-semibold rounded-lg transition">Tambah ke Keranjang</button>
+        </div>
+    </div>
 <x-app-layout>
     <x-slot name="header">
         <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
@@ -23,7 +41,8 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
     <div class="py-6 sm:py-8">
-        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
             <!-- Error Messages -->
             @if ($errors->any())
                 <div class="mb-6 bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-lg shadow-sm">
@@ -39,7 +58,8 @@
                 </div>
             @endif
 
-            <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                <!-- Form Transaksi (kiri) -->
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden lg:col-span-2">
                 <!-- Form Header -->
                 <div class="px-6 py-4 border-b border-gray-200 bg-gray-50">
                     <h3 class="text-lg font-medium text-gray-900">Informasi Transaksi</h3>
@@ -509,9 +529,122 @@
                     </form>
                 </div>
             </div>
+                <!-- Sidebar Panel: Product List (kanan, sticky) -->
+                <aside class="hidden lg:block lg:col-span-1">
+                    <div class="sticky top-8">
+                        <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                            <div class="px-6 py-4 border-b border-gray-200 bg-gray-50">
+                                <h3 class="text-lg font-medium text-gray-900 flex items-center">
+                                    <i class="bi bi-list-ul mr-2 text-pink-600"></i>Daftar Produk
+                                </h3>
+                                <p class="mt-1 text-sm text-gray-500">Cari & pilih produk dengan cepat</p>
+                            </div>
+                            <div class="p-4">
+                                <input type="text" id="sidebarProductSearch" class="w-full px-3 py-2 border border-gray-300 rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-pink-500" placeholder="Cari produk...">
+                                <div class="max-h-[60vh] overflow-y-auto" id="sidebarProductList">
+                                    @foreach($products as $product)
+                                        <div class="flex items-center justify-between p-2 mb-2 bg-gray-50 rounded hover:bg-pink-50 transition cursor-pointer sidebar-product-item" data-name="{{ strtolower($product->name) }}" data-code="{{ strtolower($product->code) }}" data-id="{{ $product->id }}">
+                                            <div>
+                                                <div class="font-medium text-gray-900">{{ $product->name }}</div>
+                                                <div class="text-xs text-gray-500">Kode: {{ $product->code ?? '-' }}</div>
+                                                <div class="text-xs text-gray-400">Stok: {{ $product->current_stock }}</div>
+                                            </div>
+                                            <button type="button" class="ml-2 px-3 py-1 bg-pink-600 hover:bg-pink-700 text-white text-xs rounded focus:outline-none select-product-btn" data-id="{{ $product->id }}">Pilih</button>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </aside>
+            </div>
         </div>
     </div>
     <script>
+    // Sidebar product search & modal popup
+    document.addEventListener('DOMContentLoaded', function() {
+        const sidebarSearch = document.getElementById('sidebarProductSearch');
+        const sidebarList = document.getElementById('sidebarProductList');
+        const productModal = document.getElementById('productModal');
+        const closeProductModal = document.getElementById('closeProductModal');
+        const modalProductName = document.getElementById('modalProductName');
+        const modalPriceType = document.getElementById('modalPriceType');
+        const modalQuantity = document.getElementById('modalQuantity');
+        const modalAddToCart = document.getElementById('modalAddToCart');
+        let selectedProduct = null;
+        if (sidebarSearch && sidebarList) {
+            sidebarSearch.addEventListener('input', function() {
+                const term = this.value.toLowerCase();
+                sidebarList.querySelectorAll('.sidebar-product-item').forEach(item => {
+                    const name = item.getAttribute('data-name') || '';
+                    const code = item.getAttribute('data-code') || '';
+                    if (name.includes(term) || code.includes(term)) {
+                        item.style.display = '';
+                    } else {
+                        item.style.display = 'none';
+                    }
+                });
+            });
+            // Pilih produk dari sidebar (show modal)
+            sidebarList.querySelectorAll('.select-product-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const id = this.getAttribute('data-id');
+                    const product = products.find(p => p.id == id);
+                    if (!product) return;
+                    selectedProduct = product;
+                    modalProductName.textContent = product.name;
+                    // Populate price type
+                    modalPriceType.innerHTML = '<option value="">-- Pilih Tipe Harga --</option>';
+                    (product.prices || []).forEach(price => {
+                        if (price.type !== 'harga_grosir') {
+                            modalPriceType.innerHTML += `<option value="${price.type}" data-price="${price.price}">${price.type.replaceAll('_',' ').toUpperCase()} (Rp ${formatPrice(parseFloat(price.price))})</option>`;
+                        }
+                    });
+                    modalQuantity.value = 1;
+                    productModal.classList.remove('hidden');
+                });
+            });
+        }
+        // Close modal
+        if (closeProductModal) closeProductModal.onclick = () => productModal.classList.add('hidden');
+        window.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') productModal.classList.add('hidden');
+        });
+        // Tambah ke keranjang dari modal
+        if (modalAddToCart) {
+            modalAddToCart.onclick = function() {
+                if (!selectedProduct) return;
+                const priceType = modalPriceType.value;
+                const priceObj = (selectedProduct.prices || []).find(pr => pr.type === priceType);
+                const quantity = parseInt(modalQuantity.value) || 1;
+                if (!priceType || !priceObj) {
+                    alert('Pilih tipe harga!');
+                    return;
+                }
+                if (quantity < 1) {
+                    alert('Jumlah minimal 1!');
+                    return;
+                }
+                let stokTersedia = selectedProduct.current_stock;
+                let unitEquivalent = priceObj.unit_equivalent ? parseInt(priceObj.unit_equivalent) : 1;
+                let totalButuh = quantity * unitEquivalent;
+                if (stokTersedia < totalButuh) {
+                    alert(`Stok produk tidak mencukupi!\nStok tersedia: ${stokTersedia}\nDibutuhkan: ${totalButuh}`);
+                    return;
+                }
+                // Push ke keranjang
+                items.push({
+                    product_id: selectedProduct.id,
+                    product_name: selectedProduct.name,
+                    price_type: priceType,
+                    quantity: quantity,
+                    price: parseFloat(priceObj.price)
+                });
+                updateTable();
+                productModal.classList.add('hidden');
+            }
+        }
+    });
         // Custom Product Dropdown
         document.addEventListener('DOMContentLoaded', function() {
             const dropdownButton = document.getElementById('productDropdownButton');
