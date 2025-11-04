@@ -9,6 +9,7 @@ class InventoryLog extends Model
 {
     // Source constants
     const SOURCE_SALE = 'sale';
+    const SOURCE_IN = 'in'; // stok masuk manual
     const SOURCE_PUBLIC_ORDER_PRODUCT = 'public_order_product';
     const SOURCE_PUBLIC_ORDER_BOUQUET = 'public_order_bouquet';
     const SOURCE_PUBLIC_ORDER_CUSTOM = 'public_order_custom';
@@ -16,9 +17,10 @@ class InventoryLog extends Model
     const SOURCE_PUBLIC_ORDER_BOUQUET_HOLD = 'public_order_bouquet_hold';
     const SOURCE_PUBLIC_ORDER_CUSTOM_HOLD = 'public_order_custom_hold';
     const SOURCE_PUBLIC_ORDER_CANCEL = 'public_order_cancel';
-    const SOURCE_PURCHASE = 'purchase';
+    const SOURCE_PURCHASE = 'Pengadaan';
     const SOURCE_RETURN = 'return';
     const SOURCE_ADJUSTMENT = 'adjustment';
+    const SOURCE_DAMAGED = 'damaged'; // stok rusak
 
     protected $fillable = [
         'product_id',

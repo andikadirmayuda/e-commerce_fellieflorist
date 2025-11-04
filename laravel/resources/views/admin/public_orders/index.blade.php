@@ -143,7 +143,9 @@
                                             </div>
                                         </th>
                                     @endif
-                                    <th class="px-4 py-2 border font-semibold text-gray-700">ID</th>
+                                    {{-- <th class="px-4 py-2 border font-semibold text-gray-700">ID</th> --}}
+                                    <th class="px-6 py-2 border font-semibold text-gray-700" style="min-width:160px;">
+                                        No. Urut</th>
                                     <th class="px-4 py-2 border font-semibold text-gray-700">Nama Pelanggan</th>
                                     <th class="px-4 py-2 border font-semibold text-gray-700">Tanggal Ambil/Kirim</th>
                                     <th class="px-4 py-2 border font-semibold text-gray-700">Waktu Ambil/Kirim</th>
@@ -172,6 +174,8 @@
                                             // Pastikan field waktu ambil/kirim sesuai field di model Anda
                                             $waktu = $order->pickup_time ?? $order->delivery_time ?? '-';
                                         @endphp
+                                        {{-- <td class="px-4 py-2 border font-mono text-blue-700">{{ $order->order_number }}
+                                        </td> --}}
                                         @include('admin.public_orders._order_row', ['order' => $order])
                                         {{-- <td class="px-4 py-2 border text-center">{{ $waktu }}</td> --}}
                                     </tr>

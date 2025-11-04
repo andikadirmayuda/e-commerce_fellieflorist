@@ -164,7 +164,7 @@ class PublicOrder extends Model
         'packing_files' => 'array',
     ];
 
-    protected $appends = ['total', 'order_number'];
+    protected $appends = ['total'];
 
     public function items()
     {
@@ -210,12 +210,6 @@ class PublicOrder extends Model
 
         // Total tidak boleh minus
         return max($subtotal, 0);
-    }
-
-    // Get order number from public_code or generate one
-    public function getOrderNumberAttribute()
-    {
-        return $this->public_code ?? 'PO-' . str_pad($this->id, 6, '0', STR_PAD_LEFT);
     }
 
     // Get customer phone from wa_number

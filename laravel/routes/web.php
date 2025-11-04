@@ -30,6 +30,7 @@ use App\Http\Controllers\PublicCheckoutController;
 use App\Http\Controllers\CashFlowController;
 use App\Http\Controllers\CashFlowCategoryController;
 use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\PurchaseOrderController;
 
 
 use Illuminate\Support\Facades\Route;
@@ -43,19 +44,19 @@ Route::get('/', function () {
 Route::post('/api/validate-rese ller-code', [OnlineCustomerController::class, 'validateResellerCode'])->name('api.validate-reseller-code');
 Route::post('/api/mark-reseller-code-used', [OnlineCustomerController::class, 'markResellerCodeUsed'])->name('api.mark-reseller-code-used');
 
-use App\Http\Controllers\Api\NotificationController as ApiNotificationController;
+// use App\Http\Controllers\Api\NotificationController as ApiNotificationController;
 
 // Push Notification API Routes
-Route::middleware(['web', 'auth'])->group(function () {
-    Route::get('/api/notifications/pending', [ApiNotificationController::class, 'getPendingNotifications'])
-        ->name('api.notifications.pending');
-    Route::post('/api/notifications/{id}/delivered', [ApiNotificationController::class, 'markAsDelivered'])
-        ->name('api.notifications.delivered');
-    Route::post('/api/notifications/test', [ApiNotificationController::class, 'testNotification'])
-        ->name('api.notifications.test');
-});
+// Route::middleware(['web', 'auth'])->group(function () {
+//     Route::get('/api/notifications/pending', [ApiNotificationController::class, 'getPendingNotifications'])
+//         ->name('api.notifications.pending');
+//     Route::post('/api/notifications/{id}/delivered', [ApiNotificationController::class, 'markAsDelivered'])
+//         ->name('api.notifications.delivered');
+//     Route::post('/api/notifications/test', [ApiNotificationController::class, 'testNotification'])
+//         ->name('api.notifications.test');
+// });
 // Include notification routes
-require __DIR__ . '/notification.php';
+// require __DIR__ . '/notification.php';
 
 // Voucher validation route
 Route::post('/voucher/validate', [VoucherController::class, 'validate'])->name('voucher.validate');
@@ -114,10 +115,17 @@ Route::middleware('auth')->group(function () {
 
     // Inventory Routes
     Route::get('/inventory', [InventoryController::class, 'index'])->name('inventory.index');
+    // Form input stok masuk
+    Route::get('/inventory/add', [InventoryController::class, 'addForm'])->name('inventory.add.form');
+    Route::post('/inventory/add', [InventoryController::class, 'addStore'])->name('inventory.add.store');
     Route::get('/inventory/{product}/history', [InventoryController::class, 'history'])->name('inventory.history');
     Route::get('/inventory/adjust', [InventoryController::class, 'adjustForm'])->name('inventory.adjust.form');
+    // Form & proses stok rusak
+    Route::get('/inventory/adjust-damaged', [InventoryController::class, 'adjustDamagedForm'])->name('inventory.adjust.damaged.form');
+    Route::post('/inventory/adjust-damaged', [InventoryController::class, 'adjustDamaged'])->name('inventory.adjust.damaged');
     Route::get('/inventory/{product}/adjust', [InventoryController::class, 'adjustForm'])->name('inventory.adjust-form');
     Route::post('/inventory/{product}/adjust', [InventoryController::class, 'adjust'])->name('inventory.adjust');
+    Route::post('inventory/adjust', [InventoryController::class, 'adjust'])->name('inventory.adjust');
 
     // API untuk modal penyesuaian stok
     Route::get('/api/categories/{category}/products', [App\Http\Controllers\ProductController::class, 'apiByCategory']);
@@ -131,6 +139,9 @@ Route::middleware('auth')->group(function () {
         'show' => 'sales.show',
         'destroy' => 'sales.destroy',
     ]);
+
+    // Update nomor WhatsApp pada transaksi penjualan
+    Route::post('/sales/{sale}/update-wa-number', [App\Http\Controllers\SaleController::class, 'updateWaNumber'])->name('sales.update-wa-number');
     Route::post('/sales/bulk-delete', [App\Http\Controllers\SaleController::class, 'bulkDelete'])->name('sales.bulk-delete');
     Route::get('/sales/{sale}/download-pdf', [App\Http\Controllers\SaleController::class, 'downloadPdf'])->name('sales.download_pdf');
 
@@ -246,3 +257,9 @@ Route::middleware(['auth'])->group(function () {
 
 // Midtrans callback route
 Route::post('/midtrans/callback', [\App\Http\Controllers\PublicOrderController::class, 'midtransCallback'])->withoutMiddleware(['web', 'csrf']);
+
+// Purchase Order
+Route::resource('purchase-orders', PurchaseOrderController::class);
+
+// Laporan Purchase Order
+Route::get('report/purchase-orders', [App\Http\Controllers\PurchaseOrderController::class, 'report'])->name('purchase-orders.report');

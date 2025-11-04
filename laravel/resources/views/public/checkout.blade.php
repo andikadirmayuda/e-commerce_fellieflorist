@@ -373,7 +373,7 @@
                     <div class="w-14 h-14 flex items-center justify-center bg-rose-100 rounded-full mb-4">
                         <i class="bi bi-exclamation-triangle text-3xl text-rose-600"></i>
                     </div>
-                    <h3 class="text-lg font-bold text-rose-700 mb-2">Mohon Bersabar</h3>
+                    <h3 class="text-lg font-bold text-rose-700 mb-2">PERHATIAN !!</h3>
                     <p id="modal-time-warning-text" class="text-gray-700 mb-6"></p>
                     <button id="close-modal-time-warning" type="button"
                         class="px-6 py-2 bg-rose-600 text-white rounded-xl font-semibold shadow hover:bg-rose-700 transition">Tutup</button>
@@ -492,12 +492,21 @@ foreach ($cartRaw as $item) {
             });
             setMinPickupTime();
 
+            let modalTimeout = null;
             function showModal(text) {
                 modalText.innerHTML = text;
                 modal.classList.remove('hidden');
+                if (modalTimeout) clearTimeout(modalTimeout);
+                modalTimeout = setTimeout(() => {
+                    hideModal();
+                }, 3000); // 3 detik
             }
             function hideModal() {
                 modal.classList.add('hidden');
+                if (modalTimeout) {
+                    clearTimeout(modalTimeout);
+                    modalTimeout = null;
+                }
             }
             closeModalBtn.addEventListener('click', hideModal);
             document.addEventListener('keydown', function (e) {
@@ -526,8 +535,20 @@ foreach ($cartRaw as $item) {
                     }
                 }
 
-                // Pisahkan jam & menit
+
+                // Validasi jam operasional toko: hanya boleh antara 10:00 dan 19:30
                 const [hours, minutes] = timeValue.split(":").map(Number);
+                // jam 10:00 s/d 19:30 (19:31 ke atas tidak boleh)
+                const isBeforeOpen = hours < 10;
+                const isAfterClose = (hours > 19) || (hours === 19 && minutes > 30);
+                if (isBeforeOpen || isAfterClose) {
+                    let msg = 'Waktu pengambilan/pengiriman hanya bisa antara <span class="font-semibold">10:00</span> sampai <span class="font-semibold">20:00</span> (jam operasional toko). Silakan pilih waktu lain.';
+                    showModal(msg);
+                    pickupTimeInput.value = '';
+                    pickupTimeDisplay.textContent = "-";
+                    return;
+                }
+
                 let period = "";
 
                 if (hours >= 4 && hours < 11) {

@@ -1123,6 +1123,7 @@
             /* hijau soft */
         }
     </style>
+    <link rel="stylesheet" href="/css/chatbot.css">
 </head>
 
 <body class="min-h-screen gradient-bg text-black flex flex-col font-sans overflow-x-hidden">
@@ -2205,6 +2206,7 @@
             }
         });
     </script>
+    <script src="/js/chatbot.js"></script>
 </body>
 
 </html>

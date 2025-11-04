@@ -179,6 +179,79 @@
             });
         }
     </script>
+
+    <script>
+        // --- AI Personalization Logic ---
+        document.addEventListener('DOMContentLoaded', function () {
+            const aiForm = document.getElementById('aiForm');
+            const btnAiRecommend = document.getElementById('btnAiRecommend');
+            const btnAiMessage = document.getElementById('btnAiMessage');
+            const aiResult = document.getElementById('aiResult');
+            const aiRecommendBox = document.getElementById('aiRecommendBox');
+            const aiMessageBox = document.getElementById('aiMessageBox');
+            const aiRecommendText = document.getElementById('aiRecommendText');
+            const aiMessageText = document.getElementById('aiMessageText');
+
+            function showLoading(target) {
+                target.innerHTML = '<span class="animate-pulse text-[#f2527d]">Memproses...</span>';
+            }
+
+            btnAiRecommend.addEventListener('click', async function () {
+                aiResult.classList.remove('hidden');
+                aiRecommendBox.classList.remove('hidden');
+                aiMessageBox.classList.add('hidden');
+                showLoading(aiRecommendText);
+                const event = document.getElementById('aiEvent').value;
+                const color = document.getElementById('aiColor').value;
+                const style = document.getElementById('aiStyle').value;
+                try {
+                    const res = await fetch('/api/ai/recommend', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                        },
+                        body: JSON.stringify({ event, color, style })
+                    });
+                    const data = await res.json();
+                    if (data.success) {
+                        aiRecommendText.textContent = data.recommendation;
+                    } else {
+                        aiRecommendText.textContent = 'Gagal mendapatkan rekomendasi.';
+                    }
+                } catch (e) {
+                    aiRecommendText.textContent = 'Terjadi error.';
+                }
+            });
+
+            btnAiMessage.addEventListener('click', async function () {
+                aiResult.classList.remove('hidden');
+                aiMessageBox.classList.remove('hidden');
+                aiRecommendBox.classList.add('hidden');
+                showLoading(aiMessageText);
+                const event = document.getElementById('aiEvent').value;
+                const style = document.getElementById('aiStyle').value;
+                try {
+                    const res = await fetch('/api/ai/generate-message', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                        },
+                        body: JSON.stringify({ event, style })
+                    });
+                    const data = await res.json();
+                    if (data.success) {
+                        aiMessageText.textContent = data.message;
+                    } else {
+                        aiMessageText.textContent = 'Gagal membuat ucapan.';
+                    }
+                } catch (e) {
+                    aiMessageText.textContent = 'Terjadi error.';
+                }
+            });
+        });
+    </script>
     <style>
         /* Custom scrollbar for mobile: lebih kecil */
         ::-webkit-scrollbar {
@@ -777,8 +850,242 @@
     <!-- Main Content -->
     <div class="w-full max-w-6xl mx-auto px-4 py-6">
 
+        <!-- AI Personalization Form -->
+        <!-- Galeri Inspirasi Custom Bouquet dari Pinterest -->
+        <div class="max-w-5xl mx-auto my-8">
+            <h2 class="text-2xl font-bold text-[#f2527d] mb-4 text-center">Inspirasi Custom Bouquet dari Pinterest</h2>
+            <div class="relative">
+                <div id="pinterestGallery" class="flex gap-6 overflow-x-auto pb-2 px-1 hide-scrollbar"
+                    style="max-width:100vw;scroll-behavior:smooth;">
+                    <!-- Galeri inspirasi Pinterest dengan embed pin, horizontal scroll -->
+                    <a data-pin-do="embedPin" href="https://www.pinterest.com/pin/3870349675158555/"
+                        class="pinterest-embed-item"></a>
+                    <a data-pin-do="embedPin" href="https://www.pinterest.com/pin/15481192463777450/"
+                        class="pinterest-embed-item"></a>
+                    <a data-pin-do="embedPin" href="https://www.pinterest.com/pin/321022279708525105/"
+                        class="pinterest-embed-item"></a>
+                    <a data-pin-do="embedPin" href="https://www.pinterest.com/pin/321022279708525105/"
+                        class="pinterest-embed-item"></a>
+                    <a data-pin-do="embedPin" href="https://www.pinterest.com/pin/321022279708525105/"
+                        class="pinterest-embed-item"></a>
+                    <a data-pin-do="embedPin" href="https://www.pinterest.com/pin/321022279708525105/"
+                        class="pinterest-embed-item"></a>
+                    <a data-pin-do="embedPin" href="https://www.pinterest.com/pin/321022279708525105/"
+                        class="pinterest-embed-item"></a>
+                    <a data-pin-do="embedPin" href="https://www.pinterest.com/pin/321022279708525105/"
+                        class="pinterest-embed-item"></a>
+                    <a data-pin-do="embedPin" href="https://www.pinterest.com/pin/321022279708525105/"
+                        class="pinterest-embed-item"></a>
+                    <a data-pin-do="embedPin" href="https://www.pinterest.com/pin/321022279708525105/"
+                        class="pinterest-embed-item"></a>
+                    <a data-pin-do="embedPin" href="https://www.pinterest.com/pin/321022279708525105/"
+                        class="pinterest-embed-item"></a>
+                    <a data-pin-do="embedPin" href="https://www.pinterest.com/pin/321022279708525105/"
+                        class="pinterest-embed-item"></a>
+                </div>
+                <div class="scroll-btns-bottom">
+                    <button id="scrollLeftPinterest" type="button" class="scroll-btn-bottom">
+                        <i class="bi bi-chevron-left"></i>
+                    </button>
+                    <button id="scrollRightPinterest" type="button" class="scroll-btn-bottom">
+                        <i class="bi bi-chevron-right"></i>
+                    </button>
+                </div>
+            </div>
+            <style>
+                .pinterest-embed-item {
+                    min-width: 160px;
+                    max-width: 160px;
+                    border-radius: 0.75rem;
+                    box-shadow: 0 2px 8px 0 rgba(0, 0, 0, 0.08);
+                    overflow: hidden;
+                    background: #fff;
+                }
+
+                .pinterest-embed-item iframe {
+                    width: 100% !important;
+                    height: auto !important;
+                    min-width: 0 !important;
+                    max-width: 160px !important;
+                    border-radius: 0.75rem;
+                }
+
+                .hide-scrollbar {
+                    scrollbar-width: none;
+                    -ms-overflow-style: none;
+                }
+
+                .hide-scrollbar::-webkit-scrollbar {
+                    display: none;
+                }
+
+                .scroll-btns-bottom {
+                    display: flex;
+                    justify-content: center;
+                    gap: 16px;
+                    position: absolute;
+                    left: 0;
+                    right: 0;
+                    bottom: 0;
+                    transform: translateY(50%);
+                    z-index: 20;
+                    pointer-events: none;
+                }
+
+                .scroll-btn-bottom {
+                    background: rgba(255, 255, 255, 0.95);
+                    border: none;
+                    border-radius: 50%;
+                    width: 38px;
+                    height: 38px;
+                    box-shadow: 0 2px 8px 0 rgba(0, 0, 0, 0.10);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-size: 1.5rem;
+                    color: #f2527d;
+                    cursor: pointer;
+                    transition: background 0.2s;
+                    pointer-events: auto;
+                }
+
+                .scroll-btn-bottom:hover {
+                    background: #f2527d;
+                    color: #fff;
+                }
+
+                @media (max-width: 900px) {
+                    .pinterest-embed-item {
+                        min-width: 45vw;
+                        max-width: 45vw;
+                    }
+
+                    .pinterest-embed-item iframe {
+                        max-width: 45vw !important;
+                    }
+                }
+
+                @media (max-width: 640px) {
+                    .pinterest-embed-item {
+                        min-width: 50vw;
+                        max-width: 50vw;
+                    }
+
+                    .pinterest-embed-item iframe {
+                        max-width: 50vw !important;
+                    }
+                }
+            </style>
+            <script>
+                document.addEventListener('DOMContentLoaded', function () {
+                    const gallery = document.getElementById('pinterestGallery');
+                    const btnLeft = document.getElementById('scrollLeftPinterest');
+                    const btnRight = document.getElementById('scrollRightPinterest');
+                    let autoScrollInterval = null;
+                    let isPaused = false;
+
+                    function updateScrollButtons() {
+                        if (!gallery) return;
+                        btnLeft.style.visibility = gallery.scrollLeft > 10 ? 'visible' : 'hidden';
+                        btnRight.style.visibility = (gallery.scrollWidth - gallery.clientWidth - gallery.scrollLeft) > 10 ? 'visible' : 'hidden';
+                    }
+                    btnLeft.addEventListener('click', function () {
+                        gallery.scrollBy({ left: -gallery.clientWidth * 0.7, behavior: 'smooth' });
+                    });
+                    btnRight.addEventListener('click', function () {
+                        gallery.scrollBy({ left: gallery.clientWidth * 0.7, behavior: 'smooth' });
+                    });
+                    gallery.addEventListener('scroll', updateScrollButtons);
+                    window.addEventListener('resize', updateScrollButtons);
+                    updateScrollButtons();
+
+                    // --- AUTO SCROLL LOGIC ---
+                    function startAutoScroll() {
+                        if (autoScrollInterval) return;
+                        autoScrollInterval = setInterval(() => {
+                            if (isPaused) return;
+                            // Scroll right by 1/2 gallery width
+                            const maxScroll = gallery.scrollWidth - gallery.clientWidth;
+                            if (gallery.scrollLeft + 10 >= maxScroll) {
+                                // Loop ke awal
+                                gallery.scrollTo({ left: 0, behavior: 'smooth' });
+                            } else {
+                                gallery.scrollBy({ left: gallery.clientWidth * 0.5, behavior: 'smooth' });
+                            }
+                        }, 2500); // Ganti interval sesuai kebutuhan
+                    }
+                    function stopAutoScroll() {
+                        if (autoScrollInterval) {
+                            clearInterval(autoScrollInterval);
+                            autoScrollInterval = null;
+                        }
+                    }
+                    // Pause saat hover/touch
+                    gallery.addEventListener('mouseenter', function () { isPaused = true; });
+                    gallery.addEventListener('mouseleave', function () { isPaused = false; });
+                    gallery.addEventListener('touchstart', function () { isPaused = true; });
+                    gallery.addEventListener('touchend', function () { isPaused = false; });
+
+                    startAutoScroll();
+                });
+            </script>
+        </div>
+
+        <!-- Script Pinterest WAJIB (cukup sekali per halaman) -->
+        <script async defer src="https://assets.pinterest.com/js/pinit.js"></script>
+        {{--
+        <div class="w-full max-w-2xl mx-auto mb-8 bg-white rounded-xl shadow p-6 border border-rose-100">
+            <h2 class="text-lg font-bold text-[#f2527d] mb-3 flex items-center"><i
+                    class="bi bi-stars mr-2"></i>Personalisasi dengan AI</h2>
+            <form id="aiForm" class="flex flex-col gap-4">
+                <div>
+                    <label class="block text-sm font-medium mb-1">Acara/Tujuan</label>
+                    <input type="text" id="aiEvent" name="event"
+                        class="w-full border rounded px-3 py-2 focus:ring-rose-200 focus:border-rose-400"
+                        placeholder="Contoh: ulang tahun, wisuda, minta maaf" required>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-1">Warna Bunga Favorit</label>
+                    <input type="text" id="aiColor" name="color"
+                        class="w-full border rounded px-3 py-2 focus:ring-rose-200 focus:border-rose-400"
+                        placeholder="Contoh: merah muda, putih, biru" required>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-1">Gaya Buket</label>
+                    <select id="aiStyle" name="style"
+                        class="w-full border rounded px-3 py-2 focus:ring-rose-200 focus:border-rose-400" required>
+                        <option value="">Pilih gaya...</option>
+                        <option value="elegan">Elegan</option>
+                        <option value="ceria">Ceria</option>
+                        <option value="romantis">Romantis</option>
+                        <option value="minimalis">Minimalis</option>
+                    </select>
+                </div>
+                <div class="flex gap-2 mt-2">
+                    <button type="button" id="btnAiRecommend"
+                        class="bg-[#f2527d] text-white px-4 py-2 rounded hover:bg-[#d13a65] transition">Rekomendasi
+                        Bunga</button>
+                    <button type="button" id="btnAiMessage"
+                        class="bg-rose-200 text-[#f2527d] px-4 py-2 rounded hover:bg-rose-300 transition">Buat Ucapan
+                        Otomatis</button>
+                </div>
+            </form>
+            <div id="aiResult" class="mt-4 hidden">
+                <div id="aiRecommendBox" class="mb-3 hidden">
+                    <div class="font-semibold text-[#f2527d] mb-1 flex items-center"><i
+                            class="bi bi-flower1 mr-2"></i>Rekomendasi Bunga:</div>
+                    <div class="bg-rose-50 border border-rose-100 rounded p-3 text-sm" id="aiRecommendText"></div>
+                </div>
+                <div id="aiMessageBox" class="hidden">
+                    <div class="font-semibold text-[#f2527d] mb-1 flex items-center"><i
+                            class="bi bi-chat-heart mr-2"></i>Ucapan Otomatis:</div>
+                    <div class="bg-rose-50 border border-rose-100 rounded p-3 text-sm" id="aiMessageText"></div>
+                </div>
+            </div>
+        </div> --}}
+
         <!-- Custom Bouquet Example Slider -->
-        <div class="w-full max-w-4xl mx-auto mt-2 mb-4">
+        {{-- <div class="w-full max-w-4xl mx-auto mt-2 mb-4">
             <div class="relative overflow-hidden rounded-xl shadow-lg">
                 <div id="bouquetSlider" class="flex transition-transform duration-700 ease-in-out touch-pan-x">
                     <img src="{{ asset('3.jpg') }}" alt="Bouquet 1" class="w-full h-full object-cover flex-shrink-0">
@@ -842,7 +1149,7 @@
                     <i class="bi bi-cursor-fill"></i> Lihat Panduan Custom Bouquet
                 </button>
             </div>
-        </div>
+        </div> --}}
 
         <!-- Horizontal Bouquet Builder -->
         <div class="mb-6 horizontal-builder">
@@ -982,21 +1289,31 @@
 
                             <!-- Action Buttons -->
                             <div class="space-y-3">
+                                <a href="{{ route('public.custom.bouquet.drafts') }}"
+                                    class="w-full inline-block text-center bg-[#f2527d] text-white font-bold py-4 px-4 rounded-xl transition-all duration-300 mb-2 hover:bg-[#d13c6b]">
+                                    <div class="relative flex items-center justify-center">
+                                        <i class="bi bi-clipboard-heart mr-2"></i>
+                                        <span>Lihat Draft</span>
+                                    </div>
+                                </a>
+                                <button type="button" id="saveDraftBtn"
+                                    class="w-full bg-white border border-[#f2527d] text-[#f2527d] font-bold py-4 px-4 rounded-xl transition-all duration-300 mb-2 hover:bg-[#f2527d] hover:text-white">
+                                    <div class="relative flex items-center justify-center">
+                                        <i class="bi bi-save mr-2"></i>
+                                        <span>Simpan Draft</span>
+                                    </div>
+                                </button>
                                 <button type="button" id="addToMainCartBtn"
-                                    class="w-full bg-[#f25270] text-white font-bold py-4 px-4 rounded-xl transition-all duration-300"
+                                    class="w-full bg-[#f25270] text-white font-bold py-4 px-4 rounded-xl transition-all duration-300 mb-2"
                                     disabled>
-                                    {{-- <div
-                                        class="absolute inset-0 bg-white opacity-0 group-hover:opacity-10 transition-opacity duration-300">
-                                    </div> --}}
                                     <div class="relative flex items-center justify-center">
                                         <span class="text-xl mr-2">🛒</span>
                                         <span>Tambah ke Keranjang Utama</span>
                                     </div>
                                 </button>
-
                                 <div class="flex justify-center">
                                     <button type="button" id="clearBuilderBtn"
-                                        class="bg-gray-100 hover:bg-gray-200 text-gray-600 hover:text-gray-800 font-medium py-2 px-4 rounded-lg transition-all duration-200 text-sm">
+                                        class="bg-gray-100 hover:bg-gray-200 text-gray-600 hover:text-gray-800 font-medium py-2 px-4 rounded-lg transition-colors duration-200 text-sm">
                                         🗑️ Kosongkan Item
                                     </button>
                                 </div>
@@ -1615,6 +1932,31 @@
                 e.preventDefault();
                 clearBuilder();
             });
+            document.getElementById('saveDraftBtn').addEventListener('click', function (e) {
+                e.preventDefault();
+                saveDraft();
+            });
+        }
+
+        async function saveDraft() {
+            // Kirim permintaan simpan draft ke backend (misal PATCH/POST ke /custom-bouquet/{id}/save-draft)
+            try {
+                const response = await fetch(`/custom-bouquet/${currentCustomBouquetId}/save-draft`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': csrfToken,
+                    },
+                    body: JSON.stringify({}),
+                });
+                if (response.ok) {
+                    showNotification('Draft berhasil disimpan!', 'success');
+                } else {
+                    showNotification('Gagal menyimpan draft.', 'error');
+                }
+            } catch (error) {
+                showNotification('Terjadi kesalahan saat menyimpan draft.', 'error');
+            }
         }
 
         async function openProductModal(productId) {

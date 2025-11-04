@@ -20,6 +20,80 @@ class DashboardController extends Controller
 {
     public function index(Request $request)
     {
+        // --- FILTER RANGE UNTUK HEATMAP ---
+        $orderTimeRange = $request->input('order_time_range', '30d'); // default 30 hari
+        if ($orderTimeRange === '1d') {
+            $startHeatmap = now()->startOfDay();
+        } elseif ($orderTimeRange === '7d') {
+            $startHeatmap = now()->subDays(6)->startOfDay();
+        } else {
+            $startHeatmap = now()->subDays(29)->startOfDay();
+        }
+        $endHeatmap = now()->endOfDay();
+
+        // --- DATA HEATMAP WAKTU PEMESANAN TERBANYAK PER HARI DAN JAM ---
+        $orderTimeData = DB::table('public_orders')
+            ->selectRaw('DAYOFWEEK(created_at) as day_of_week, HOUR(created_at) as hour, COUNT(*) as total')
+            ->whereIn('status', ['pending', 'confirmed', 'processing', 'ready', 'completed'])
+            ->whereBetween('created_at', [$startHeatmap, $endHeatmap])
+            ->groupBy('day_of_week', 'hour')
+            ->get();
+
+        // --- DATA HEATMAP WAKTU BELI LANGSUNG KE TOKO (SALES) ---
+        $directSaleTimeData = DB::table('sales')
+            ->selectRaw('DAYOFWEEK(created_at) as day_of_week, HOUR(created_at) as hour, COUNT(*) as total')
+            ->whereNull('deleted_at')
+            ->whereBetween('created_at', [$startHeatmap, $endHeatmap])
+            ->groupBy('day_of_week', 'hour')
+            ->get();
+
+        // Siapkan label hari dan jam
+        $days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', "Jum'at", 'Sabtu'];
+        $hours = range(7, 21); // jam operasional 07:00 - 21:00
+
+        // Inisialisasi array heatmap (jam x hari)
+        $heatmapData = [];
+        foreach ($hours as $hour) {
+            $row = [];
+            foreach (range(1, 7) as $day) { // 1=minggu, 2=senin, dst (DAYOFWEEK)
+                $found = $orderTimeData->first(function ($item) use ($day, $hour) {
+                    return $item->day_of_week == $day && $item->hour == $hour;
+                });
+                $row[] = $found ? $found->total : 0;
+            }
+            $heatmapData[] = $row;
+        }
+
+        // Inisialisasi array heatmap untuk direct sales (jam x hari)
+        $directSaleHeatmapData = [];
+        foreach ($hours as $hour) {
+            $row = [];
+            foreach (range(1, 7) as $day) {
+                $found = $directSaleTimeData->first(function ($item) use ($day, $hour) {
+                    return $item->day_of_week == $day && $item->hour == $hour;
+                });
+                $row[] = $found ? $found->total : 0;
+            }
+            $directSaleHeatmapData[] = $row;
+        }
+
+        // Data untuk Chart.js heatmap: { labels: [jam], datasets: [{ label: hari, data: [jumlah] }] }
+        $orderTimeHeatmap = [
+            'labels' => array_map(function ($h) {
+                return sprintf('%02d:00', $h);
+            }, $hours),
+            'days' => $days,
+            'data' => $heatmapData, // [ [minggu, senin, ...], ...per jam ]
+        ];
+
+        // Data heatmap untuk pembelian langsung ke toko
+        $directSaleTimeHeatmap = [
+            'labels' => array_map(function ($h) {
+                return sprintf('%02d:00', $h);
+            }, $hours),
+            'days' => $days,
+            'data' => $directSaleHeatmapData,
+        ];
         // Bouquet Ready Stock & Performance
         $bouquetReadyStock = \App\Models\Bouquet::with(['category'])
             ->whereHas('components', function ($q) {
@@ -29,12 +103,13 @@ class DashboardController extends Controller
             })
             ->get();
 
-        // Hitung total penjualan untuk setiap bouquet dari public_order_items
+        // Hitung total penjualan untuk setiap bouquet dari public_order_items (ALL TIME, tanpa filter tanggal)
         foreach ($bouquetReadyStock as $bouquet) {
-            $soldCount = \App\Models\PublicOrderItem::where('item_type', 'bouquet')
+            $soldPublicOrder = \App\Models\PublicOrderItem::where('item_type', 'bouquet')
                 ->where('bouquet_id', $bouquet->id)
                 ->sum('quantity');
-            $bouquet->total_sold = $soldCount;
+            $bouquet->total_sold = $soldPublicOrder;
+            $bouquet->sold_detail_string = $soldPublicOrder . ' item terjual';
         }
 
         // Urutkan bouquetReadyStock berdasarkan total_sold (terlaris)
@@ -342,33 +417,56 @@ class DashboardController extends Controller
         $saldoBersih = $totalPendapatanToko + $inflowLain - $totalOutflow;
 
 
-        // Produk ready stock (stok > 0), urutkan berdasarkan total_sold (terlaris)
+
+        // Produk ready stock (stok > 0), urutkan berdasarkan kategori custom order
+        $categoryOrder = [
+            'fresh flowers',
+            'daun',
+            'artifisial',
+            'aksesoris',
+        ];
         $readyProducts = Product::with(['category', 'prices'])
             ->where('current_stock', '>', 0)
             ->get();
 
-        // Hitung penjualan untuk setiap produk
+        // Hitung penjualan untuk setiap produk berdasarkan inventory_logs (ALL TIME, breakdown sale & public order)
         foreach ($readyProducts as $product) {
-            // Hitung total penjualan dari sale_items
-            $soldInSales = DB::table('sale_items')
-                ->join('sales', 'sales.id', '=', 'sale_items.sale_id')
-                ->where('sale_items.product_id', $product->id)
-                ->whereNull('sales.deleted_at')
-                ->sum('sale_items.quantity');
-
-            // Hitung total penjualan dari public_orders
-            $soldInOrders = DB::table('public_order_items')
-                ->join('public_orders', 'public_orders.id', '=', 'public_order_items.public_order_id')
-                ->where('public_order_items.product_id', $product->id)
-                ->whereIn('public_orders.status', ['completed', 'delivered'])
-                ->sum('public_order_items.quantity');
-
-            $totalSold = $soldInSales + $soldInOrders;
-            $product->total_sold = $totalSold;
+            // Sale
+            $keluar_sale = InventoryLog::where('product_id', $product->id)
+                ->where('qty', '<', 0)
+                ->where('source', InventoryLog::SOURCE_SALE)
+                ->sum('qty');
+            // Public Order (semua tipe)
+            $publicOrderSources = [
+                InventoryLog::SOURCE_PUBLIC_ORDER_PRODUCT,
+                InventoryLog::SOURCE_PUBLIC_ORDER_BOUQUET,
+                InventoryLog::SOURCE_PUBLIC_ORDER_CUSTOM,
+                InventoryLog::SOURCE_PUBLIC_ORDER_HOLD,
+                InventoryLog::SOURCE_PUBLIC_ORDER_BOUQUET_HOLD,
+                InventoryLog::SOURCE_PUBLIC_ORDER_CUSTOM_HOLD,
+            ];
+            $keluar_public_order = InventoryLog::where('product_id', $product->id)
+                ->where('qty', '<', 0)
+                ->whereIn('source', $publicOrderSources)
+                ->sum('qty');
+            $totalQtySold = abs($keluar_sale) + abs($keluar_public_order);
+            $product->total_sold = $totalQtySold;
+            $product->sold_detail_string = $totalQtySold . ' ' . ($product->base_unit ?? 'pcs') . ' terjual';
+            $product->sold_sale = abs($keluar_sale);
+            $product->sold_public_order = abs($keluar_public_order);
         }
 
-        // Urutkan readyProducts berdasarkan total_sold (terlaris)
-        $readyProducts = $readyProducts->sortByDesc('total_sold')->values();
+        // Urutkan readyProducts: kategori custom, lalu total_sold DESC dalam kategori
+        // Urutkan: kategori custom, lalu total_sold DESC dalam kategori
+        $readyProducts = $readyProducts
+            ->sortBy(function ($product) use ($categoryOrder) {
+                $catName = strtolower($product->category->name ?? '');
+                $idx = array_search($catName, $categoryOrder);
+                $catOrder = $idx !== false ? $idx : 999;
+                // -total_sold agar descending
+                return [$catOrder, -1 * (int)$product->total_sold];
+            })
+            ->values();
 
         // Data untuk Performa Produk (berdasarkan kategori)
         $productPerformance = DB::table('categories')
@@ -485,25 +583,8 @@ class DashboardController extends Controller
         //     'bouquet_order_items_sample' => BouquetOrderItem::with(['bouquet.category'])->take(5)->get()
         // ]);
 
-        // Hitung penjualan untuk setiap produk
-        foreach ($readyProducts as $product) {
-            // Hitung total penjualan dari sale_items
-            $soldInSales = DB::table('sale_items')
-                ->join('sales', 'sales.id', '=', 'sale_items.sale_id')
-                ->where('sale_items.product_id', $product->id)
-                ->whereNull('sales.deleted_at')
-                ->sum('sale_items.quantity');
+        // (Perulangan ini dihapus, gunakan hasil parsing log inventaris saja)
 
-            // Hitung total penjualan dari public_orders
-            $soldInOrders = DB::table('public_order_items')
-                ->join('public_orders', 'public_orders.id', '=', 'public_order_items.public_order_id')
-                ->where('public_order_items.product_id', $product->id)
-                ->whereIn('public_orders.status', ['completed', 'delivered'])
-                ->sum('public_order_items.quantity');
-
-            $totalSold = $soldInSales + $soldInOrders;
-            $product->total_sold = $totalSold;
-        }
 
         $data = compact(
             'user',
@@ -526,7 +607,10 @@ class DashboardController extends Controller
             'inflowLain',
             'totalOutflow',
             'saldoBersih',
-            'yearlyRevenueChartData'
+            'yearlyRevenueChartData',
+            'orderTimeHeatmap',
+            'directSaleTimeHeatmap',
+            'orderTimeRange'
         );
 
         // Selalu arahkan ke dashboard utama

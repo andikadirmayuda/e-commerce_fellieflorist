@@ -272,78 +272,11 @@
                 }
             }
 
-            function checkNotifications() {
-                fetch('/api/admin/notifications/pending', {
-                    headers: {
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                        'Accept': 'application/json'
-                    },
-                    credentials: 'same-origin'
-                })
-                    .then(response => {
-                        if (!response.ok) {
-                            throw new Error('Network response was not ok');
-                        }
-                        return response.json();
-                    })
-                    .then(notifications => {
-                        if (!Array.isArray(notifications)) {
-                            console.error('Unexpected response format:', notifications);
-                            return;
-                        }
-                        // Update badge dengan jumlah notifikasi
-                        updateNotificationBadge(notifications.length);
-
-                        // Jika ada notifikasi baru dan browser mendukung
-                        if (notifications.length > 0 && 'Notification' in window && Notification.permission === 'granted') {
-                            notifications.forEach(notification => {
-                                // Cek apakah notifikasi ini sudah ditampilkan sebelumnya
-                                const shown = localStorage.getItem(`notification-${notification.id}`);
-                                if (!shown) {
-                                    // Tampilkan notifikasi browser
-                                    new Notification(notification.message.title, {
-                                        body: notification.message.body,
-                                        icon: '/logo-fellie-florist.png'
-                                    });
-                                    // Tandai notifikasi ini sudah ditampilkan
-                                    localStorage.setItem(`notification-${notification.id}`, 'true');
-                                    // Mark as delivered di server
-                                    fetch(`/api/admin/notifications/${notification.id}/delivered`, {
-                                        method: 'POST',
-                                        headers: {
-                                            'Content-Type': 'application/json',
-                                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-                                        }
-                                    });
-                                }
-                            });
-                        }
-                    })
-                    .catch(error => console.error('Error checking notifications:', error));
-            }
-
-            // Inisialisasi sistem notifikasi
-            document.addEventListener('DOMContentLoaded', function () {
-                // Request permission untuk notifikasi browser
-                if ('Notification' in window && Notification.permission === 'default') {
-                    Notification.requestPermission();
-                }
-
-                // Setup bell click handler
-                const bell = document.getElementById('notification-bell');
-                if (bell) {
-                    bell.addEventListener('click', function () {
-                        window.location.href = '{{ route("admin.public-orders.index") }}';
-                    });
-                }
-
-                // Mulai checking notifications
-                checkNotifications();
-                setInterval(checkNotifications, 10000); // Check setiap 10 detik
-            });
+            // ...existing code...
         </script>
 
-        @stack('scripts')
+</body>
+@stack('scripts')
 </body>
 
 </html>

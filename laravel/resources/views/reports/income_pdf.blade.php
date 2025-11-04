@@ -156,7 +156,7 @@
 
     <!-- Summary Cards -->
     <div class="summary">
-        <div class="summary-grid">
+        <div class="summary-grid" style="grid-template-columns: repeat(7, 1fr);">
             <div class="summary-card">
                 <h3 class="currency">Rp{{ number_format($totalPenjualan, 0, ',', '.') }}</h3>
                 <p>Total Penjualan Langsung</p>
@@ -165,10 +165,26 @@
                 <h3 class="currency">Rp{{ number_format($totalPemesanan, 0, ',', '.') }}</h3>
                 <p>Total Pemesanan Online</p>
             </div>
-            <div class="summary-card total">
-                <h3 class="currency">Rp{{ number_format($totalPendapatan, 0, ',', '.') }}</h3>
-                <p>Total Pendapatan</p>
+            <div class="summary-card">
+                <h3 class="currency">Rp{{ number_format(($totalPenjualan ?? 0) + ($totalPemesanan ?? 0), 0, ',', '.') }}</h3>
+                <p>Total Pendapatan Real (Penjualan + Pemesanan)</p>
             </div>
+            <div class="summary-card">
+                <h3 class="currency">Rp{{ number_format($totalInflow ?? 0, 0, ',', '.') }}</h3>
+                <p>Pemasukan Cash Flow</p>
+            </div>
+            <div class="summary-card">
+                <h3 class="currency">Rp{{ number_format($totalOutflow ?? 0, 0, ',', '.') }}</h3>
+                <p>Pengeluaran Cash Flow</p>
+            </div>
+            <div class="summary-card total">
+                <h3 class="currency">Rp{{ number_format($totalPendapatan ?? 0, 0, ',', '.') }}</h3>
+                <p>Total Pendapatan (Gabungan)</p>
+            </div>
+            {{-- <div class="summary-card">
+                <h3 class="currency">Rp{{ number_format(($totalInflow ?? 0) - ($totalOutflow ?? 0), 0, ',', '.') }}</h3>
+                <p>Total Cash Flow Keseluruhan</p>
+            </div> --}}
         </div>
     </div>
 
@@ -184,10 +200,11 @@
             </tr>
         </thead>
         <tbody>
-            @php $grandTotalPenjualanHarian = 0; $grandTotalPemesananHarian = 0; @endphp
+            @php $grandTotalPenjualanHarian = 0;
+            $grandTotalPemesananHarian = 0; @endphp
             @forelse($harian as $tgl => $row)
                 @php 
-                    $grandTotalPenjualanHarian += $row['penjualan']; 
+                                    $grandTotalPenjualanHarian += $row['penjualan'];
                     $grandTotalPemesananHarian += $row['pemesanan']; 
                 @endphp
                 <tr>

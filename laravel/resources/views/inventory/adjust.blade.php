@@ -270,7 +270,7 @@
                         </label>
                         <textarea id="notes" name="notes" rows="4"
                             class="w-full px-4 py-3 border border-pink-200 rounded-xl input-focus focus:outline-none"
-                            placeholder="Masukkan alasan atau catatan untuk penyesuaian stok ini...">{{ old('notes') }}</textarea>
+                            placeholder="Masukkan alasan atau catatan untuk penyesuaian stok ini...">{{ old('notes', 'Penyesuaian Stok Yang Ada') }}</textarea>
                         <p class="text-xs text-gray-500 mt-1">Opsional - catatan akan membantu tracking perubahan stok
                         </p>
                     </div>

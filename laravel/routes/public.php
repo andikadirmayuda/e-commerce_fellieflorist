@@ -28,6 +28,22 @@ Route::post('/custom-bouquet/upload-reference', [CustomBouquetController::class,
 Route::post('/custom-bouquet/{id}/finalize', [CustomBouquetController::class, 'finalize'])->name('custom.bouquet.finalize');
 Route::post('/custom-bouquet/{customBouquet}/add-to-cart', [CustomBouquetController::class, 'addToCart'])->name('custom.bouquet.add-to-cart');
 
+// Simpan draft custom bouquet
+Route::post('/custom-bouquet/{id}/save-draft', [CustomBouquetController::class, 'saveDraft'])->name('custom.bouquet.save-draft');
+
+// Daftar draft custom bouquet
+Route::get('/custom-bouquet/drafts', [CustomBouquetController::class, 'drafts'])->name('custom.bouquet.drafts');
+
+// Public: Daftar draft custom bouquet (tanpa login)
+// Route::get('/public/custom-bouquet/drafts', [App\Http\Controllers\CustomBouquetController::class, 'publicDrafts'])->name('public.custom.bouquet.drafts');
+Route::get('/public/custom-bouquet/drafts', [App\Http\Controllers\CustomBouquetController::class, 'publicDrafts'])->name('public.custom.bouquet.drafts');
+
+Route::delete('/custom-bouquet/draft/{draft_id}', [CustomBouquetController::class, 'deleteDraft'])->name('custom.bouquet.deleteDraft');
+
+// Bulk delete custom bouquet drafts
+Route::delete('/custom-bouquet/drafts/bulk-delete', [CustomBouquetController::class, 'bulkDelete'])->name('custom.bouquet.bulkDelete');
+
+
 // Public order detail only (view only)
 Route::get('/public-order/{public_code}', [PublicOrderController::class, 'show'])->name('public.order.show');
 

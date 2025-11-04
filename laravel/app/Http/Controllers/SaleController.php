@@ -14,6 +14,17 @@ use Illuminate\Support\Facades\Auth;
 
 class SaleController extends Controller
 {
+    // Update nomor WhatsApp untuk transaksi
+    public function updateWaNumber(Request $request, $id)
+    {
+        $request->validate([
+            'wa_number' => 'nullable|string|max:30',
+        ]);
+        $sale = Sale::findOrFail($id);
+        $sale->wa_number = $request->wa_number;
+        $sale->save();
+        return redirect()->route('sales.show', $sale->id)->with('success', 'Nomor WhatsApp berhasil diupdate!');
+    }
     public function index()
     {
         $sales = Sale::active()->latest()->paginate(20);
@@ -78,7 +89,10 @@ class SaleController extends Controller
             $total = $subtotal; // Bisa ditambah diskon/pajak jika perlu
 
             // Generate kode unik public_code
-            $public_code = bin2hex(random_bytes(8));
+            // Generate kode unik public_code format SALE-XXXXXX (6 digit angka random)
+            do {
+                $public_code = 'SALE-' . str_pad(strval(random_int(0, 999999)), 6, '0', STR_PAD_LEFT);
+            } while (Sale::where('public_code', $public_code)->exists());
 
             $cash_given = null;
             $change = null;

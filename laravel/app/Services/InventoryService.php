@@ -10,8 +10,29 @@ use App\Models\ProductPrice;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
+
 class InventoryService
 {
+
+    /**
+     * Tambah stok masuk dari form input stok masuk
+     */
+    public function addStock(Product $product, int $qty, string $unit, string $date, ?string $notes = null): InventoryLog
+    {
+        // Gabungkan satuan ke notes jika diisi
+        $finalNotes = $notes;
+        if ($unit) {
+            $finalNotes = trim(($notes ? $notes . ' | ' : '') . 'Satuan: ' . $unit);
+        }
+        // Gunakan source 'purchase' untuk stok masuk
+        $log = $product->addStock(
+            quantity: $qty,
+            source: InventoryLog::SOURCE_PURCHASE,
+            referenceId: 'IN-' . time(),
+            notes: $finalNotes
+        );
+        return $log;
+    }
     /**
      * Get inventory movement history for a product
      */

@@ -22,7 +22,21 @@
 @endphp
 <tr>
     <td class="px-4 py-2 border">{{ $loop->iteration }}</td>
-    <td class="px-4 py-2 border">{{ $order->id }}</td>
+    {{-- <td class="px-4 py-2 border">{{ $order->id }}</td> --}}
+    @php
+        // Nomor urut harian: [tanggal][urutan_harian_3_digit]
+        $orderDate = \Carbon\Carbon::parse($order->created_at)->format('dmY');
+        // Ambil semua order pada tanggal yang sama, urutkan berdasarkan created_at
+        $ordersToday = \App\Models\PublicOrder::whereDate('created_at', \Carbon\Carbon::parse($order->created_at)->toDateString())
+            ->orderBy('created_at', 'asc')
+            ->pluck('id')
+            ->toArray();
+        $orderIndex = array_search($order->id, $ordersToday);
+        $orderNumberToday = $orderIndex !== false ? $orderIndex + 1 : 1;
+        $orderNumberPadded = str_pad($orderNumberToday, 3, '0', STR_PAD_LEFT);
+        $customOrderNumber = 'ODR-' . $orderDate . $orderNumberPadded;
+    @endphp
+    <td class="px-4 py-2 border font-mono text-black">{{ $customOrderNumber }}</td>
     <td class="px-4 py-2 border">{{ $order->customer_name }}</td>
     <td class="px-4 py-2 border">
         @if(isset($tanggalFormatted) && $tanggalFormatted)
@@ -73,6 +87,9 @@
     @if(auth()->user()->hasRole(['owner', 'admin']))
         <td class="px-4 py-2 border">
             <a href="{{ route('admin.public-orders.show', $order->id) }}" class="text-blue-600 hover:underline">Detail</a>
+            <br>
+            <a href="{{ url('/order/' . $order->public_code) }}" class="text-green-600 hover:underline" target="_blank">Link
+            </a>
         </td>
     @endif
 </tr>

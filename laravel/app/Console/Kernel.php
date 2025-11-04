@@ -10,7 +10,7 @@ class Kernel extends ConsoleKernel
     protected function schedule(Schedule $schedule)
     {
         // ...existing code...        $schedule->command('orders:archive')->daily();
-        
+
         // Jalankan pembersihan riwayat sesuai pengaturan
         $cleanupPeriod = \App\Models\Setting::getValue('history_cleanup_period', 'monthly');
         if ($cleanupPeriod === 'biweekly') {
@@ -19,6 +19,4 @@ class Kernel extends ConsoleKernel
             $schedule->command('orders:cleanup-histories')->monthly();
         }
     }
-
-    // ...existing methods...
 }

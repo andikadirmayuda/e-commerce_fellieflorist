@@ -264,7 +264,51 @@
 
             <!-- Statistik Gabungan Metode Pembayaran (Sale + Order) -->
             <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-                <div class="stats-card p-6 relative overflow-hidden">
+                <!-- Pendapatan Cash Bersih (Sale + Order - Outflow) -->
+                <div class="stats-card p-6 relative overflow-hidden mb-8">
+                    <div class="absolute right-0 top-0 w-32 h-32 opacity-10">
+                        <i class="bi bi-cash-coin text-8xl text-green-700 transform translate-x-8 -translate-y-8"></i>
+                    </div>
+                    <div class="relative">
+                        <div class="flex items-center mb-4">
+                            <div class="p-3 bg-gradient-to-br from-green-700 to-green-500 rounded-xl shadow-lg">
+                                <i class="bi bi-cash-coin text-xl text-white"></i>
+                            </div>
+                            <p class="ml-3 text-sm font-medium text-gray-500">Pendapatan Cash Bersih (Sale + Order -
+                                Outflow)</p>
+                        </div>
+                        <p class="text-2xl font-bold text-gray-800">
+                            Rp{{ number_format(($totalCashSale ?? 0) + ($totalCashOrder ?? 0) - ($totalOutflow ?? 0), 0, ',', '.') }}
+                        </p>
+                        <div class="flex items-center mt-2">
+                            <i class="bi bi-calculator text-xs text-green-700 mr-1"></i>
+                            <p class="text-xs text-gray-500">Cash Sale + Cash Order - Outflow</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Total Cash (Sale + Order) -->
+                <div class="stats-card p-6 relative overflow-hidden mb-8">
+                    <div class="absolute right-0 top-0 w-32 h-32 opacity-10">
+                        <i class="bi bi-cash text-8xl text-green-500 transform translate-x-8 -translate-y-8"></i>
+                    </div>
+                    <div class="relative">
+                        <div class="flex items-center mb-4">
+                            <div class="p-3 bg-gradient-to-br from-green-500 to-green-400 rounded-xl shadow-lg">
+                                <i class="bi bi-cash text-xl text-white"></i>
+                            </div>
+                            <p class="ml-3 text-sm font-medium text-gray-500">Total Cash (Sale + Order)</p>
+                        </div>
+                        <p class="text-2xl font-bold text-gray-800">
+                            Rp{{ number_format(($totalCashSale ?? 0) + ($totalCashOrder ?? 0), 0, ',', '.') }}
+                        </p>
+                        <div class="flex items-center mt-2">
+                            <i class="bi bi-plus-circle text-xs text-green-500 mr-1"></i>
+                            <p class="text-xs text-gray-500">Cash Sale + Cash Order</p>
+                        </div>
+                    </div>
+                </div>
+                {{-- <div class="stats-card p-6 relative overflow-hidden">
                     <div class="absolute right-0 top-0 w-20 h-20 opacity-10">
                         <i class="bi bi-cash text-6xl text-green-500"></i>
                     </div>
@@ -278,7 +322,7 @@
                             Rp{{ number_format($totalCash ?? 0, 0, ',', '.') }}</p>
                         <div class="text-xs text-gray-400 mt-1">(Sale + Order + Inflow - Outflow)</div>
                     </div>
-                </div>
+                </div> --}}
                 <div class="stats-card p-6 relative overflow-hidden">
                     <div class="absolute right-0 top-0 w-20 h-20 opacity-10">
                         <i class="bi bi-bank text-6xl text-blue-500"></i>
@@ -323,6 +367,52 @@
                         <p class="text-xl font-bold text-gray-800">
                             Rp{{ number_format($totalEwallet ?? 0, 0, ',', '.') }}</p>
                         <div class="text-xs text-gray-400 mt-1">(Order + Inflow - Outflow)</div>
+                    </div>
+                </div>
+                <!-- Tambahan: Statistik Cashflow khusus -->
+                <div class="stats-card p-6 relative overflow-hidden">
+                    <div class="absolute right-0 top-0 w-20 h-20 opacity-10">
+                        <i class="bi bi-cash text-6xl text-green-400"></i>
+                    </div>
+                    <div class="relative">
+                        <div class="flex items-center mb-2">
+                            <div class="p-2 bg-green-100 rounded-xl"><i class="bi bi-cash text-lg text-green-600"></i>
+                            </div>
+                            <p class="ml-2 text-sm font-medium text-gray-500">Total Cash dari Cash Flow</p>
+                        </div>
+                        <p class="text-xl font-bold text-gray-800">
+                            Rp{{ number_format($totalCashflowCash ?? 0, 0, ',', '.') }}</p>
+                        <div class="text-xs text-gray-400 mt-1">(Cash Flow saja)</div>
+                    </div>
+                </div>
+                <div class="stats-card p-6 relative overflow-hidden">
+                    <div class="absolute right-0 top-0 w-20 h-20 opacity-10">
+                        <i class="bi bi-bank text-6xl text-blue-400"></i>
+                    </div>
+                    <div class="relative">
+                        <div class="flex items-center mb-2">
+                            <div class="p-2 bg-blue-100 rounded-xl"><i class="bi bi-bank text-lg text-blue-600"></i>
+                            </div>
+                            <p class="ml-2 text-sm font-medium text-gray-500">Total Transfer dari Cash Flow</p>
+                        </div>
+                        <p class="text-xl font-bold text-gray-800">
+                            Rp{{ number_format($totalCashflowTransfer ?? 0, 0, ',', '.') }}</p>
+                        <div class="text-xs text-gray-400 mt-1">(Cash Flow saja)</div>
+                    </div>
+                </div>
+                <div class="stats-card p-6 relative overflow-hidden">
+                    <div class="absolute right-0 top-0 w-20 h-20 opacity-10">
+                        <i class="bi bi-wallet2 text-6xl text-pink-400"></i>
+                    </div>
+                    <div class="relative">
+                        <div class="flex items-center mb-2">
+                            <div class="p-2 bg-pink-100 rounded-xl"><i class="bi bi-wallet2 text-lg text-pink-600"></i>
+                            </div>
+                            <p class="ml-2 text-sm font-medium text-gray-500">Total E-Wallet dari Cash Flow</p>
+                        </div>
+                        <p class="text-xl font-bold text-gray-800">
+                            Rp{{ number_format($totalCashflowEwallet ?? 0, 0, ',', '.') }}</p>
+                        <div class="text-xs text-gray-400 mt-1">(Cash Flow saja)</div>
                     </div>
                 </div>
             </div>
@@ -583,79 +673,81 @@
                 </div>
             </div>
             <!-- Tabel Pendapatan Bulanan -->
-            <div class="section-card p-6">
-                <div class="flex items-center mb-6">
-                    <div class="flex items-center justify-center w-8 h-8 bg-pink-100 rounded-lg mr-3">
-                        <i class="bi bi-calendar-month text-pink-600"></i>
+            @if(auth()->user()->hasRole(['owner']))
+                <div class="section-card p-6">
+                    <div class="flex items-center mb-6">
+                        <div class="flex items-center justify-center w-8 h-8 bg-pink-100 rounded-lg mr-3">
+                            <i class="bi bi-calendar-month text-pink-600"></i>
+                        </div>
+                        <h2 class="text-lg font-semibold text-gray-900">Pendapatan Bulanan</h2>
                     </div>
-                    <h2 class="text-lg font-semibold text-gray-900">Pendapatan Bulanan</h2>
-                </div>
-                <div class="overflow-x-auto">
-                    <table class="min-w-full divide-y divide-gray-200">
-                        <thead class="bg-gray-50">
-                            <tr>
-                                <th
-                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Bulan</th>
-                                <th
-                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Penjualan</th>
-                                <th
-                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Pemesanan</th>
-                                <th
-                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Total</th>
-                            </tr>
-                        </thead>
-                        <tbody class="bg-white divide-y divide-gray-200">
-                            @forelse($bulanan as $bulan => $row)
-                                <tr class="hover:bg-gray-50 transition-colors duration-200">
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <div class="flex items-center">
-                                            <div
-                                                class="flex items-center justify-center w-8 h-8 bg-indigo-100 rounded-lg mr-3">
-                                                <i class="bi bi-calendar-month-fill text-indigo-600 text-sm"></i>
-                                            </div>
-                                            <div class="text-sm font-medium text-gray-900">{{ $bulan }}</div>
-                                        </div>
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <div class="flex items-center">
-                                            <i class="bi bi-shop text-green-500 mr-2"></i>
-                                            <span
-                                                class="text-sm text-gray-900">Rp{{ number_format($row['penjualan'], 0, ',', '.') }}</span>
-                                        </div>
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <div class="flex items-center">
-                                            <i class="bi bi-laptop text-blue-500 mr-2"></i>
-                                            <span
-                                                class="text-sm text-gray-900">Rp{{ number_format($row['pemesanan'], 0, ',', '.') }}</span>
-                                        </div>
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <span
-                                            class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-purple-100 text-purple-800">
-                                            <i class="bi bi-cash-stack mr-1"></i>
-                                            Rp{{ number_format($row['penjualan'] + $row['pemesanan'], 0, ',', '.') }}
-                                        </span>
-                                    </td>
-                                </tr>
-                            @empty
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
                                 <tr>
-                                    <td colspan="4" class="px-6 py-12 text-center">
-                                        <div class="flex flex-col items-center">
-                                            <i class="bi bi-calendar-x text-4xl text-gray-300 mb-4"></i>
-                                            <p class="text-gray-500 text-sm">Tidak ada data pendapatan bulanan</p>
-                                        </div>
-                                    </td>
+                                    <th
+                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Bulan</th>
+                                    <th
+                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Penjualan</th>
+                                    <th
+                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Pemesanan</th>
+                                    <th
+                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Total</th>
                                 </tr>
-                            @endforelse
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                @forelse($bulanan as $bulan => $row)
+                                    <tr class="hover:bg-gray-50 transition-colors duration-200">
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <div class="flex items-center">
+                                                <div
+                                                    class="flex items-center justify-center w-8 h-8 bg-indigo-100 rounded-lg mr-3">
+                                                    <i class="bi bi-calendar-month-fill text-indigo-600 text-sm"></i>
+                                                </div>
+                                                <div class="text-sm font-medium text-gray-900">{{ $bulan }}</div>
+                                            </div>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <div class="flex items-center">
+                                                <i class="bi bi-shop text-green-500 mr-2"></i>
+                                                <span
+                                                    class="text-sm text-gray-900">Rp{{ number_format($row['penjualan'], 0, ',', '.') }}</span>
+                                            </div>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <div class="flex items-center">
+                                                <i class="bi bi-laptop text-blue-500 mr-2"></i>
+                                                <span
+                                                    class="text-sm text-gray-900">Rp{{ number_format($row['pemesanan'], 0, ',', '.') }}</span>
+                                            </div>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <span
+                                                class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-purple-100 text-purple-800">
+                                                <i class="bi bi-cash-stack mr-1"></i>
+                                                Rp{{ number_format($row['penjualan'] + $row['pemesanan'], 0, ',', '.') }}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td colspan="4" class="px-6 py-12 text-center">
+                                            <div class="flex flex-col items-center">
+                                                <i class="bi bi-calendar-x text-4xl text-gray-300 mb-4"></i>
+                                                <p class="text-gray-500 text-sm">Tidak ada data pendapatan bulanan</p>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
-            </div>
+            @endif
         </div>
     </div>
 </x-app-layout>

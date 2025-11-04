@@ -69,14 +69,50 @@
                                     <i class="bi bi-whatsapp text-green-600"></i>
                                 </div>
                                 <div class="flex-1">
-                                    <p class="text-xs font-medium text-gray-500 uppercase tracking-wider">No. WhatsApp
-                                    </p>
-                                    <p class="text-sm font-semibold text-gray-900">{{ $sale->wa_number ?? '-' }}</p>
-                                    @if($sale->wa_number)
-                                        <p class="text-xs text-green-600 mt-1">
-                                            <i class="bi bi-check-circle mr-1"></i>Dapat mengirim link struk
+                                    <div class="flex items-center justify-between">
+                                        <p class="text-xs font-medium text-gray-500 uppercase tracking-wider mb-0">No.
+                                            WhatsApp</p>
+                                        <button type="button" id="editWaBtn"
+                                            class="ml-2 text-xs text-blue-600 hover:underline" onclick="toggleEditWa()">
+                                            <i class="bi bi-pencil-square"></i> Edit
+                                        </button>
+                                    </div>
+                                    <div id="waDisplay" class="mt-1">
+                                        <p class="text-sm font-semibold text-gray-900 mb-0">
+                                            {{ $sale->wa_number ?? '-' }}
                                         </p>
-                                    @endif
+                                        @if($sale->wa_number)
+                                            <p class="text-xs text-green-600 mt-1">
+                                                <i class="bi bi-check-circle mr-1"></i>Dapat mengirim link struk
+                                            </p>
+                                        @endif
+                                    </div>
+                                    <form id="waEditForm" action="{{ route('sales.update-wa-number', $sale->id) }}"
+                                        method="POST" class="hidden mt-2 flex flex-col items-start gap-0">
+                                        @csrf
+                                        <input type="text" name="wa_number" value="{{ $sale->wa_number }}"
+                                            class="form-input px-2 py-1 border border-pink-200 rounded focus:outline-none text-sm w-full max-w-xs"
+                                            placeholder="08xxx atau 62xxx" maxlength="30" required>
+                                        <div class="flex gap-2 mt-2">
+                                            <button type="submit"
+                                                class="inline-flex items-center justify-center px-3 py-1.5 bg-pink-500 hover:bg-pink-600 text-white font-medium rounded-lg shadow-sm transition-all duration-200 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-pink-500 focus:ring-offset-2 text-sm">Simpan</button>
+                                            <button type="button" onclick="toggleEditWa()"
+                                                class="text-xs text-gray-500">Batal</button>
+                                        </div>
+                                    </form>
+                                    <script>
+                                        function toggleEditWa() {
+                                            const form = document.getElementById('waEditForm');
+                                            const display = document.getElementById('waDisplay');
+                                            if (form.classList.contains('hidden')) {
+                                                form.classList.remove('hidden');
+                                                display.classList.add('hidden');
+                                            } else {
+                                                form.classList.add('hidden');
+                                                display.classList.remove('hidden');
+                                            }
+                                        }
+                                    </script>
                                 </div>
                             </div>
                         </div>
@@ -336,11 +372,11 @@
                 notification.className = `fixed top-4 right-4 z-50 px-4 py-3 rounded-lg shadow-lg transform transition-all duration-300 ${type === 'success' ? 'bg-green-100 text-green-800 border border-green-200' : 'bg-red-100 text-red-800 border border-red-200'
                     }`;
                 notification.innerHTML = `
-                                                                                <div class="flex items-center">
-                                                                                    <i class="bi bi-check-circle-fill mr-2"></i>
-                                                                                    <span class="text-sm font-medium">${message}</span>
-                                                                                </div>
-                                                                            `;
+                                                                                                        <div class="flex items-center">
+                                                                                                            <i class="bi bi-check-circle-fill mr-2"></i>
+                                                                                                            <span class="text-sm font-medium">${message}</span>
+                                                                                                        </div>
+                                                                                                    `;
 
                 document.body.appendChild(notification);
 

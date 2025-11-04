@@ -8,10 +8,20 @@
             {{-- @if(!auth()->user()->hasRole('kasir')) --}}
             @if(!auth()->user()->hasRole(['kasir', 'karyawan']))
                 <div class="flex gap-3">
+                    <a href="{{ route('inventory.add.form') }}"
+                        class="bg-pink-500 hover:bg-pink-600 text-white font-bold py-2 px-4 rounded-xl transition-all duration-200">
+                        <i class="bi bi-pencil-square mr-1"></i>
+                        Input Stok Masuk
+                    </a>
                     <a href="{{ route('inventory.adjust.form') }}"
                         class="bg-pink-500 hover:bg-pink-600 text-white font-bold py-2 px-4 rounded-xl transition-all duration-200">
                         <i class="bi bi-pencil-square mr-1"></i>
                         Sesuaikan Stok
+                    </a>
+                    <a href="{{ route('inventory.adjust.damaged.form') }}"
+                        class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-xl transition-all duration-200">
+                        <i class="bi bi-tools mr-1"></i>
+                        Input Stok Rusak
                     </a>
                 </div>
             @endif

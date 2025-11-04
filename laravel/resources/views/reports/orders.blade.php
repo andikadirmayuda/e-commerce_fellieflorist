@@ -104,7 +104,86 @@
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             {{-- @if(auth()->user()->hasRole(['owner'])) --}}
             <!-- Cards Statistik -->
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-8">
+                <!-- Pending Card -->
+                <div class="stats-card p-6 relative overflow-hidden">
+                    <div class="absolute right-0 top-0 w-32 h-32 opacity-10">
+                        <i class="bi bi-hourglass-split text-8xl text-yellow-500 transform translate-x-8 -translate-y-8"></i>
+                    </div>
+                    <div class="relative">
+                        <div class="flex items-center mb-4">
+                            <div class="p-3 bg-gradient-to-br from-yellow-400 to-yellow-500 rounded-xl shadow-lg">
+                                <i class="bi bi-hourglass-split text-xl text-white"></i>
+                            </div>
+                            <p class="ml-3 text-sm font-medium text-gray-500">Pending</p>
+                        </div>
+                        <p class="text-2xl font-bold text-gray-800">{{ $totalPending }}</p>
+                        <div class="flex items-center mt-2">
+                            <i class="bi bi-clock-history text-xs text-yellow-500 mr-1"></i>
+                            <p class="text-xs text-gray-500">Belum diproses</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Processed Card -->
+                <div class="stats-card p-6 relative overflow-hidden">
+                    <div class="absolute right-0 top-0 w-32 h-32 opacity-10">
+                        <i class="bi bi-box-seam text-8xl text-blue-400 transform translate-x-8 -translate-y-8"></i>
+                    </div>
+                    <div class="relative">
+                        <div class="flex items-center mb-4">
+                            <div class="p-3 bg-gradient-to-br from-blue-400 to-blue-500 rounded-xl shadow-lg">
+                                <i class="bi bi-box-seam text-xl text-white"></i>
+                            </div>
+                            <p class="ml-3 text-sm font-medium text-gray-500">Diproses</p>
+                        </div>
+                        <p class="text-2xl font-bold text-gray-800">{{ $totalProcessed }}</p>
+                        <div class="flex items-center mt-2">
+                            <i class="bi bi-arrow-repeat text-xs text-blue-400 mr-1"></i>
+                            <p class="text-xs text-gray-500">Sedang diproses</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Completed Card -->
+                <div class="stats-card p-6 relative overflow-hidden">
+                    <div class="absolute right-0 top-0 w-32 h-32 opacity-10">
+                        <i class="bi bi-check-circle text-8xl text-purple-400 transform translate-x-8 -translate-y-8"></i>
+                    </div>
+                    <div class="relative">
+                        <div class="flex items-center mb-4">
+                            <div class="p-3 bg-gradient-to-br from-purple-400 to-purple-500 rounded-xl shadow-lg">
+                                <i class="bi bi-check-circle text-xl text-white"></i>
+                            </div>
+                            <p class="ml-3 text-sm font-medium text-gray-500">Selesai</p>
+                        </div>
+                        <p class="text-2xl font-bold text-gray-800">{{ $totalCompleted }}</p>
+                        <div class="flex items-center mt-2">
+                            <i class="bi bi-check2-all text-xs text-purple-400 mr-1"></i>
+                            <p class="text-xs text-gray-500">Pesanan selesai</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Cancelled Card -->
+                <div class="stats-card p-6 relative overflow-hidden">
+                    <div class="absolute right-0 top-0 w-32 h-32 opacity-10">
+                        <i class="bi bi-x-circle text-8xl text-red-400 transform translate-x-8 -translate-y-8"></i>
+                    </div>
+                    <div class="relative">
+                        <div class="flex items-center mb-4">
+                            <div class="p-3 bg-gradient-to-br from-red-400 to-red-500 rounded-xl shadow-lg">
+                                <i class="bi bi-x-circle text-xl text-white"></i>
+                            </div>
+                            <p class="ml-3 text-sm font-medium text-gray-500">Dibatalkan</p>
+                        </div>
+                        <p class="text-2xl font-bold text-gray-800">{{ $totalCancelled }}</p>
+                        <div class="flex items-center mt-2">
+                            <i class="bi bi-x-octagon text-xs text-red-400 mr-1"></i>
+                            <p class="text-xs text-gray-500">Pesanan batal</p>
+                        </div>
+                    </div>
+                </div>
                 <!-- Total Pesanan Online Card -->
                 <div class="stats-card p-6 relative overflow-hidden">
                     <div class="absolute right-0 top-0 w-32 h-32 opacity-10">
@@ -244,21 +323,41 @@
             </div>
             @if(auth()->user()->hasRole(['owner']))
                 <!-- Total Nominal Card -->
-                <div class="stats-card w-full mb-6 p-6 relative overflow-hidden">
-                    <div class="absolute right-0 top-0 w-32 h-32 opacity-10">
-                        <i class="bi bi-cash-stack text-8xl text-blue-500 transform translate-x-8 -translate-y-8"></i>
-                    </div>
-                    <div class="relative">
-                        <div class="flex items-center mb-4">
-                            <div class="p-3 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl shadow-lg">
-                                <i class="bi bi-cash-stack text-xl text-white"></i>
-                            </div>
-                            <p class="ml-3 text-sm font-medium text-gray-500">Total Nilai Pesanan</p>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                    <div class="stats-card w-full p-6 relative overflow-hidden">
+                        <div class="absolute right-0 top-0 w-32 h-32 opacity-10">
+                            <i class="bi bi-cash-stack text-8xl text-blue-500 transform translate-x-8 -translate-y-8"></i>
                         </div>
-                        <p class="text-2xl font-bold text-gray-800">Rp{{ number_format($totalNominal, 0, ',', '.') }}</p>
-                        <div class="flex items-center mt-2">
-                            <i class="bi bi-check-circle text-xs text-blue-500 mr-1"></i>
-                            <p class="text-xs text-gray-500">Semua status pesanan</p>
+                        <div class="relative">
+                            <div class="flex items-center mb-4">
+                                <div class="p-3 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl shadow-lg">
+                                    <i class="bi bi-cash-stack text-xl text-white"></i>
+                                </div>
+                                <p class="ml-3 text-sm font-medium text-gray-500">Total Nilai Pesanan</p>
+                            </div>
+                            <p class="text-2xl font-bold text-gray-800">Rp{{ number_format($totalNominal, 0, ',', '.') }}</p>
+                            <div class="flex items-center mt-2">
+                                <i class="bi bi-check-circle text-xs text-blue-500 mr-1"></i>
+                                <p class="text-xs text-gray-500">Semua status pesanan</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="stats-card w-full p-6 relative overflow-hidden">
+                        <div class="absolute right-0 top-0 w-32 h-32 opacity-10">
+                            <i class="bi bi-cash-stack text-8xl text-green-500 transform translate-x-8 -translate-y-8"></i>
+                        </div>
+                        <div class="relative">
+                            <div class="flex items-center mb-4">
+                                <div class="p-3 bg-gradient-to-br from-green-500 to-green-600 rounded-xl shadow-lg">
+                                    <i class="bi bi-cash-stack text-xl text-white"></i>
+                                </div>
+                                <p class="ml-3 text-sm font-medium text-gray-500">Total Nilai Pesanan Selesai/Lunas</p>
+                            </div>
+                            <p class="text-2xl font-bold text-gray-800">Rp{{ number_format($totalNominalLunas, 0, ',', '.') }}</p>
+                            <div class="flex items-center mt-2">
+                                <i class="bi bi-check-circle text-xs text-green-500 mr-1"></i>
+                                <p class="text-xs text-gray-500">Status paid, processed, completed</p>
+                            </div>
                         </div>
                     </div>
                 </div>

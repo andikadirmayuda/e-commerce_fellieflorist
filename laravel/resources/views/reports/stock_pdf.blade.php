@@ -169,10 +169,14 @@
     <table>
         <thead>
             <tr>
+                <th>No</th>
                 <th>Produk</th>
                 <th>Kategori</th>
                 <th class="text-center">Stok Masuk</th>
-                <th class="text-center">Stok Keluar</th>
+                <th class="text-center">Stok Keluar Sale</th>
+                <th class="text-center">Stok Keluar Public Order</th>
+                <th class="text-center">Stok Keluar (Total)</th>
+                <th class="text-center">Stok Rusak</th>
                 <th class="text-center">Penyesuaian</th>
                 <th class="text-center">Stok Akhir</th>
             </tr>
@@ -180,16 +184,20 @@
         <tbody>
             @forelse($products as $product)
                 <tr>
+                    <td class="text-center">{{ $loop->iteration }}</td>
                     <td>{{ $product->name }}</td>
                     <td>{{ $product->category->name ?? '-' }}</td>
                     <td class="text-center">{{ $rekap[$product->id]['masuk'] ?? 0 }}</td>
+                    <td class="text-center">{{ $rekap[$product->id]['keluar_sale'] ?? 0 }}</td>
+                    <td class="text-center">{{ $rekap[$product->id]['keluar_public_order'] ?? 0 }}</td>
                     <td class="text-center">{{ $rekap[$product->id]['keluar'] ?? 0 }}</td>
+                    <td class="text-center">{{ $rekap[$product->id]['keluar_rusak'] ?? 0 }}</td>
                     <td class="text-center">{{ $rekap[$product->id]['penyesuaian'] ?? 0 }}</td>
                     <td class="text-center">{{ $rekap[$product->id]['stok_akhir'] ?? $product->current_stock }}</td>
                 </tr>
             @empty
                 <tr>
-                    <td colspan="6" class="text-center">Tidak ada data produk</td>
+                    <td colspan="10" class="text-center">Tidak ada data produk</td>
                 </tr>
             @endforelse
         </tbody>
@@ -204,7 +212,7 @@
                     <th>Tanggal</th>
                     <th>Produk</th>
                     <th class="text-center">Perubahan</th>
-                    <th>Keterangan</th>
+                    <th>Catatan</th>
                 </tr>
             </thead>
             <tbody>
@@ -213,7 +221,7 @@
                         <td>{{ $log->created_at->format('d/m/Y H:i') }}</td>
                         <td>{{ $log->product->name ?? '-' }}</td>
                         <td class="text-center">{{ $log->qty > 0 ? '+' : '' }}{{ $log->qty }}</td>
-                        <td>{{ $log->description }}</td>
+                        <td>{{ $log->notes ?? '-' }}</td>
                     </tr>
                 @endforeach
             </tbody>

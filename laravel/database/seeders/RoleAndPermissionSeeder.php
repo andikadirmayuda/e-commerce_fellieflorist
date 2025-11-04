@@ -286,6 +286,26 @@ class RoleAndPermissionSeeder extends Seeder
                         // Basic access
                         'view-dashboard'
                     ]
+                ],
+                [
+                    'name' => 'finance',
+                    'display_name' => 'Finance',
+                    'description' => 'Staff keuangan untuk mengelola pembayaran dan laporan keuangan',
+                    'permissions' => [
+                        // Order Management (akses pembayaran)
+                        'view-orders',
+                        'process-payment',
+
+                        // Report Management (fokus keuangan)
+                        'view-reports',
+                        'view-income-report',
+                        'generate-report',
+                        'export-report',
+
+                        // Basic access
+                        'view-dashboard',
+                        'view-notifications'
+                    ]
                 ]
             ];
 

@@ -13,8 +13,7 @@
 </head>
 
 <style>
-
-/* Professional Name Styles */
+    /* Professional Name Styles */
     .professional-name {
         font-weight: 600;
         letter-spacing: 0.5px;
@@ -35,17 +34,19 @@
             border-width: 1px;
         }
     }
+
     .professional-name:hover {
-    background: rgba(255, 255, 255, 0.15);
-    border-color: #58B8AB;
-    box-shadow: 0 0 10px rgba(255,255,255,0.4);
-    transform: translateY(-2px);
-    color: #58B8AB;
-    }
-    .professional-name:hover i {
-        color: #58B8AB; /* hijau soft */
+        background: rgba(255, 255, 255, 0.15);
+        border-color: #58B8AB;
+        box-shadow: 0 0 10px rgba(255, 255, 255, 0.4);
+        transform: translateY(-2px);
+        color: #58B8AB;
     }
 
+    .professional-name:hover i {
+        color: #58B8AB;
+        /* hijau soft */
+    }
 </style>
 <!-- Midtrans Snap JS -->
 <script src="https://app.sandbox.midtrans.com/snap/snap.js"
@@ -73,25 +74,45 @@
                 <p class="text-gray-500 text-xs sm:text-base font-medium">Detail Pemesanan</p>
                 <div class="mt-2 mb-4">
                     <span class="text-sm text-gray-600">Kode Pesanan:</span>
-                    <span class="font-mono font-bold text-lg text-pink-600 bg-pink-50 px-3 py-1 rounded-lg border"style="color:#f25270">{{ $order->public_code }}</span>
+                    <span class="font-mono font-bold text-lg text-pink-600 bg-pink-50 px-3 py-1 rounded-lg border"
+                        style="color:#f25270">{{ $order->public_code }}</span>
+                    <br>
+
+                    <br>
+
+                        @php
+                            // Nomor urut harian: [tanggal][urutan_harian_3_digit]
+                            $orderDate = \Carbon\Carbon::parse($order->created_at)->format('dmY');
+                            // Ambil semua order pada tanggal yang sama, urutkan berdasarkan created_at
+                            $ordersToday = \App\Models\PublicOrder::whereDate('created_at', \Carbon\Carbon::parse($order->created_at)->toDateString())
+                                ->orderBy('created_at', 'asc')
+                                ->pluck('id')
+                                ->toArray();
+                            $orderIndex = array_search($order->id, $ordersToday);
+                            $orderNumberToday = $orderIndex !== false ? $orderIndex + 1 : 1;
+                            $orderNumberPadded = str_pad($orderNumberToday, 3, '0', STR_PAD_LEFT);
+                            $customOrderNumber = 'ODR-'.$orderDate . $orderNumberPadded;
+                        @endphp
+                        <span class="text-xs text-gray-500">No. Urut: </span>
+                        <span class="font-mono font-semibold text-sm text-pink-700 bg-pink-50 px-3 py-1 rounded-lg border">{{ $customOrderNumber }}</span>
                 </div>
             </div>
             <!-- Status Badge -->
             <div class="flex flex-col sm:flex-row gap-2 justify-center items-center mb-6">
                 @php
-$statusIndo = [
-    'pending' => 'Menunggu',
-    'confirmed' => 'Dikonfirmasi',
-    'processing' => 'Diproses',
-    'processed' => 'Diproses',
-    'packing' => 'Sedang Dikemas',
-    'ready' => 'Sudah Siap',
-    'shipping' => 'Dikirim',
-    'shipped' => 'Dikirim',
-    'delivered' => 'Terkirim',
-    'completed' => 'Selesai',
-    'cancelled' => 'Dibatalkan'
-];
+                    $statusIndo = [
+                        'pending' => 'Menunggu',
+                        'confirmed' => 'Dikonfirmasi',
+                        'processing' => 'Diproses',
+                        'processed' => 'Diproses',
+                        'packing' => 'Sedang Dikemas',
+                        'ready' => 'Sudah Siap',
+                        'shipping' => 'Dikirim',
+                        'shipped' => 'Dikirim',
+                        'delivered' => 'Terkirim',
+                        'completed' => 'Selesai',
+                        'cancelled' => 'Dibatalkan'
+                    ];
                 @endphp
                 <span
                     class="inline-flex items-center gap-1 px-3 py-1 rounded-full font-semibold text-white text-xs sm:text-sm shadow"
@@ -99,25 +120,25 @@ $statusIndo = [
                     <i class="bi bi-clipboard-check"></i> {{ $statusIndo[$order->status] ?? ucfirst($order->status) }}
                 </span>
                 @php
-$paymentStatusMap = [
-    'waiting_confirmation' => 'Menunggu Konfirmasi Stok',
-    'ready_to_pay' => 'Siap Dibayar',
-    'waiting_payment' => 'Menunggu Pembayaran',
-    'waiting_verification' => 'Menunggu Verifikasi Pembayaran',
-    'paid' => 'Lunas',
-    'rejected' => 'Pembayaran Ditolak',
-    'cancelled' => 'Dibatalkan',
-];
-$paymentBg = match ($order->payment_status) {
-    'paid' => '#16a34a',
-    'ready_to_pay' => '#f59e42',
-    'waiting_confirmation' => '#64748b',
-    'waiting_payment' => '#f59e42',
-    'waiting_verification' => '#f59e42',
-    'rejected' => '#dc2626',
-    'cancelled' => '#6b7280',
-    default => '#64748b',
-};
+                    $paymentStatusMap = [
+                        'waiting_confirmation' => 'Menunggu Konfirmasi Stok',
+                        'ready_to_pay' => 'Siap Dibayar',
+                        'waiting_payment' => 'Menunggu Pembayaran',
+                        'waiting_verification' => 'Menunggu Verifikasi Pembayaran',
+                        'paid' => 'Lunas',
+                        'rejected' => 'Pembayaran Ditolak',
+                        'cancelled' => 'Dibatalkan',
+                    ];
+                    $paymentBg = match ($order->payment_status) {
+                        'paid' => '#16a34a',
+                        'ready_to_pay' => '#f59e42',
+                        'waiting_confirmation' => '#64748b',
+                        'waiting_payment' => '#f59e42',
+                        'waiting_verification' => '#f59e42',
+                        'rejected' => '#dc2626',
+                        'cancelled' => '#6b7280',
+                        default => '#64748b',
+                    };
                 @endphp
                 <span
                     class="inline-flex items-center gap-1 px-3 py-1 rounded-full font-semibold text-white text-xs sm:text-sm shadow" 
@@ -129,38 +150,38 @@ $paymentBg = match ($order->payment_status) {
             <!-- Stepper Status Responsive Split for Mobile -->
             <div class="w-full mb-8">
                 @php
-// Base steps untuk flow normal pesanan
-$baseSteps = [
-    'pending' => 'Pesanan Diterima',
-    'processing' => 'Diproses',
-    'packing' => 'Dikemas',
-    'ready' => 'Sudah Siap',
-    'shipped' => 'Dikirim',
-    'done' => 'Selesai',
-];
+                    // Base steps untuk flow normal pesanan
+                    $baseSteps = [
+                        'pending' => 'Pesanan Diterima',
+                        'processing' => 'Diproses',
+                        'packing' => 'Dikemas',
+                        'ready' => 'Sudah Siap',
+                        'shipped' => 'Dikirim',
+                        'done' => 'Selesai',
+                    ];
 
-// Tambahkan status dibatalkan hanya jika pesanan dibatalkan
-$steps = $baseSteps;
-if (in_array(strtolower($order->status), ['cancelled', 'canceled'])) {
-    $steps['cancelled'] = 'Dibatalkan';
-}
+                    // Tambahkan status dibatalkan hanya jika pesanan dibatalkan
+                    $steps = $baseSteps;
+                    if (in_array(strtolower($order->status), ['cancelled', 'canceled'])) {
+                        $steps['cancelled'] = 'Dibatalkan';
+                    }
 
-$statusMap = [
-    'pending' => 'pending',
-    'processed' => 'processing',
-    'processing' => 'processing',
-    'packing' => 'packing',
-    'ready' => 'ready',
-    'shipped' => 'shipped',
-    'done' => 'done',
-    'completed' => 'done',
-    'cancelled' => 'cancelled',
-    'canceled' => 'cancelled',
-];
-$currentStatus = strtolower($order->status);
-$currentStatus = $statusMap[$currentStatus] ?? $currentStatus;
-$stepKeys = array_keys($steps);
-$currentIndex = array_search($currentStatus, $stepKeys);
+                    $statusMap = [
+                        'pending' => 'pending',
+                        'processed' => 'processing',
+                        'processing' => 'processing',
+                        'packing' => 'packing',
+                        'ready' => 'ready',
+                        'shipped' => 'shipped',
+                        'done' => 'done',
+                        'completed' => 'done',
+                        'cancelled' => 'cancelled',
+                        'canceled' => 'cancelled',
+                    ];
+                    $currentStatus = strtolower($order->status);
+                    $currentStatus = $statusMap[$currentStatus] ?? $currentStatus;
+                    $stepKeys = array_keys($steps);
+                    $currentIndex = array_search($currentStatus, $stepKeys);
                 @endphp
                 <!-- Mobile: 2 rows, Desktop: 1 row -->
                 @php 
@@ -198,8 +219,8 @@ $currentIndex = array_search($currentStatus, $stepKeys);
                 @endif
                 <div class="flex flex-col gap-1 sm:hidden">
                     @php 
-                                                $stepCount = count($steps);
-$isCancelled = in_array(strtolower($order->status), ['cancelled', 'canceled']);
+                                                                        $stepCount = count($steps);
+                        $isCancelled = in_array(strtolower($order->status), ['cancelled', 'canceled']);
                     @endphp
                     
                     @if($isCancelled)
@@ -280,13 +301,13 @@ $isCancelled = in_array(strtolower($order->status), ['cancelled', 'canceled']);
                             <span class="text-gray-500">Waktu Ambil/Pengiriman</span><br>
                             <span class="font-bold text-gray-800 break-words">{{ $order->pickup_time }}</span>
                             @php
-$hour = (int) substr($order->pickup_time, 0, 2);
-$timeOfDay = match (true) {
-    $hour >= 5 && $hour < 11 => 'Pagi',
-    $hour >= 11 && $hour < 15 => 'Siang',
-    $hour >= 15 && $hour < 18 => 'Sore',
-    default => 'Malam'
-};
+                                $hour = (int) substr($order->pickup_time, 0, 2);
+                                $timeOfDay = match (true) {
+                                    $hour >= 5 && $hour < 11 => 'Pagi',
+                                    $hour >= 11 && $hour < 15 => 'Siang',
+                                    $hour >= 15 && $hour < 18 => 'Sore',
+                                    default => 'Malam'
+                                };
                             @endphp
                             <span class="text-sm text-blue-600 ml-2">({{ $timeOfDay }})</span>
                         </div>
@@ -302,8 +323,10 @@ $timeOfDay = match (true) {
                             <div class="text-center font-bold text-red-600 text-xs sm:text-base mb-1 sm:mb-2"
                             >Informasi Penting !!!</div>
                             <div class="text-xs sm:text-sm text-gray-700 leading-relaxed text-center break-words">
-                                {{ $order->info ?? 'Harap membaca seluruh informasi dengan saksama.
-                            Jika Anda memiliki pertanyaan, jangan ragu untuk menghubungi kami. 😊🙏' }}
+                                {{ $order->info ?? 'Semua pesanan diproses berdasarkan nomor urut.
+Pesanan dengan nomor urut lebih awal akan diprioritaskan terlebih dahulu.
+Waktu pengerjaan dapat berbeda tergantung jenis dan jumlah pesanan yang masuk.
+Mohon kesabaran dan pengertian Anda, Dan jika ada pertanyaan silahkan hubungi kami.😊🙏' }}
                             </div>
                         </div>
                     </div>
@@ -312,67 +335,67 @@ $timeOfDay = match (true) {
             
             <!-- Catatan Pesanan -->
             @if(!empty($order->notes))
-                                <div class="mb-4 sm:mb-6">
-                                    <div class="bg-gradient-to-br from-blue-50 via-indigo-50 to-blue-100 border border-blue-200 rounded-lg sm:rounded-xl shadow-sm overflow-hidden">
-                                        <!-- Header -->
-                                        <div class="bg-gradient-to-r from-blue-500 to-indigo-600 px-3 sm:px-6 py-2 sm:py-3" style="background:#f25270">
-                                            <div class="flex items-center">
-                                                <div class="flex items-center justify-center w-6 h-6 sm:w-8 sm:h-8 bg-white bg-opacity-20 rounded-full mr-2 sm:mr-3">
-                                                    <i class="bi bi-chat-left-text text-white text-xs sm:text-sm"></i>
-                                                </div>
-                                                <h3 class="font-bold text-white text-sm sm:text-base lg:text-lg">Catatan Pesanan</h3>
-                                            </div>
-                                        </div>
-                                        <!-- Content -->
-                                            <div class="p-3 sm:p-4 lg:p-6">
-    <div class="bg-white rounded-lg p-3 sm:p-4 lg:p-5 border border-gray-100 shadow-sm">
-        <div class="items-start">
-            <div class="min-w-0">
-                <div class="text-gray-800 text-xs sm:text-sm lg:text-base leading-relaxed whitespace-pre-wrap break-words break-all font-medium italic text-left">
-                    {{ $order->notes }}
+                                                <div class="mb-4 sm:mb-6">
+                                                    <div class="bg-gradient-to-br from-blue-50 via-indigo-50 to-blue-100 border border-blue-200 rounded-lg sm:rounded-xl shadow-sm overflow-hidden">
+                                                        <!-- Header -->
+                                                        <div class="bg-gradient-to-r from-blue-500 to-indigo-600 px-3 sm:px-6 py-2 sm:py-3" style="background:#f25270">
+                                                            <div class="flex items-center">
+                                                                <div class="flex items-center justify-center w-6 h-6 sm:w-8 sm:h-8 bg-white bg-opacity-20 rounded-full mr-2 sm:mr-3">
+                                                                    <i class="bi bi-chat-left-text text-white text-xs sm:text-sm"></i>
+                                                                </div>
+                                                                <h3 class="font-bold text-white text-sm sm:text-base lg:text-lg">Catatan Pesanan</h3>
+                                                            </div>
+                                                        </div>
+                                                        <!-- Content -->
+                                                            <div class="p-3 sm:p-4 lg:p-6">
+                    <div class="bg-white rounded-lg p-3 sm:p-4 lg:p-5 border border-gray-100 shadow-sm">
+                        <div class="items-start">
+                            <div class="min-w-0">
+                                <div class="text-gray-800 text-xs sm:text-sm lg:text-base leading-relaxed whitespace-pre-wrap break-words break-all font-medium italic text-left">
+                                    {{ $order->notes }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-            </div>
-        </div>
-    </div>
-</div>
 
-                                        </div>
-                                    </div>
-                                @endif
+                                                        </div>
+                                                    </div>
+            @endif
             
             <h2 class="text-base sm:text-lg font-semibold mb-4 mt-2 flex items-center gap-2">
                 <i class="bi bi-box-seam"></i> Produk Dipesan
             </h2>
             
             @php 
-                                $itemsTotal = 0;
-// Calculate totals from items only
-foreach ($order->items as $item) {
-    $subtotal = ($item->price ?? 0) * ($item->quantity ?? 0);
-    $itemsTotal += $subtotal;
-}
+                                                $itemsTotal = 0;
+                // Calculate totals from items only
+                foreach ($order->items as $item) {
+                    $subtotal = ($item->price ?? 0) * ($item->quantity ?? 0);
+                    $itemsTotal += $subtotal;
+                }
 
-// Check if delivery method needs shipping fee
-$needsShippingFee = in_array($order->delivery_method, [
-    'Gosend (Pesan Dari Toko)',
-    'Gocar (Pesan Dari Toko)'
-]);
+                // Check if delivery method needs shipping fee
+                $needsShippingFee = in_array($order->delivery_method, [
+                    'Gosend (Pesan Dari Toko)',
+                    'Gocar (Pesan Dari Toko)'
+                ]);
 
-// Check if admin has set shipping fee
-$shippingFee = $order->shipping_fee ?? 0;
-$shippingFeeSet = $shippingFee > 0;
+                // Check if admin has set shipping fee
+                $shippingFee = $order->shipping_fee ?? 0;
+                $shippingFeeSet = $shippingFee > 0;
 
-// Determine if we should show grand total
-$showGrandTotal = !$needsShippingFee || $shippingFeeSet;
+                // Determine if we should show grand total
+                $showGrandTotal = !$needsShippingFee || $shippingFeeSet;
 
-// Calculate grand total with voucher discount
-$voucherAmount = $order->voucher_amount ?? 0;
-$grandTotal = ($itemsTotal - $voucherAmount) + $shippingFee;
+                // Calculate grand total with voucher discount
+                $voucherAmount = $order->voucher_amount ?? 0;
+                $grandTotal = ($itemsTotal - $voucherAmount) + $shippingFee;
 
-// Payment calculations
-$totalPaid = $order->amount_paid ?? 0;
-$sisa = $order->payment_status === 'paid' ? 0 : max($grandTotal - $totalPaid, 0);
-$displayTotalPaid = $order->payment_status === 'paid' ? $grandTotal : $totalPaid;
+                // Payment calculations
+                $totalPaid = $order->amount_paid ?? 0;
+                $sisa = $order->payment_status === 'paid' ? 0 : max($grandTotal - $totalPaid, 0);
+                $displayTotalPaid = $order->payment_status === 'paid' ? $grandTotal : $totalPaid;
             @endphp
 
             <!-- Desktop: Table Layout -->
@@ -390,118 +413,118 @@ $displayTotalPaid = $order->payment_status === 'paid' ? $grandTotal : $totalPaid
                     </thead>
                     <tbody class="divide-y">
                         @foreach($order->items as $item)
-                                                    @php 
-                                                        $subtotal = ($item->price ?? 0) * ($item->quantity ?? 0);
-    $cleanName = preg_replace('/\s*\(Komponen:.*?\)\s*/', '', $item->product_name);
-    $cleanName = trim($cleanName) ?: $item->product_name;
-                                                    @endphp
-                                                    <tr>
-                                                        <td class="py-3 px-4 break-words whitespace-pre-wrap align-top">{{ $cleanName }}</td>
-                                                        <td class="py-3 px-4 break-words whitespace-normal align-top">
-                                                            @php
-    $priceType = $item->price_type ?? '-';
-    if (Str::startsWith($priceType, 'ikat_')) {
-        $jumlah = (int) str_replace('ikat_', '', $priceType);
-        echo 'Per Ikat (isi ' . $jumlah . ' Tangkai)';
-    } else {
-        echo $priceType;
-    }
-                                                            @endphp
-                                                        </td>
-                                                        <td class="py-3 px-4 text-right align-top whitespace-nowrap">Rp{{ number_format($item->price ?? 0, 0, ',', '.') }}</td>
-                                                        <td class="py-3 px-4 text-right align-top whitespace-nowrap">{{ $item->unit_equivalent ?? '-' }}</td>
-                                                        <td class="py-3 px-4 text-right align-top whitespace-nowrap">{{ $item->quantity }}</td>
-                                                        <td class="py-3 px-4 text-right align-top whitespace-nowrap">Rp{{ number_format($subtotal, 0, ',', '.') }}</td>
-                                                    </tr>
-                                                    @if(!empty($item->greeting_card))
-                                                        <tr>
-                                                            <td colspan="6" class="px-4 py-2">
-                                                                <div class="mt-2 p-2 bg-pink-50 border border-pink-200 rounded-lg">
-                                                                    <div class="flex items-start">
-                                                                        <i class="bi bi-card-text text-pink-400 mr-2"></i>
-                                                                        <div class="text-sm text-pink-700 italic leading-relaxed break-words" style="word-break: break-all;">
-                                                                            <strong>Kartu Ucapan: </strong> {{ $item->greeting_card }}
-                                                                        </div>
-                                                                    </div>
-                                                                </div>
-                                                            </td>
-                                                        </tr>
-                                                    @endif
+                            @php 
+                                                                                    $subtotal = ($item->price ?? 0) * ($item->quantity ?? 0);
+                                $cleanName = preg_replace('/\s*\(Komponen:.*?\)\s*/', '', $item->product_name);
+                                $cleanName = trim($cleanName) ?: $item->product_name;
+                            @endphp
+                            <tr>
+                                <td class="py-3 px-4 break-words whitespace-pre-wrap align-top">{{ $cleanName }}</td>
+                                <td class="py-3 px-4 break-words whitespace-normal align-top">
+                                    @php
+                                        $priceType = $item->price_type ?? '-';
+                                        if (Str::startsWith($priceType, 'ikat_')) {
+                                            $jumlah = (int) str_replace('ikat_', '', $priceType);
+                                            echo 'Per Ikat (isi ' . $jumlah . ' Tangkai)';
+                                        } else {
+                                            echo $priceType;
+                                        }
+                                    @endphp
+                                </td>
+                                <td class="py-3 px-4 text-right align-top whitespace-nowrap">Rp{{ number_format($item->price ?? 0, 0, ',', '.') }}</td>
+                                <td class="py-3 px-4 text-right align-top whitespace-nowrap">{{ $item->unit_equivalent ?? '-' }}</td>
+                                <td class="py-3 px-4 text-right align-top whitespace-nowrap">{{ $item->quantity }}</td>
+                                <td class="py-3 px-4 text-right align-top whitespace-nowrap">Rp{{ number_format($subtotal, 0, ',', '.') }}</td>
+                            </tr>
+                            @if(!empty($item->greeting_card))
+                                <tr>
+                                    <td colspan="6" class="px-4 py-2">
+                                        <div class="mt-2 p-2 bg-pink-50 border border-pink-200 rounded-lg">
+                                            <div class="flex items-start">
+                                                <i class="bi bi-card-text text-pink-400 mr-2"></i>
+                                                <div class="text-sm text-pink-700 italic leading-relaxed break-words" style="word-break: break-all;">
+                                                    <strong>Kartu Ucapan: </strong> {{ $item->greeting_card }}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            @endif
 
-                                                    {{-- Tambahkan detail bouquet jika item adalah bouquet --}}
-                                                    @if(isset($item->bouquet) && $item->bouquet)
-                                                                                <tr>
-                                                                                    <td colspan="6" class="px-4 py-2">
-                                                                                        <div class="my-4 rounded-xl border border-gray-200 bg-white shadow-lg">
-                                                                                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-0 items-stretch">
-                                                                                                <div class="flex items-center justify-center p-6 sm:p-8">
-                                                                                                    @if($item->bouquet->image)
-                                                                                                        <div class="relative group w-32 h-32">
-                                                                                                            <img src="{{ asset('storage/' . $item->bouquet->image) }}" alt="{{ $item->bouquet->name }}" class="w-32 h-32 object-cover rounded-2xl border-2 border-rose-200 shadow cursor-pointer group-hover:opacity-80 transition duration-200"
-                                                                                                            onclick="openImageModal('{{ asset('storage/' . $item->bouquet->image) }}', 'Gambar Bouquet')">
-                                                                                                        </div>
-                                                                                                    @else
-                                                                                                        <div class="w-32 h-32 bg-gray-200 rounded-2xl flex items-center justify-center border-2 border-gray-300">
-                                                                                                            <i class="bi bi-flower3 text-5xl text-rose-300"></i>
-                                                                                                        </div>
-                                                                                                    @endif
-                                                                                                </div>
-                                                                                                <div class="col-span-2 flex flex-col justify-center p-6 sm:p-8">
-                                                                                                    <div class="grid grid-cols-2 gap-x-6 gap-y-2">
-                                                                                                        <div>
-                                                                                                            <span class="text-xs text-gray-500 font-medium">Nama Bouquet</span>
-                                                                                                            <div class="font-bold text-lg text-rose-700">{{ $item->bouquet->name }}</div>
-                                                                                                        </div>
-                                                                                                        <div>
-                                                                                                            <span class="text-xs text-gray-500 font-medium">Kategori</span>
-                                                                                                            <div class="font-semibold text-rose-600">{{ $item->bouquet->category->name ?? '-' }}</div>
-                                                                                                        </div>
-                                                                                                        <div>
-                                                                                                            <span class="text-xs text-gray-500 font-medium">Ukuran</span>
-                                                                                                            <div class="font-semibold text-rose-600">{{ $item->price_type ?? '-' }}</div>
-                                                                                                        </div>
-                                                                                                        <div>
-                                                                                                            <span class="text-xs text-gray-500 font-medium">Harga</span>
-                                                                                                            <div class="font-bold text-base text-green-700">Rp{{ number_format($item->price ?? 0, 0, ',', '.') }}</div>
-                                                                                                        </div>
-                                                                                                    </div>
-                                                                                                </div>
-                                                                                            </div>
-                                                                                            @php
-        $components = $item->size_id
-            ? $item->bouquet->components()->where('size_id', $item->size_id)->with('product')->get()
-            : $item->bouquet->components()->with('product')->get();
-                                                                                            @endphp
-                                                                                            <div class="px-6 pb-6 pt-2">
-                                                                                                <span class="text-xs text-gray-500 font-medium">Komponen Bunga (Ukuran {{ $item->price_type ?? '-' }})</span>
-                                                                                                    {{-- <div class="mb-2 p-2 bg-gray-50 border border-gray-200 rounded text-xs text-gray-600">
-                                                                                                        <strong>Debug:</strong>
-                                                                                                        Bouquet ID: {{ $item->bouquet_id ?? '-' }} | Size ID: {{ $item->size_id ?? '-' }} | Komponen Count: {{ $components->count() }}
-                                                                                                    </div> --}}
-                                                                                                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 mt-2">
-                                                                                                    @forelse($components as $component)
-                                                                                                        <div class="flex items-center bg-white border border-gray-100 rounded-lg p-3 shadow-sm">
-                                                                                                            @if($component->product && $component->product->image)
-                                                                                                                <img src="{{ asset('storage/' . $component->product->image) }}" alt="{{ $component->product->name }}" class="w-9 h-9 object-cover rounded-lg mr-3 border border-gray-200">
-                                                                                                            @else
-                                                                                                                <div class="w-9 h-9 bg-gray-100 rounded-lg flex items-center justify-center mr-3 border border-gray-200">
-                                                                                                                    <i class="bi bi-flower1 text-gray-400 text-xl"></i>
-                                                                                                                </div>
-                                                                                                            @endif
-                                                                                                            <div>
-                                                                                                                <span class="font-semibold text-rose-700 text-sm">{{ $component->product->name ?? '-' }}</span>
-                                                                                                                <span class="text-xs text-gray-500 block">Jumlah: {{ $component->quantity }} {{ $component->product->base_unit ?? 'tangkai' }}</span>
-                                                                                                            </div>
-                                                                                                        </div>
-                                                                                                    @empty
-                                                                                                        <div class="text-xs text-gray-400 italic">Tidak ada komponen bunga untuk ukuran ini.</div>
-                                                                                                    @endforelse
-                                                                                                </div>
-                                                                                            </div>
-                                                                                        </div>
-                                                                                    </td>
-                                                                                </tr>
+                            {{-- Tambahkan detail bouquet jika item adalah bouquet --}}
+                            @if(isset($item->bouquet) && $item->bouquet)
+                                <tr>
+                                    <td colspan="6" class="px-4 py-2">
+                                        <div class="my-4 rounded-xl border border-gray-200 bg-white shadow-lg">
+                                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-0 items-stretch">
+                                                <div class="flex items-center justify-center p-6 sm:p-8">
+                                                    @if($item->bouquet->image)
+                                                        <div class="relative group w-32 h-32">
+                                                            <img src="{{ asset('storage/' . $item->bouquet->image) }}" alt="{{ $item->bouquet->name }}" class="w-32 h-32 object-cover rounded-2xl border-2 border-rose-200 shadow cursor-pointer group-hover:opacity-80 transition duration-200"
+                                                            onclick="openImageModal('{{ asset('storage/' . $item->bouquet->image) }}', 'Gambar Bouquet')">
+                                                        </div>
+                                                    @else
+                                                        <div class="w-32 h-32 bg-gray-200 rounded-2xl flex items-center justify-center border-2 border-gray-300">
+                                                            <i class="bi bi-flower3 text-5xl text-rose-300"></i>
+                                                        </div>
                                                     @endif
+                                                </div>
+                                                <div class="col-span-2 flex flex-col justify-center p-6 sm:p-8">
+                                                    <div class="grid grid-cols-2 gap-x-6 gap-y-2">
+                                                        <div>
+                                                            <span class="text-xs text-gray-500 font-medium">Nama Bouquet</span>
+                                                            <div class="font-bold text-lg text-rose-700">{{ $item->bouquet->name }}</div>
+                                                        </div>
+                                                        <div>
+                                                            <span class="text-xs text-gray-500 font-medium">Kategori</span>
+                                                            <div class="font-semibold text-rose-600">{{ $item->bouquet->category->name ?? '-' }}</div>
+                                                        </div>
+                                                        <div>
+                                                            <span class="text-xs text-gray-500 font-medium">Ukuran</span>
+                                                            <div class="font-semibold text-rose-600">{{ $item->price_type ?? '-' }}</div>
+                                                        </div>
+                                                        <div>
+                                                            <span class="text-xs text-gray-500 font-medium">Harga</span>
+                                                            <div class="font-bold text-base text-green-700">Rp{{ number_format($item->price ?? 0, 0, ',', '.') }}</div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            @php
+                                                $components = $item->size_id
+                                                    ? $item->bouquet->components()->where('size_id', $item->size_id)->with('product')->get()
+                                                    : $item->bouquet->components()->with('product')->get();
+                                            @endphp
+                                            <div class="px-6 pb-6 pt-2">
+                                                <span class="text-xs text-gray-500 font-medium">Komponen Bunga (Ukuran {{ $item->price_type ?? '-' }})</span>
+                                                    {{-- <div class="mb-2 p-2 bg-gray-50 border border-gray-200 rounded text-xs text-gray-600">
+                                                        <strong>Debug:</strong>
+                                                        Bouquet ID: {{ $item->bouquet_id ?? '-' }} | Size ID: {{ $item->size_id ?? '-' }} | Komponen Count: {{ $components->count() }}
+                                                    </div> --}}
+                                                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 mt-2">
+                                                    @forelse($components as $component)
+                                                        <div class="flex items-center bg-white border border-gray-100 rounded-lg p-3 shadow-sm">
+                                                            @if($component->product && $component->product->image)
+                                                                <img src="{{ asset('storage/' . $component->product->image) }}" alt="{{ $component->product->name }}" class="w-9 h-9 object-cover rounded-lg mr-3 border border-gray-200">
+                                                            @else
+                                                                <div class="w-9 h-9 bg-gray-100 rounded-lg flex items-center justify-center mr-3 border border-gray-200">
+                                                                    <i class="bi bi-flower1 text-gray-400 text-xl"></i>
+                                                                </div>
+                                                            @endif
+                                                            <div>
+                                                                <span class="font-semibold text-rose-700 text-sm">{{ $component->product->name ?? '-' }}</span>
+                                                                <span class="text-xs text-gray-500 block">Jumlah: {{ $component->quantity }} {{ $component->product->base_unit ?? 'tangkai' }}</span>
+                                                            </div>
+                                                        </div>
+                                                    @empty
+                                                        <div class="text-xs text-gray-400 italic">Tidak ada komponen bunga untuk ukuran ini.</div>
+                                                    @endforelse
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            @endif
                         @endforeach
                         </tbody>
                     <tfoot class="bg-gray-50">
@@ -510,12 +533,12 @@ $displayTotalPaid = $order->payment_status === 'paid' ? $grandTotal : $totalPaid
                             <th class="px-4 py-3 text-right font-bold text-green-600">Rp{{ number_format($itemsTotal, 0, ',', '.') }}</th>
                         </tr>
                         @if(($order->voucher_amount ?? 0) > 0)
-                        <tr>
-                            <th colspan="5" class="text-right px-4 py-3 font-semibold">Potongan Voucher</th>
-                            <th class="px-4 py-3 text-right font-bold text-red-600">
-                                -Rp{{ number_format($order->voucher_amount, 0, ',', '.') }}
-                            </th>
-                        </tr>
+                            <tr>
+                                <th colspan="5" class="text-right px-4 py-3 font-semibold">Potongan Voucher</th>
+                                <th class="px-4 py-3 text-right font-bold text-red-600">
+                                    -Rp{{ number_format($order->voucher_amount, 0, ',', '.') }}
+                                </th>
+                            </tr>
                         @endif
                         
                         @if($needsShippingFee && !$shippingFeeSet)
@@ -574,9 +597,9 @@ $displayTotalPaid = $order->payment_status === 'paid' ? $grandTotal : $totalPaid
             <div class="sm:hidden space-y-3 mb-6">
                 @foreach($order->items as $item)
                     @php 
-                        $subtotal = ($item->price ?? 0) * ($item->quantity ?? 0);
-    $cleanName = preg_replace('/\s*\(Komponen:.*?\)\s*/', '', $item->product_name);
-    $cleanName = trim($cleanName) ?: $item->product_name;
+                                            $subtotal = ($item->price ?? 0) * ($item->quantity ?? 0);
+                        $cleanName = preg_replace('/\s*\(Komponen:.*?\)\s*/', '', $item->product_name);
+                        $cleanName = trim($cleanName) ?: $item->product_name;
                     @endphp
                     <!-- Bouquet Detail Card for Mobile -->
                     @if(isset($item->bouquet) && $item->bouquet)
@@ -613,9 +636,9 @@ $displayTotalPaid = $order->payment_status === 'paid' ? $grandTotal : $totalPaid
                                     </div>
                                 </div>
                                 @php
-        $components = $item->size_id
-            ? $item->bouquet->components()->where('size_id', $item->size_id)->with('product')->get()
-            : $item->bouquet->components()->with('product')->get();
+                                    $components = $item->size_id
+                                        ? $item->bouquet->components()->where('size_id', $item->size_id)->with('product')->get()
+                                        : $item->bouquet->components()->with('product')->get();
                                 @endphp
                                 <div class="w-full mt-2">
                                     <span class="text-xs text-gray-500 font-medium">Komponen Bunga (Ukuran {{ $item->price_type ?? '-' }})</span>
@@ -654,13 +677,13 @@ $displayTotalPaid = $order->payment_status === 'paid' ? $grandTotal : $totalPaid
                                         @if($item->price_type && $item->price_type !== '-')
                                             <span class="inline-block mt-2 px-2 py-0.5 bg-blue-100 text-blue-800 text-xs rounded-md font-medium">
                                                 @php
-            $priceType = $item->price_type;
-            if (Str::startsWith($priceType, 'ikat_')) {
-                $jumlah = (int) str_replace('ikat_', '', $priceType);
-                echo 'Per Ikat (isi ' . $jumlah . ' Tangkai)';
-            } else {
-                echo $priceType;
-            }
+                                                    $priceType = $item->price_type;
+                                                    if (Str::startsWith($priceType, 'ikat_')) {
+                                                        $jumlah = (int) str_replace('ikat_', '', $priceType);
+                                                        echo 'Per Ikat (isi ' . $jumlah . ' Tangkai)';
+                                                    } else {
+                                                        echo $priceType;
+                                                    }
                                                 @endphp
                                             </span>
                                         @endif
@@ -722,10 +745,10 @@ $displayTotalPaid = $order->payment_status === 'paid' ? $grandTotal : $totalPaid
                         </div>
 
                         @if($order->voucher_amount > 0)
-                        <div class="flex justify-between items-center py-1.5 border-b border-gray-100">
-                            <span class="text-gray-600 text-sm">Potongan Voucher</span>
-                            <span class="text-purple-600 text-sm font-bold">-Rp{{ number_format($order->voucher_amount, 0, ',', '.') }}</span>
-                        </div>
+                            <div class="flex justify-between items-center py-1.5 border-b border-gray-100">
+                                <span class="text-gray-600 text-sm">Potongan Voucher</span>
+                                <span class="text-purple-600 text-sm font-bold">-Rp{{ number_format($order->voucher_amount, 0, ',', '.') }}</span>
+                            </div>
                         @endif
                         
                         @if($needsShippingFee && !$shippingFeeSet)
@@ -781,9 +804,9 @@ $displayTotalPaid = $order->payment_status === 'paid' ? $grandTotal : $totalPaid
 
             <!-- Custom Bouquet Information Card -->
             @php
-$customBouquetItems = $order->items->filter(function ($item) {
-    return $item->type === 'custom_bouquet';
-});
+                $customBouquetItems = $order->items->filter(function ($item) {
+                    return $item->type === 'custom_bouquet';
+                });
             @endphp
             
             @if($customBouquetItems->count() > 0)
@@ -927,180 +950,180 @@ $customBouquetItems = $order->items->filter(function ($item) {
 
             <!-- Informasi Pembayaran Section -->
             @if($showGrandTotal && $sisa > 0 && $order->payment_status !== 'paid')
-            <div class="my-8">
-            <div class="bg-gradient-to-r from-orange-50 to-yellow-50 border-2 border-orange-200 rounded-2xl p-4 sm:p-6">
-                <div class="flex items-center justify-center mb-4">
-                    <div class="bg-orange-500 rounded-full p-2 mr-3">
-                        <i class="bi bi-credit-card-2-front text-white text-lg"></i>
+                    <div class="my-8">
+                    <div class="bg-gradient-to-r from-orange-50 to-yellow-50 border-2 border-orange-200 rounded-2xl p-4 sm:p-6">
+                        <div class="flex items-center justify-center mb-4">
+                            <div class="bg-orange-500 rounded-full p-2 mr-3">
+                                <i class="bi bi-credit-card-2-front text-white text-lg"></i>
+                            </div>
+                            <h3 class="text-lg sm:text-xl font-bold text-orange-800">Informasi Pembayaran</h3>
+                        </div>
+
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                            <!-- Metode Pembayaran Otomatis -->
+                            <div class="bg-white rounded-xl border-2 border-blue-200 p-4 shadow-sm">
+                                <div class="flex items-center mb-3">
+                                    <div class="bg-blue-600 rounded-lg p-2 mr-3">
+                                        <i class="bi bi-bank text-white"></i>
+                                    </div>
+                                    <h4 class="font-bold text-blue-800 text-sm sm:text-base">Metode Pembayaran</h4>
+                                </div>
+
+                                <div class="space-y-2 text-xs sm:text-sm text-gray-700">
+                                    <p>Pembayaran Anda akan diproses secara otomatis melalui sistem Fellie Florist.</p>
+                                    <p>Anda dapat memilih berbagai metode seperti Transfer Bank, QRIS, atau E-Wallet.</p>
+                                </div>
+
+                                <div class="mt-4 bg-green-50 border border-green-200 rounded-lg p-3 text-center">
+                                    <span class="text-xs text-gray-600">Total yang harus dibayar:</span>
+                                    <div class="text-lg sm:text-xl font-bold text-green-600">
+                                        Rp{{ number_format($sisa, 0, ',', '.') }}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Petunjuk Pembayaran Otomatis -->
+                            <div class="bg-white rounded-xl border-2 border-green-200 p-4 shadow-sm">
+                                <div class="flex items-center mb-3">
+                                    <div class="bg-green-600 rounded-lg p-2 mr-3">
+                                        <i class="bi bi-list-check text-white"></i>
+                                    </div>
+                                    <h4 class="font-bold text-green-800 text-sm sm:text-base">Petunjuk Pembayaran:</h4>
+                                </div>
+
+                                <ol class="text-xs sm:text-sm space-y-2 text-gray-700">
+                                    <li class="flex items-start">
+                                        <span class="bg-green-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs mr-2 mt-0.5 flex-shrink-0">1</span>
+                                        <span>Klik tombol <b>Lanjutkan Pembayaran</b> di bawah.</span>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <span class="bg-green-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs mr-2 mt-0.5 flex-shrink-0">2</span>
+                                        <span>Pilih metode pembayaran yang Anda inginkan (Bank, QRIS, atau E-Wallet).</span>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <span class="bg-green-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs mr-2 mt-0.5 flex-shrink-0">3</span>
+                                        <span>Lakukan pembayaran sesuai instruksi pada halaman tersebut.</span>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <span class="bg-green-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs mr-2 mt-0.5 flex-shrink-0">4</span>
+                                        <span>Status pembayaran Anda akan diperbarui otomatis setelah berhasil melakukan pembayaran.</span>
+                                    </li>
+                                </ol>
+
+                                {{-- <div class="mt-4 text-center">
+                                    <button 
+                                        class="bg-green-600 hover:bg-green-700 text-white text-xs sm:text-sm px-4 py-2 rounded-lg transition duration-200">
+                                        <i class="bi bi-credit-card"></i> Lanjutkan Pembayaran
+                                    </button>
+                                </div> --}}
+                            </div>
+                        </div>
                     </div>
-                    <h3 class="text-lg sm:text-xl font-bold text-orange-800">Informasi Pembayaran</h3>
                 </div>
+                {{-- button untuk midtrans --}}
+                                                                                                                                    @if($order->payment_status !== 'paid' || $sisa != 0)
+                                                                                                                                        <div class="mt-6 text-center mb-4">
+                                                                                                                                            <button id="payMidtransBtn"
+                                                                                                                                                class="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white font-bold py-3 px-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 inline-flex items-center gap-3">
+                                                                                                                                                <i class="bi bi-credit-card-fill text-xl"></i>
+                                                                                                                                                <span class="text-base">Lanjutkan Pembayaran</span>
+                                                                                                                                            </button>
+                                                                                                                                        </div>
+                                                                                                                                    @endif
+                @php
+                    $waMessage = "🌸 *Halo, Fellie Florist*\n\n";
+                    // $waMessage .= "══════════\n\n";
+                    $waMessage .= "Saya ingin mengirim bukti pembayaran untuk:\n\n";
+                    $waMessage .= "📋 *Pesanan :* {$order->public_code}\n";
+                    $waMessage .= "🔗 *Link :* " . url("/order/{$order->public_code}") . "\n\n";
+                    $waMessage .= "👤 *Nama Pemesan :* {$order->customer_name}\n";
+                    $waMessage .= "📱 *WhatsApp Pemesan :* {$order->wa_number}\n\n";
+                    // if ($order->receiver_name) {
+                    //     $waMessage .= "👥 *Nama Penerima :* {$order->receiver_name}\n";
+                    // }
+                    // if ($order->receiver_wa) {
+                    //     $waMessage .= "📲 *WhatsApp Penerima :* {$order->receiver_wa}\n";
+                    // }
+                    // $waMessage .= "📅 *Tanggal :* " . \Carbon\Carbon::parse($order->pickup_date)->format('d-m-Y') . "\n";
+                    // $waMessage .= "⏰ *Waktu :* {$order->pickup_time}\n";
+                    // $waMessage .= "🚚 *Pengiriman :* {$order->delivery_method}\n";
+                    // $waMessage .= "📍 *Tujuan :* {$order->destination}\n\n";
 
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    <!-- Metode Pembayaran Otomatis -->
-                    <div class="bg-white rounded-xl border-2 border-blue-200 p-4 shadow-sm">
-                        <div class="flex items-center mb-3">
-                            <div class="bg-blue-600 rounded-lg p-2 mr-3">
-                                <i class="bi bi-bank text-white"></i>
-                            </div>
-                            <h4 class="font-bold text-blue-800 text-sm sm:text-base">Metode Pembayaran</h4>
-                        </div>
+                    // Tambahkan breakdown harga dengan ongkir
+                    $waMessage .= "💰 *Detail Harga:*\n";
+                    $waMessage .= "• Total Produk: Rp " . number_format($itemsTotal, 0, ',', '.') . "\n";
+                    if ($shippingFee > 0) {
+                        $waMessage .= "• Ongkir: Rp " . number_format($shippingFee, 0, ',', '.') . "\n";
+                    }
+                    if ($order->voucher_amount > 0) {
+                        $waMessage .= "• Potongan Voucher: -Rp " . number_format($order->voucher_amount, 0, ',', '.') . "\n";
+                    }
+                    $waMessage .= "• *Total Keseluruhan: Rp " . number_format($grandTotal, 0, ',', '.') . "*\n\n";
 
-                        <div class="space-y-2 text-xs sm:text-sm text-gray-700">
-                            <p>Pembayaran Anda akan diproses secara otomatis melalui sistem Fellie Florist.</p>
-                            <p>Anda dapat memilih berbagai metode seperti Transfer Bank, QRIS, atau E-Wallet.</p>
-                        </div>
+                    if ($showGrandTotal) {
+                        $waMessage .= "💰 *Total Pesanan :* Rp " . number_format($grandTotal, 0, ',', '.') . "\n\n";
+                        // $waMessage .= "═══════════\n";
+                        $waMessage .= "Mohon konfirmasi pembayaran 🙏\n";
+                    } else {
+                        $waMessage .= "⏳ *Status :* Menunggu admin menghitung ongkir\n\n";
+                        // $waMessage .= "═══════════\n";
+                        $waMessage .= "Mohon tunggu info total final dari admin 🙏\n";
+                    }
 
-                        <div class="mt-4 bg-green-50 border border-green-200 rounded-lg p-3 text-center">
-                            <span class="text-xs text-gray-600">Total yang harus dibayar:</span>
-                            <div class="text-lg sm:text-xl font-bold text-green-600">
-                                Rp{{ number_format($sisa, 0, ',', '.') }}
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Petunjuk Pembayaran Otomatis -->
-                    <div class="bg-white rounded-xl border-2 border-green-200 p-4 shadow-sm">
-                        <div class="flex items-center mb-3">
-                            <div class="bg-green-600 rounded-lg p-2 mr-3">
-                                <i class="bi bi-list-check text-white"></i>
-                            </div>
-                            <h4 class="font-bold text-green-800 text-sm sm:text-base">Petunjuk Pembayaran:</h4>
-                        </div>
-
-                        <ol class="text-xs sm:text-sm space-y-2 text-gray-700">
-                            <li class="flex items-start">
-                                <span class="bg-green-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs mr-2 mt-0.5 flex-shrink-0">1</span>
-                                <span>Klik tombol <b>Lanjutkan Pembayaran</b> di bawah.</span>
-                            </li>
-                            <li class="flex items-start">
-                                <span class="bg-green-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs mr-2 mt-0.5 flex-shrink-0">2</span>
-                                <span>Pilih metode pembayaran yang Anda inginkan (Bank, QRIS, atau E-Wallet).</span>
-                            </li>
-                            <li class="flex items-start">
-                                <span class="bg-green-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs mr-2 mt-0.5 flex-shrink-0">3</span>
-                                <span>Lakukan pembayaran sesuai instruksi pada halaman tersebut.</span>
-                            </li>
-                            <li class="flex items-start">
-                                <span class="bg-green-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs mr-2 mt-0.5 flex-shrink-0">4</span>
-                                <span>Status pembayaran Anda akan diperbarui otomatis setelah berhasil melakukan pembayaran.</span>
-                            </li>
-                        </ol>
-
-                        {{-- <div class="mt-4 text-center">
-                            <button 
-                                class="bg-green-600 hover:bg-green-700 text-white text-xs sm:text-sm px-4 py-2 rounded-lg transition duration-200">
-                                <i class="bi bi-credit-card"></i> Lanjutkan Pembayaran
-                            </button>
-                        </div> --}}
-                    </div>
-                </div>
-            </div>
-        </div>
-        {{-- button untuk midtrans --}}
-                                                                                                                            @if($order->payment_status !== 'paid' || $sisa != 0)
-                                                                                                                                <div class="mt-6 text-center mb-4">
-                                                                                                                                    <button id="payMidtransBtn"
-                                                                                                                                        class="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white font-bold py-3 px-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 inline-flex items-center gap-3">
-                                                                                                                                        <i class="bi bi-credit-card-fill text-xl"></i>
-                                                                                                                                        <span class="text-base">Lanjutkan Pembayaran</span>
-                                                                                                                                    </button>
-                                                                                                                                </div>
-                                                                                                                            @endif
-        @php
-    $waMessage = "🌸 *Halo, Fellie Florist*\n\n";
-    // $waMessage .= "══════════\n\n";
-    $waMessage .= "Saya ingin mengirim bukti pembayaran untuk:\n\n";
-    $waMessage .= "📋 *Pesanan :* {$order->public_code}\n";
-    $waMessage .= "🔗 *Link :* " . url("/order/{$order->public_code}") . "\n\n";
-    $waMessage .= "👤 *Nama Pemesan :* {$order->customer_name}\n";
-    $waMessage .= "📱 *WhatsApp Pemesan :* {$order->wa_number}\n\n";
-    // if ($order->receiver_name) {
-    //     $waMessage .= "👥 *Nama Penerima :* {$order->receiver_name}\n";
-    // }
-    // if ($order->receiver_wa) {
-    //     $waMessage .= "📲 *WhatsApp Penerima :* {$order->receiver_wa}\n";
-    // }
-    // $waMessage .= "📅 *Tanggal :* " . \Carbon\Carbon::parse($order->pickup_date)->format('d-m-Y') . "\n";
-    // $waMessage .= "⏰ *Waktu :* {$order->pickup_time}\n";
-    // $waMessage .= "🚚 *Pengiriman :* {$order->delivery_method}\n";
-    // $waMessage .= "📍 *Tujuan :* {$order->destination}\n\n";
-
-    // Tambahkan breakdown harga dengan ongkir
-    $waMessage .= "💰 *Detail Harga:*\n";
-    $waMessage .= "• Total Produk: Rp " . number_format($itemsTotal, 0, ',', '.') . "\n";
-    if ($shippingFee > 0) {
-        $waMessage .= "• Ongkir: Rp " . number_format($shippingFee, 0, ',', '.') . "\n";
-    }
-    if ($order->voucher_amount > 0) {
-        $waMessage .= "• Potongan Voucher: -Rp " . number_format($order->voucher_amount, 0, ',', '.') . "\n";
-    }
-    $waMessage .= "• *Total Keseluruhan: Rp " . number_format($grandTotal, 0, ',', '.') . "*\n\n";
-
-    if ($showGrandTotal) {
-        $waMessage .= "💰 *Total Pesanan :* Rp " . number_format($grandTotal, 0, ',', '.') . "\n\n";
-        // $waMessage .= "═══════════\n";
-        $waMessage .= "Mohon konfirmasi pembayaran 🙏\n";
-    } else {
-        $waMessage .= "⏳ *Status :* Menunggu admin menghitung ongkir\n\n";
-        // $waMessage .= "═══════════\n";
-        $waMessage .= "Mohon tunggu info total final dari admin 🙏\n";
-    }
-
-    $waMessage .= "Terima kasih 😊";
-    $encodedMessage = urlencode($waMessage);
-                                                                                                                                                @endphp
-                                                                                                                                                {{-- <a href="https://wa.me/+6282177929879?text={{ $encodedMessage }}" 
-                                                                                                                                                   target="_blank"
-                                                                                                                                                   class="bg-green-500 hover:bg-green-600 text-white text-xs px-4 py-2 rounded-lg transition duration-200 inline-flex items-center gap-2 shadow-md hover:shadow-lg">
-                                                                                                                                                    <i class="bi bi-whatsapp text-lg"></i> 
-                                                                                                                                                    <span class="font-medium">Kirim Bukti Transfer</span>
-                                                                                                                                                </a> --}}
+                    $waMessage .= "Terima kasih 😊";
+                    $encodedMessage = urlencode($waMessage);
+                @endphp
+                                                                                                                                                        {{-- <a href="https://wa.me/+6282177929879?text={{ $encodedMessage }}" 
+                                                                                                                                                           target="_blank"
+                                                                                                                                                           class="bg-green-500 hover:bg-green-600 text-white text-xs px-4 py-2 rounded-lg transition duration-200 inline-flex items-center gap-2 shadow-md hover:shadow-lg">
+                                                                                                                                                            <i class="bi bi-whatsapp text-lg"></i> 
+                                                                                                                                                            <span class="font-medium">Kirim Bukti Transfer</span>
+                                                                                                                                                        </a> --}}
+                                                                                                                                                    </div>
+                                                                                                                                                </div>
                                                                                                                                             </div>
+
+                                                                                                                                            <!-- Button Petunjuk Pembayaran yang Prominent -->
+                                                                                                                                            {{-- <div class="mt-6 text-center">
+                                                                                                                                                <button onclick="scrollToPetunjukPembayaran()" 
+                                                                                                                                                        class="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-bold py-3 px-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 inline-flex items-center gap-3">
+                                                                                                                                                    <i class="bi bi-info-circle-fill text-xl"></i>
+                                                                                                                                                    <span class="text-base">Lihat Petunjuk Pembayaran Lengkap</span>
+                                                                                                                                                </button>
+                                                                                                                                            </div> --}}
+
+
                                                                                                                                         </div>
                                                                                                                                     </div>
 
-                                                                                                                                    <!-- Button Petunjuk Pembayaran yang Prominent -->
-                                                                                                                                    {{-- <div class="mt-6 text-center">
-                                                                                                                                        <button onclick="scrollToPetunjukPembayaran()" 
-                                                                                                                                                class="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-bold py-3 px-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 inline-flex items-center gap-3">
-                                                                                                                                            <i class="bi bi-info-circle-fill text-xl"></i>
-                                                                                                                                            <span class="text-base">Lihat Petunjuk Pembayaran Lengkap</span>
-                                                                                                                                        </button>
-                                                                                                                                    </div> --}}
+                                                                                                                                    <script>
+                                                                                                                                    function scrollToPetunjukPembayaran() {
+                                                                                                                                        // Cari element yang berisi "Petunjuk Pembayaran"
+                                                                                                                                        const elements = document.querySelectorAll('h4');
+                                                                                                                                        for (let element of elements) {
+                                                                                                                                            if (element.textContent.includes('Petunjuk Pembayaran')) {
+                                                                                                                                                element.scrollIntoView({ 
+                                                                                                                                                    behavior: 'smooth', 
+                                                                                                                                                    block: 'center' 
+                                                                                                                                                });
 
-                                                                                                                                    
-                                                                                                                                </div>
-                                                                                                                            </div>
+                                                                                                                                                // Highlight effect
+                                                                                                                                                const parentCard = element.closest('.bg-white');
+                                                                                                                                                if (parentCard) {
+                                                                                                                                                    parentCard.style.transition = 'all 0.3s ease';
+                                                                                                                                                    parentCard.style.transform = 'scale(1.02)';
+                                                                                                                                                    parentCard.style.boxShadow = '0 8px 25px rgba(0,0,0,0.15)';
 
-                                                                                                                            <script>
-                                                                                                                            function scrollToPetunjukPembayaran() {
-                                                                                                                                // Cari element yang berisi "Petunjuk Pembayaran"
-                                                                                                                                const elements = document.querySelectorAll('h4');
-                                                                                                                                for (let element of elements) {
-                                                                                                                                    if (element.textContent.includes('Petunjuk Pembayaran')) {
-                                                                                                                                        element.scrollIntoView({ 
-                                                                                                                                            behavior: 'smooth', 
-                                                                                                                                            block: 'center' 
-                                                                                                                                        });
-
-                                                                                                                                        // Highlight effect
-                                                                                                                                        const parentCard = element.closest('.bg-white');
-                                                                                                                                        if (parentCard) {
-                                                                                                                                            parentCard.style.transition = 'all 0.3s ease';
-                                                                                                                                            parentCard.style.transform = 'scale(1.02)';
-                                                                                                                                            parentCard.style.boxShadow = '0 8px 25px rgba(0,0,0,0.15)';
-
-                                                                                                                                            setTimeout(() => {
-                                                                                                                                                parentCard.style.transform = 'scale(1)';
-                                                                                                                                                parentCard.style.boxShadow = '';
-                                                                                                                                            }, 1000);
+                                                                                                                                                    setTimeout(() => {
+                                                                                                                                                        parentCard.style.transform = 'scale(1)';
+                                                                                                                                                        parentCard.style.boxShadow = '';
+                                                                                                                                                    }, 1000);
+                                                                                                                                                }
+                                                                                                                                                break;
+                                                                                                                                            }
                                                                                                                                         }
-                                                                                                                                        break;
                                                                                                                                     }
-                                                                                                                                }
-                                                                                                                            }
-                                                                                                                            </script>
+                                                                                                                                    </script>
             @endif
             
             <!-- Pesan untuk pesanan yang sudah lunas -->
@@ -1140,7 +1163,7 @@ $customBouquetItems = $order->items->filter(function ($item) {
                     <h3 class="font-semibold text-base mb-2 flex items-center gap-2 justify-center"><i
                             class="bi bi-receipt"></i> Bukti Pembayaran</h3>
                     @php
-    $ext = pathinfo($order->payment_proof, PATHINFO_EXTENSION);
+                        $ext = pathinfo($order->payment_proof, PATHINFO_EXTENSION);
                     @endphp
                     @if(in_array(strtolower($ext), ['jpg', 'jpeg', 'png', 'gif', 'webp']))
                         <img src="{{ asset('storage/' . $order->payment_proof) }}" alt="Bukti Pembayaran"
@@ -1174,29 +1197,29 @@ $customBouquetItems = $order->items->filter(function ($item) {
                     </h3>
 
                     @php
-    $packingFiles = [];
+                        $packingFiles = [];
 
-    // Prioritize new multiple files format
-    if (!empty($order->packing_files)) {
-        $files = is_string($order->packing_files) ? json_decode($order->packing_files, true) : $order->packing_files;
-        if (is_array($files)) {
-            $packingFiles = $files;
-        }
-    }
-    // Fallback to old single photo format only if no packing_files
-    elseif (!empty($order->packing_photo)) {
-        $packingFiles[] = $order->packing_photo;
-    }
+                        // Prioritize new multiple files format
+                        if (!empty($order->packing_files)) {
+                            $files = is_string($order->packing_files) ? json_decode($order->packing_files, true) : $order->packing_files;
+                            if (is_array($files)) {
+                                $packingFiles = $files;
+                            }
+                        }
+                        // Fallback to old single photo format only if no packing_files
+                        elseif (!empty($order->packing_photo)) {
+                            $packingFiles[] = $order->packing_photo;
+                        }
                     @endphp
 
                     @if(count($packingFiles) > 0)
                         <div class="max-w-4xl mx-auto @if(count($packingFiles) === 1) flex justify-center @else grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 @endif">
                             @foreach($packingFiles as $index => $file)
                                 @php
-            $filePath = asset('storage/' . $file);
-            $ext = strtolower(pathinfo($file, PATHINFO_EXTENSION));
-            $isVideo = in_array($ext, ['mp4', 'mov', 'avi', 'wmv', 'flv', 'webm']);
-            $isImage = in_array($ext, ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp']);
+                                    $filePath = asset('storage/' . $file);
+                                    $ext = strtolower(pathinfo($file, PATHINFO_EXTENSION));
+                                    $isVideo = in_array($ext, ['mp4', 'mov', 'avi', 'wmv', 'flv', 'webm']);
+                                    $isImage = in_array($ext, ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp']);
                                 @endphp
 
                                 <div class="bg-white rounded-lg border border-gray-200 p-3 shadow-sm">

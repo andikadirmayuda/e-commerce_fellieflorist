@@ -16,7 +16,7 @@ class UserSeeder extends Seeder
     public function run(): void
     {
         // Check if required roles exist
-        $roles = ['owner', 'admin', 'kasir', 'karyawan', 'customers service'];
+        $roles = ['owner', 'admin', 'kasir', 'karyawan', 'customers service', 'finance'];
         foreach ($roles as $roleName) {
             if (!Role::where('name', $roleName)->exists()) {
                 throw new Exception("Role '$roleName' not found. Please run RoleAndPermissionSeeder first.");
@@ -77,5 +77,16 @@ class UserSeeder extends Seeder
             ]
         );
         $cs->roles()->sync([Role::where('name', 'customers service')->first()->id]);
+
+        // Create Finance
+        $finance = User::updateOrCreate(
+            ['email' => 'finance@fellieflorist.com'],
+            [
+                'name' => 'Finance Florist',
+                'password' => Hash::make('Finance_fellieflorist123@###'),
+                'status' => 'active',
+            ]
+        );
+        $finance->roles()->sync([Role::where('name', 'finance')->first()->id]);
     }
 }

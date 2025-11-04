@@ -18,6 +18,64 @@ use Illuminate\Support\Facades\Log;
 class CustomBouquetController extends Controller
 {
     /**
+     * Halaman publik: daftar draft custom bouquet (tanpa login)
+     */
+    public function publicDrafts()
+    {
+        $drafts = \App\Models\CustomBouquet::where('status', 'draft')->orderByDesc('updated_at')->get();
+        return view('custom-bouquet.public-drafts', compact('drafts'));
+    }
+    /**
+     * Tampilkan daftar draft custom bouquet
+     */
+    public function drafts()
+    {
+        // Ambil semua custom bouquet dengan status draft (bisa difilter per user jika ada user_id)
+        $drafts = CustomBouquet::where('status', 'draft')->orderByDesc('updated_at')->get();
+        return view('custom-bouquet.drafts', compact('drafts'));
+    }
+    /**
+     * Simpan draft custom bouquet (manual save)
+     */
+    public function saveDraft(Request $request, $id)
+    {
+        try {
+            $customBouquet = CustomBouquet::findOrFail($id);
+            $customBouquet->status = 'draft';
+            $customBouquet->save();
+            return response()->json([
+                'success' => true,
+                'message' => 'Draft berhasil disimpan.'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal menyimpan draft.'
+            ], 500);
+        }
+    }
+
+    public function deleteDraft($draft_id)
+    {
+        $draft = CustomBouquet::findOrFail($draft_id);
+        $draft->delete();
+        return redirect()->route('custom.bouquet.drafts')->with('success', 'Draft berhasil dihapus.');
+    }
+
+    /**
+     * Bulk delete custom bouquet drafts
+     */
+    public function bulkDelete(Request $request)
+    {
+        $ids = $request->input('draft_ids', []);
+        if (empty($ids)) {
+            return redirect()->route('custom.bouquet.drafts')->with('error', 'Tidak ada draft yang dipilih.');
+        }
+        CustomBouquet::whereIn('id', $ids)->delete();
+        return redirect()->route('custom.bouquet.drafts')->with('success', 'Draft terpilih berhasil dihapus.');
+    }
+
+    /**
      * Calculate total price for custom bouquet items
      */
     private function calculateTotalPrice($items)
@@ -92,12 +150,26 @@ class CustomBouquetController extends Controller
         // Get all categories for filtering
         $categories = Category::orderBy('name')->get();
 
-        // Create a new draft custom bouquet for this session
-        $customBouquet = CustomBouquet::create([
-            'name' => 'Custom Bouquet Draft',
-            'status' => 'draft',
-            'total_price' => 0
-        ]);
+        // Jika ada draft_id di query, ambil draft tersebut
+        $draftId = request('draft_id');
+        if ($draftId) {
+            $customBouquet = CustomBouquet::where('id', $draftId)->where('status', 'draft')->first();
+            if (!$customBouquet) {
+                // Jika tidak ditemukan, fallback ke draft baru
+                $customBouquet = CustomBouquet::create([
+                    'name' => 'Custom Bouquet Draft',
+                    'status' => 'draft',
+                    'total_price' => 0
+                ]);
+            }
+        } else {
+            // Jika tidak ada draft_id, buat draft baru
+            $customBouquet = CustomBouquet::create([
+                'name' => 'Custom Bouquet Draft',
+                'status' => 'draft',
+                'total_price' => 0
+            ]);
+        }
 
         return view('custom-bouquet.create', compact('products', 'categories', 'customBouquet'));
     }

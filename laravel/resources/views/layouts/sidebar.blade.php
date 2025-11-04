@@ -10,6 +10,19 @@
 
         <ul class="space-y-1">
 
+            <!-- DRAFT CUSTOM BOUQUET -->
+            <li class="mt-4 mb-1 text-xs font-bold uppercase tracking-wider text-pink-500 flex items-center gap-2">
+                <i class="bi bi-flower1"></i> Custom Bouquet
+            </li>
+            <x-sidebar-link :href="route('custom.bouquet.drafts')"
+                :active="request()->routeIs('custom.bouquet.drafts')">
+                <x-slot name="icon">
+                    <i class="bi bi-clipboard-heart text-lg mr-1"></i>
+                </x-slot>
+                Daftar Draft Custom Bouquet
+            </x-sidebar-link>
+
+
 
             <!-- DASHBOARD -->
             <li class="mb-2">
@@ -166,6 +179,17 @@
                 </x-sidebar-link>
             @endif
 
+            <!-- PURCHASE ORDER MENU -->
+            <li class="mt-4 mb-1 text-xs font-bold uppercase tracking-wider text-pink-500 flex items-center gap-2">
+                <i class="bi bi-clipboard-data"></i> Purchase Order
+            </li>
+            <x-sidebar-link :href="route('purchase-orders.index')" :active="request()->routeIs('purchase-orders.*')">
+                <x-slot name="icon">
+                    <i class="bi bi-clipboard-plus text-lg mr-1"></i>
+                </x-slot>
+                {{ __('Purchase Order') }}
+            </x-sidebar-link>
+
 
             <!-- LAPORAN -->
             <li class="mt-4 mb-1 text-xs font-bold uppercase tracking-wider text-pink-500 flex items-center gap-2"><i
@@ -212,12 +236,22 @@
                 </x-sidebar-link>
             @endif
 
-            @if(auth()->user()->hasRole('owner'))
+
+            @if(auth()->user()->hasRole('owner') || auth()->user()->hasRole('admin'))
                 <x-sidebar-link :href="route('reports.income')" :active="request()->routeIs('reports.income')">
                     <x-slot name="icon">
                         <i class="bi bi-cash-stack text-lg mr-1"></i>
                     </x-slot>
                     Laporan Pendapatan
+                </x-sidebar-link>
+            @endif
+            @if(auth()->user()->hasRole('owner') || auth()->user()->hasRole('admin') || auth()->user()->hasRole('kasir'))
+                <x-sidebar-link :href="route('purchase-orders.report')"
+                    :active="request()->routeIs('purchase-orders.report')">
+                    <x-slot name="icon">
+                        <i class="bi bi-clipboard-data text-lg mr-1"></i>
+                    </x-slot>
+                    Laporan Purchase Order
                 </x-sidebar-link>
             @endif
         </ul>

@@ -103,7 +103,7 @@
     </x-slot>
 
     <div class="py-8 gradient-bg min-h-screen">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+        <div class="w-full mx-auto px-2 md:px-6 lg:px-8">
             <!-- Cards Statistik -->
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                 <!-- Total Produk Card -->
@@ -220,7 +220,16 @@
                                     Stok Masuk</th>
                                 <th
                                     class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Stok Keluar</th>
+                                    Stok Keluar Sale</th>
+                                <th
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Stok Keluar Public Order</th>
+                                <th
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Stok Keluar (Total)</th>
+                                <th
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Stok Rusak</th>
                                 <th
                                     class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                     Penyesuaian</th>
@@ -260,7 +269,28 @@
                                         <div class="flex items-center">
                                             <i class="bi bi-arrow-up-circle text-red-500 mr-2"></i>
                                             <span
+                                                class="text-sm text-gray-900">{{ $rekap[$product->id]['keluar_sale'] ?? 0 }}</span>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="flex items-center">
+                                            <i class="bi bi-arrow-up-circle text-yellow-500 mr-2"></i>
+                                            <span
+                                                class="text-sm text-gray-900">{{ $rekap[$product->id]['keluar_public_order'] ?? 0 }}</span>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="flex items-center">
+                                            <i class="bi bi-arrow-up-circle text-red-500 mr-2"></i>
+                                            <span
                                                 class="text-sm text-gray-900">{{ $rekap[$product->id]['keluar'] ?? 0 }}</span>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="flex items-center">
+                                            <i class="bi bi-exclamation-triangle text-orange-500 mr-2"></i>
+                                            <span
+                                                class="text-sm text-gray-900">{{ $rekap[$product->id]['keluar_rusak'] ?? 0 }}</span>
                                         </div>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
@@ -272,14 +302,14 @@
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium 
-                                                                @if(($rekap[$product->id]['stok_akhir'] ?? $product->current_stock) > 10)
-                                                                    bg-green-100 text-green-800
-                                                                @elseif(($rekap[$product->id]['stok_akhir'] ?? $product->current_stock) > 5)
-                                                                    bg-yellow-100 text-yellow-800
-                                                                @else
-                                                                    bg-red-100 text-red-800
-                                                                @endif
-                                                            ">
+                                                                                @if(($rekap[$product->id]['stok_akhir'] ?? $product->current_stock) > 10)
+                                                                                    bg-green-100 text-green-800
+                                                                                @elseif(($rekap[$product->id]['stok_akhir'] ?? $product->current_stock) > 5)
+                                                                                    bg-yellow-100 text-yellow-800
+                                                                                @else
+                                                                                    bg-red-100 text-red-800
+                                                                                @endif
+                                                                            ">
                                             {{ $rekap[$product->id]['stok_akhir'] ?? $product->current_stock }}
                                         </span>
                                     </td>
@@ -321,7 +351,7 @@
                                     Perubahan</th>
                                 <th
                                     class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Keterangan</th>
+                                    Catatan</th>
                             </tr>
                         </thead>
                         <tbody class="bg-white divide-y divide-gray-200">
@@ -349,14 +379,14 @@
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium 
-                                                                @if($log->qty > 0)
-                                                                    bg-green-100 text-green-800
-                                                                @elseif($log->qty < 0)
-                                                                    bg-red-100 text-red-800
-                                                                @else
-                                                                    bg-gray-100 text-gray-800
-                                                                @endif
-                                                            ">
+                                                                                @if($log->qty > 0)
+                                                                                    bg-green-100 text-green-800
+                                                                                @elseif($log->qty < 0)
+                                                                                    bg-red-100 text-red-800
+                                                                                @else
+                                                                                    bg-gray-100 text-gray-800
+                                                                                @endif
+                                                                            ">
                                             @if($log->qty > 0)
                                                 <i class="bi bi-plus-circle mr-1"></i>
                                             @elseif($log->qty < 0)
@@ -368,7 +398,7 @@
                                         </span>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
-                                        <div class="text-sm text-gray-900">{{ $log->description }}</div>
+                                        <div class="text-sm text-gray-900">{{ $log->notes ?? '-' }}</div>
                                     </td>
                                 </tr>
                             @empty

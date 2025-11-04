@@ -85,180 +85,196 @@
                     @endif
 
                     <!-- Customers Table -->
-                    @if($onlineCustomers->count() > 0)
-                        <div class="overflow-x-auto">
-                            <table class="min-w-full bg-white border border-gray-200 rounded-lg">
-                                <thead class="bg-gray-50">
-                                    <tr>
-                                        <th
-                                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            Pelanggan
-                                            <div class="flex items-center text-xs text-gray-400 mt-1 normal-case">
-                                                <i class="bi bi-info-circle mr-1"></i>
-                                                <span>Berdasarkan No. WA</span>
-                                            </div>
-                                        </th>
-                                        <th
-                                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            No. WhatsApp
-                                        </th>
-                                        <th
-                                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            Status
-                                        </th>
-                                        <th
-                                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            Total Pesanan
-                                        </th>
-                                        <th
-                                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            Total Belanja
-                                        </th>
-                                        <th
-                                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            Terakhir Pesan
-                                        </th>
-                                        <th
-                                            class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            Aksi
-                                        </th>
-                                    </tr>
-                                </thead>
-                                <tbody class="bg-white divide-y divide-gray-200">
-                                    @foreach($onlineCustomers as $customer)
-                                        <tr class="hover:bg-gray-50">
-                                            <td class="px-6 py-4 whitespace-nowrap">
-                                                <div class="flex items-start">
-                                                    <div class="flex-shrink-0 h-10 w-10 mt-0.5">
-                                                        <div
-                                                            class="h-10 w-10 rounded-full bg-pink-100 flex items-center justify-center">
-                                                            <i class="bi bi-person-fill text-pink-500"></i>
-                                                        </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-800 mb-2 flex items-center"><i class="bi bi-globe2 text-pink-500 mr-2"></i> Daftar Pelanggan Online</h3>
+                            @if($onlineCustomers->count() > 0)
+                                <div class="overflow-x-auto">
+                                    <table class="min-w-full bg-white border border-gray-200 rounded-lg mb-10">
+                                        <thead class="bg-gray-50">
+                                            <tr>
+                                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Pelanggan
+                                                    <div class="flex items-center text-xs text-gray-400 mt-1 normal-case">
+                                                        <i class="bi bi-info-circle mr-1"></i>
+                                                        <span>Berdasarkan No. WA</span>
                                                     </div>
-                                                    <div class="ml-4 flex-1">
-                                                        <div class="text-sm font-medium text-gray-900 mb-1">
-                                                            {{ $customer->customer_name }}
-                                                        </div>
-                                                        @if($customer->names_count > 1)
-                                                            <div class="space-y-1">
-                                                                <div class="text-xs text-gray-500">
-                                                                    <i class="bi bi-info-circle mr-1"></i>
-                                                                    {{ $customer->names_count }} variasi nama:
-                                                                </div>
-                                                                <div class="flex flex-wrap gap-1">
-                                                                    @foreach($customer->all_names as $name)
-                                                                        <span
-                                                                            class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium 
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            {{ $name === $customer->customer_name ? 'bg-pink-100 text-pink-700' : 'bg-gray-100 text-gray-600' }}">
-                                                                            {{ $name }}
-                                                                            @if($name === $customer->customer_name)
-                                                                                <i class="bi bi-star-fill ml-1 text-xs"></i>
-                                                                            @endif
-                                                                        </span>
-                                                                    @endforeach
+                                                </th>
+                                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">No. WhatsApp</th>
+                                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total Pesanan</th>
+                                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total Belanja</th>
+                                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Terakhir Pesan</th>
+                                                <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody class="bg-white divide-y divide-gray-200">
+                                            @foreach($onlineCustomers as $customer)
+                                                <tr class="hover:bg-gray-50">
+                                                    <td class="px-6 py-4 whitespace-nowrap">
+                                                        <div class="flex items-start">
+                                                            <div class="flex-shrink-0 h-10 w-10 mt-0.5">
+                                                                <div class="h-10 w-10 rounded-full bg-pink-100 flex items-center justify-center">
+                                                                    <i class="bi bi-person-fill text-pink-500"></i>
                                                                 </div>
                                                             </div>
-                                                        @endif
-                                                        <div class="text-sm text-gray-500 mt-2">
-                                                            Bergabung:
-                                                            {{ \Carbon\Carbon::parse($customer->first_order_date)->format('d M Y') }}
+                                                            <div class="ml-4 flex-1">
+                                                                <div class="text-sm font-medium text-gray-900 mb-1">
+                                                                    {{ $customer->customer_name }}
+                                                                </div>
+                                                                @if($customer->names_count > 1)
+                                                                    <div class="space-y-1">
+                                                                        <div class="text-xs text-gray-500">
+                                                                            <i class="bi bi-info-circle mr-1"></i>
+                                                                            {{ $customer->names_count }} variasi nama:
+                                                                        </div>
+                                                                        <div class="flex flex-wrap gap-1">
+                                                                            @foreach($customer->all_names as $name)
+                                                                                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium {{ $name === $customer->customer_name ? 'bg-pink-100 text-pink-700' : 'bg-gray-100 text-gray-600' }}">
+                                                                                    {{ $name }}
+                                                                                    @if($name === $customer->customer_name)
+                                                                                        <i class="bi bi-star-fill ml-1 text-xs"></i>
+                                                                                    @endif
+                                                                                </span>
+                                                                            @endforeach
+                                                                        </div>
+                                                                    </div>
+                                                                @endif
+                                                                <div class="text-sm text-gray-500 mt-2">
+                                                                    Bergabung:
+                                                                    {{ \Carbon\Carbon::parse($customer->first_order_date)->format('d M Y') }}
+                                                                </div>
+                                                            </div>
                                                         </div>
-                                                    </div>
-                                                </div>
-                                            </td>
-                                            <td class="px-6 py-4 whitespace-nowrap">
-                                                <div class="flex flex-col">
-                                                    <div class="text-sm text-gray-900 mb-1">
-                                                        <i class="bi bi-whatsapp text-green-500 mr-1"></i>
-                                                        {{ $customer->wa_number }}
-                                                    </div>
-                                                    @if($customer->names_count > 1)
-                                                        <span class="text-xs text-gray-500">
-                                                            <i class="bi bi-people-fill mr-1"></i>
-                                                            {{ $customer->names_count }} nama berbeda
+                                                    </td>
+                                                    <td class="px-6 py-4 whitespace-nowrap">
+                                                        <div class="flex flex-col">
+                                                            <div class="text-sm text-gray-900 mb-1">
+                                                                <i class="bi bi-whatsapp text-green-500 mr-1"></i>
+                                                                {{ $customer->wa_number }}
+                                                            </div>
+                                                            @if($customer->names_count > 1)
+                                                                <span class="text-xs text-gray-500">
+                                                                    <i class="bi bi-people-fill mr-1"></i>
+                                                                    {{ $customer->names_count }} nama berbeda
+                                                                </span>
+                                                            @endif
+                                                        </div>
+                                                    </td>
+                                                    <td class="px-6 py-4 whitespace-nowrap">
+                                                        <div class="flex flex-col gap-1">
+                                                            @if($customer->is_reseller)
+                                                                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                                                                    <i class="bi bi-star-fill mr-1"></i>
+                                                                    Reseller
+                                                                </span>
+                                                            @endif
+                                                            @if($customer->promo_discount && $customer->promo_discount > 0)
+                                                                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                                                                    <i class="bi bi-gift-fill mr-1"></i>
+                                                                    Promo {{ $customer->promo_discount }}%
+                                                                </span>
+                                                            @endif
+                                                            @if(!$customer->is_reseller && (!$customer->promo_discount || $customer->promo_discount == 0))
+                                                                <span class="text-xs text-gray-400">Regular</span>
+                                                            @endif
+                                                        </div>
+                                                    </td>
+                                                    <td class="px-6 py-4 whitespace-nowrap">
+                                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                                            {{ $customer->total_orders }} pesanan
                                                         </span>
-                                                    @endif
-                                                </div>
-                                            </td>
-                                            <td class="px-6 py-4 whitespace-nowrap">
-                                                <div class="flex flex-col gap-1">
-                                                    @if($customer->is_reseller)
-                                                        <span
-                                                            class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
-                                                            <i class="bi bi-star-fill mr-1"></i>
-                                                            Reseller
-                                                        </span>
-                                                    @endif
-                                                    @if($customer->promo_discount && $customer->promo_discount > 0)
-                                                        <span
-                                                            class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
-                                                            <i class="bi bi-gift-fill mr-1"></i>
-                                                            Promo {{ $customer->promo_discount }}%
-                                                        </span>
-                                                    @endif
-                                                    @if(!$customer->is_reseller && (!$customer->promo_discount || $customer->promo_discount == 0))
-                                                        <span class="text-xs text-gray-400">Regular</span>
-                                                    @endif
-                                                </div>
-                                            </td>
-                                            <td class="px-6 py-4 whitespace-nowrap">
-                                                <span
-                                                    class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                                                    {{ $customer->total_orders }} pesanan
-                                                </span>
-                                            </td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                                Rp {{ number_format($customer->total_spent, 0, ',', '.') }}
-                                            </td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                                {{ \Carbon\Carbon::parse($customer->last_order_date)->diffForHumans() }}
-                                            </td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
-                                                <div class="flex justify-center space-x-2">
-                                                    <a href="{{ route('online-customers.show', $customer->wa_number) }}"
-                                                        class="text-blue-600 hover:text-blue-900 transition"
-                                                        title="Lihat Detail">
-                                                        <i class="bi bi-eye"></i>
-                                                        <p>lihat</p>
-                                                    </a>
-                                                    @if(auth()->user()->hasRole(['owner', 'admin']))
-                                                        <a href="{{ route('online-customers.edit', $customer->wa_number) }}"
-                                                            class="text-green-600 hover:text-green-900 transition"
-                                                            title="Edit Pelanggan">
-                                                            <i class="bi bi-pencil"></i>
-                                                            <p>Edit</p>
-                                                        </a>
-                                                    @endif
-                                                    @if($customer->is_reseller)
-                                                        <button type="button"
-                                                            class="text-purple-600 hover:text-purple-900 transition"
-                                                            title="Generate Kode Reseller"
-                                                            onclick="openGenerateCodeModal('{{ $customer->wa_number }}', '{{ $customer->customer_name }}')">
-                                                            <i class="bi bi-key"></i>
-                                                        </button>
-                                                    @endif
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
+                                                    </td>
+                                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                                        Rp {{ number_format($customer->total_spent, 0, ',', '.') }}
+                                                    </td>
+                                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                                        {{ \Carbon\Carbon::parse($customer->last_order_date)->diffForHumans() }}
+                                                    </td>
+                                                    <td class="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
+                                                        <div class="flex justify-center space-x-2">
+                                                            <a href="{{ route('online-customers.show', $customer->wa_number) }}" class="text-blue-600 hover:text-blue-900 transition" title="Lihat Detail">
+                                                                <i class="bi bi-eye"></i>
+                                                                <p>lihat</p>
+                                                            </a>
+                                                            @if(auth()->user()->hasRole(['owner', 'admin']))
+                                                                <a href="{{ route('online-customers.edit', $customer->wa_number) }}" class="text-green-600 hover:text-green-900 transition" title="Edit Pelanggan">
+                                                                    <i class="bi bi-pencil"></i>
+                                                                    <p>Edit</p>
+                                                                </a>
+                                                            @endif
+                                                            @if($customer->is_reseller)
+                                                                <button type="button" class="text-purple-600 hover:text-purple-900 transition" title="Generate Kode Reseller" onclick="openGenerateCodeModal('{{ $customer->wa_number }}', '{{ $customer->customer_name }}')">
+                                                                    <i class="bi bi-key"></i>
+                                                                </button>
+                                                            @endif
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            @endforeach
+                                        </tbody>
+                                    </table>
+                                </div>
+                            @else
+                                <div class="text-center py-12">
+                                    <i class="bi bi-people text-6xl text-gray-300 mb-4"></i>
+                                    <h3 class="text-lg font-medium text-gray-900 mb-2">Tidak ada pelanggan online</h3>
+                                    <p class="text-gray-500">
+                                        @if($search)
+                                            Tidak ditemukan pelanggan dengan kata kunci "{{ $search }}"
+                                        @else
+                                            Belum ada pelanggan yang melakukan pemesanan online
+                                        @endif
+                                    </p>
+                                </div>
+                            @endif
                         </div>
-
-                        <!-- No Pagination -->
-                    @else
-                        <div class="text-center py-12">
-                            <i class="bi bi-people text-6xl text-gray-300 mb-4"></i>
-                            <h3 class="text-lg font-medium text-gray-900 mb-2">Tidak ada pelanggan online</h3>
-                            <p class="text-gray-500">
-                                @if($search)
-                                    Tidak ditemukan pelanggan dengan kata kunci "{{ $search }}"
-                                @else
-                                    Belum ada pelanggan yang melakukan pemesanan online
-                                @endif
-                            </p>
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-800 mb-2 flex items-center"><i class="bi bi-shop text-green-500 mr-2"></i> Daftar Pelanggan Offline (Dari Penjualan Langsung)</h3>
+                            @if($offlineCustomers->count() > 0)
+                                <div class="overflow-x-auto">
+                                    <table class="min-w-full bg-white border border-gray-200 rounded-lg">
+                                        <thead class="bg-gray-50">
+                                            <tr>
+                                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">No. WhatsApp</th>
+                                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total Transaksi</th>
+                                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total Belanja</th>
+                                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Terakhir Transaksi</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody class="bg-white divide-y divide-gray-200">
+                                            @foreach($offlineCustomers as $customer)
+                                                <tr class="hover:bg-gray-50">
+                                                    <td class="px-6 py-4 whitespace-nowrap">
+                                                        <div class="flex items-center">
+                                                            <i class="bi bi-whatsapp text-green-500 mr-1"></i>
+                                                            {{ $customer->wa_number }}
+                                                        </div>
+                                                    </td>
+                                                    <td class="px-6 py-4 whitespace-nowrap">
+                                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                                            {{ $customer->total_orders }} transaksi
+                                                        </span>
+                                                    </td>
+                                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                                        Rp {{ number_format($customer->total_spent, 0, ',', '.') }}
+                                                    </td>
+                                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                                        {{ \Carbon\Carbon::parse($customer->last_order_date)->diffForHumans() }}
+                                                    </td>
+                                                </tr>
+                                            @endforeach
+                                        </tbody>
+                                    </table>
+                                </div>
+                            @else
+                                <div class="text-center py-8">
+                                    <i class="bi bi-shop text-6xl text-gray-300 mb-4"></i>
+                                    <h3 class="text-lg font-medium text-gray-900 mb-2">Tidak ada pelanggan offline</h3>
+                                    <p class="text-gray-500">Belum ada transaksi penjualan langsung dengan nomor WhatsApp.</p>
+                                </div>
+                            @endif
                         </div>
-                    @endif
+                    </div>
                 </div>
             </div>
         </div>

@@ -23,7 +23,7 @@ class OnlineCustomerController extends Controller
     {
         $search = $request->get('search');
 
-        // Ambil data pelanggan (baik dari pesanan online maupun yang ditambah manual)
+        // Ambil data pelanggan online (dari pesanan online maupun yang ditambah manual)
         $customersQuery = Customer::query();
         if ($search) {
             $customersQuery->where(function ($q) use ($search) {
@@ -58,7 +58,7 @@ class OnlineCustomerController extends Controller
             ->get()
             ->groupBy('wa_number');
 
-        // Gabungkan data
+        // Gabungkan data pelanggan online
         $groupedCustomers = collect();
 
         // Proses customer yang memiliki pesanan online
@@ -111,7 +111,41 @@ class OnlineCustomerController extends Controller
         // Tampilkan semua data tanpa pagination
         $onlineCustomers = $groupedCustomers->values();
 
-        return view('online-customers.index', compact('onlineCustomers', 'search'));
+        // Ambil nomor WhatsApp dari online customers
+        $onlineWaNumbers = $onlineCustomers->pluck('wa_number')->map(function ($wa) {
+            return preg_replace('/[^0-9]/', '', $wa);
+        })->unique()->toArray();
+
+        // Ambil nomor WhatsApp unik dari sales yang tidak ada di online
+        $offlineSales = \App\Models\Sale::active()
+            ->whereNotNull('wa_number')
+            ->where('wa_number', '!=', '')
+            ->where('wa_number', '!=', '-')
+            ->get()
+            ->unique('wa_number')
+            ->filter(function ($sale) use ($onlineWaNumbers) {
+                $wa = preg_replace('/[^0-9]/', '', $sale->wa_number);
+                return !in_array($wa, $onlineWaNumbers);
+            });
+
+        // Format offline customers
+        $offlineCustomers = $offlineSales->map(function ($sale) {
+            return (object) [
+                'customer_name' => '-',
+                'all_names' => [],
+                'names_count' => 0,
+                'wa_number' => $sale->wa_number,
+                'total_orders' => 1,
+                'total_spent' => $sale->total,
+                'last_order_date' => $sale->order_time,
+                'first_order_date' => $sale->order_time,
+                'is_reseller' => false,
+                'promo_discount' => null,
+                'customer' => null
+            ];
+        })->values();
+
+        return view('online-customers.index', compact('onlineCustomers', 'offlineCustomers', 'search'));
     }
 
     /**

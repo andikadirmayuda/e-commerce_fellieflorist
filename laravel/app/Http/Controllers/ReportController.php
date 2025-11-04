@@ -141,24 +141,56 @@ class ReportController extends Controller
         $products = Product::with('category')->get();
         $logs = InventoryLog::whereBetween('created_at', [$start, $end])->latest()->limit(100)->get();
 
-        // Rekap stok masuk, keluar, penyesuaian, dan total per produk
+        // Rekap stok masuk, keluar (total, sale, public_order), penyesuaian, dan total per produk
         $rekap = [];
         foreach ($products as $product) {
+            // Stok keluar karena rusak
+            $keluar_rusak = InventoryLog::where('product_id', $product->id)
+                ->where('qty', '<', 0)
+                ->where('source', InventoryLog::SOURCE_DAMAGED)
+                ->whereBetween('created_at', [$start, $end])
+                ->sum('qty');
             $masuk = InventoryLog::where('product_id', $product->id)
                 ->where('qty', '>', 0)
                 ->whereBetween('created_at', [$start, $end])
                 ->sum('qty');
-            $keluar = InventoryLog::where('product_id', $product->id)
+
+            // Stok keluar dari sale
+            $keluar_sale = InventoryLog::where('product_id', $product->id)
                 ->where('qty', '<', 0)
+                ->where('source', InventoryLog::SOURCE_SALE)
                 ->whereBetween('created_at', [$start, $end])
                 ->sum('qty');
+
+            // Stok keluar dari public_order (semua tipe public_order)
+            $publicOrderSources = [
+                InventoryLog::SOURCE_PUBLIC_ORDER_PRODUCT,
+                InventoryLog::SOURCE_PUBLIC_ORDER_BOUQUET,
+                InventoryLog::SOURCE_PUBLIC_ORDER_CUSTOM,
+                InventoryLog::SOURCE_PUBLIC_ORDER_HOLD,
+                InventoryLog::SOURCE_PUBLIC_ORDER_BOUQUET_HOLD,
+                InventoryLog::SOURCE_PUBLIC_ORDER_CUSTOM_HOLD,
+            ];
+            $keluar_public_order = InventoryLog::where('product_id', $product->id)
+                ->where('qty', '<', 0)
+                ->whereIn('source', $publicOrderSources)
+                ->whereBetween('created_at', [$start, $end])
+                ->sum('qty');
+
+            // Stok keluar total hanya dari sale + public order
+            $keluar = abs($keluar_sale) + abs($keluar_public_order);
+
             $penyesuaian = InventoryLog::where('product_id', $product->id)
-                ->where('source', 'adjustment')
+                ->where('source', InventoryLog::SOURCE_ADJUSTMENT)
                 ->whereBetween('created_at', [$start, $end])
                 ->sum('qty');
+
             $rekap[$product->id] = [
                 'masuk' => $masuk,
-                'keluar' => abs($keluar),
+                'keluar' => $keluar,
+                'keluar_sale' => abs($keluar_sale),
+                'keluar_public_order' => abs($keluar_public_order),
+                'keluar_rusak' => abs($keluar_rusak),
                 'penyesuaian' => $penyesuaian,
                 'stok_akhir' => $product->current_stock,
             ];
@@ -219,14 +251,22 @@ class ReportController extends Controller
         $totalOrder = $orders->count();
         $totalNominal = $orders->sum('total');
 
-        // Status untuk public order - mapping yang benar berdasarkan status yang ada
+
         // Status yang dianggap "Lunas/Dibayar": paid, processed, completed
-        // Status yang dianggap "Belum Lunas": pending, unpaid
         $statusLunas = ['paid', 'processed', 'completed'];
         $statusBelumLunas = ['pending', 'unpaid'];
 
         $totalLunas = $orders->whereIn('status', $statusLunas)->count();
         $totalBelumLunas = $orders->whereIn('status', $statusBelumLunas)->count();
+
+        // Total nominal pesanan yang sudah menghasilkan pendapatan (lunas/selesai)
+        $totalNominalLunas = $orders->whereIn('status', $statusLunas)->sum('total');
+
+        // Tambahan: statistik jumlah order per status
+        $totalPending = $orders->where('status', 'pending')->count();
+        $totalProcessed = $orders->where('status', 'processed')->count();
+        $totalCompleted = $orders->where('status', 'completed')->count();
+        $totalCancelled = $orders->where('status', 'cancelled')->count();
 
         // Statistik pendapatan berdasarkan metode pembayaran
         $totalCashOrder = $orders->where('payment_method', 'cash')->sum('total');
@@ -240,8 +280,13 @@ class ReportController extends Controller
             'end',
             'totalOrder',
             'totalNominal',
+            'totalNominalLunas',
             'totalLunas',
             'totalBelumLunas',
+            'totalPending',
+            'totalProcessed',
+            'totalCompleted',
+            'totalCancelled',
             'totalCashOrder',
             'totalTransferOrder',
             'totalDebitOrder',
@@ -309,40 +354,41 @@ class ReportController extends Controller
         $totalTransferSale = Sale::whereBetween('created_at', [$start, $end])->where('payment_method', 'transfer')->sum('total');
         $totalDebitSale = Sale::whereBetween('created_at', [$start, $end])->where('payment_method', 'debit')->sum('total');
 
-        // Total pendapatan dari pemesanan (hitung dari items menggunakan join)
+        // Total pendapatan dari pemesanan (sum dari item, status paid, processed, completed)
+        $statusLunas = ['paid', 'processed', 'completed'];
         $totalPemesanan = DB::table('public_orders')
             ->join('public_order_items', 'public_orders.id', '=', 'public_order_items.public_order_id')
             ->whereBetween('public_orders.created_at', [$start, $end])
-            ->whereIn('public_orders.status', ['confirmed', 'processing', 'ready', 'completed'])
+            ->whereIn('public_orders.status', $statusLunas)
             ->sum(DB::raw('public_order_items.quantity * public_order_items.price'));
 
-        // Total per metode pembayaran di public order (hitung dari items)
+        // Total per metode pembayaran di public order (sum dari item, status paid, processed, completed)
         $totalCashOrder = DB::table('public_orders')
             ->join('public_order_items', 'public_orders.id', '=', 'public_order_items.public_order_id')
             ->whereBetween('public_orders.created_at', [$start, $end])
             ->where('public_orders.payment_method', 'cash')
-            ->whereIn('public_orders.status', ['confirmed', 'processing', 'ready', 'completed'])
+            ->whereIn('public_orders.status', $statusLunas)
             ->sum(DB::raw('public_order_items.quantity * public_order_items.price'));
 
         $totalTransferOrder = DB::table('public_orders')
             ->join('public_order_items', 'public_orders.id', '=', 'public_order_items.public_order_id')
             ->whereBetween('public_orders.created_at', [$start, $end])
             ->where('public_orders.payment_method', 'transfer')
-            ->whereIn('public_orders.status', ['confirmed', 'processing', 'ready', 'completed'])
+            ->whereIn('public_orders.status', $statusLunas)
             ->sum(DB::raw('public_order_items.quantity * public_order_items.price'));
 
         $totalDebitOrder = DB::table('public_orders')
             ->join('public_order_items', 'public_orders.id', '=', 'public_order_items.public_order_id')
             ->whereBetween('public_orders.created_at', [$start, $end])
             ->where('public_orders.payment_method', 'debit')
-            ->whereIn('public_orders.status', ['confirmed', 'processing', 'ready', 'completed'])
+            ->whereIn('public_orders.status', $statusLunas)
             ->sum(DB::raw('public_order_items.quantity * public_order_items.price'));
 
         $totalEwalletOrder = DB::table('public_orders')
             ->join('public_order_items', 'public_orders.id', '=', 'public_order_items.public_order_id')
             ->whereBetween('public_orders.created_at', [$start, $end])
             ->where('public_orders.payment_method', 'e-wallet')
-            ->whereIn('public_orders.status', ['confirmed', 'processing', 'ready', 'completed'])
+            ->whereIn('public_orders.status', $statusLunas)
             ->sum(DB::raw('public_order_items.quantity * public_order_items.price'));
 
 
@@ -364,14 +410,19 @@ class ReportController extends Controller
         $totalEwalletInflow = \App\Models\CashFlow::where('type', 'inflow')->where('payment_method', 'e-wallet')->whereBetween('transaction_date', [$start, $end])->sum('amount');
         $totalEwalletOutflow = \App\Models\CashFlow::where('type', 'outflow')->where('payment_method', 'e-wallet')->whereBetween('transaction_date', [$start, $end])->sum('amount');
 
+        // Statistik khusus cashflow saja (tanpa sale/order)
+        $totalCashflowCash = $totalCashInflow - $totalCashOutflow;
+        $totalCashflowTransfer = $totalTransferInflow - $totalTransferOutflow;
+        $totalCashflowEwallet = $totalEwalletInflow - $totalEwalletOutflow;
+
         // Total pendapatan gabungan (penjualan + pemesanan + pemasukan cash flow - pengeluaran cash flow)
         $totalPendapatan = ($totalPenjualan + $totalPemesanan + $totalInflow) - $totalOutflow;
 
-        // Breakdown total cash, transfer, debit, e-wallet (sale + order + inflow - outflow)
-        $totalCash = ($totalCashSale + $totalCashOrder + $totalCashInflow) - $totalCashOutflow;
-        $totalTransfer = ($totalTransferSale + $totalTransferOrder + $totalTransferInflow) - $totalTransferOutflow;
-        $totalDebit = ($totalDebitSale + $totalDebitOrder + $totalDebitInflow) - $totalDebitOutflow;
-        $totalEwallet = ($totalEwalletOrder + $totalEwalletInflow) - $totalEwalletOutflow;
+        // Breakdown total cash, transfer, debit, e-wallet (sale + order + inflow cashflow)
+        $totalCash = $totalCashSale + $totalCashOrder;
+        $totalTransfer = $totalTransferSale + $totalTransferOrder;
+        $totalDebit = $totalDebitSale + $totalDebitOrder;
+        $totalEwallet = $totalEwalletOrder + $totalEwalletInflow;
 
         // Pendapatan harian: hanya tampilkan tanggal yang ada transaksi
         $harian = [];
@@ -484,7 +535,10 @@ class ReportController extends Controller
             'totalCash',
             'totalTransfer',
             'totalDebit',
-            'totalEwallet'
+            'totalEwallet',
+            'totalCashflowCash',
+            'totalCashflowTransfer',
+            'totalCashflowEwallet'
         ));
     }
 
@@ -505,29 +559,58 @@ class ReportController extends Controller
                 ->limit(50)
                 ->get();
 
-            // Calculate stock recap
+            // Calculate stock recap (sama seperti di fungsi stock)
             $rekap = [];
             foreach ($products as $product) {
+                // Stok keluar karena rusak
+                $keluar_rusak = InventoryLog::where('product_id', $product->id)
+                    ->where('qty', '<', 0)
+                    ->where('source', InventoryLog::SOURCE_DAMAGED)
+                    ->whereBetween('created_at', [$start, $end])
+                    ->sum('qty');
                 $masuk = InventoryLog::where('product_id', $product->id)
-                    ->where('type', 'masuk')
+                    ->where('qty', '>', 0)
                     ->whereBetween('created_at', [$start, $end])
                     ->sum('qty');
 
-                $keluar = InventoryLog::where('product_id', $product->id)
-                    ->where('type', 'keluar')
+                // Stok keluar dari sale
+                $keluar_sale = InventoryLog::where('product_id', $product->id)
+                    ->where('qty', '<', 0)
+                    ->where('source', InventoryLog::SOURCE_SALE)
                     ->whereBetween('created_at', [$start, $end])
                     ->sum('qty');
+
+                // Stok keluar dari public_order (semua tipe public_order)
+                $publicOrderSources = [
+                    InventoryLog::SOURCE_PUBLIC_ORDER_PRODUCT,
+                    InventoryLog::SOURCE_PUBLIC_ORDER_BOUQUET,
+                    InventoryLog::SOURCE_PUBLIC_ORDER_CUSTOM,
+                    InventoryLog::SOURCE_PUBLIC_ORDER_HOLD,
+                    InventoryLog::SOURCE_PUBLIC_ORDER_BOUQUET_HOLD,
+                    InventoryLog::SOURCE_PUBLIC_ORDER_CUSTOM_HOLD,
+                ];
+                $keluar_public_order = InventoryLog::where('product_id', $product->id)
+                    ->where('qty', '<', 0)
+                    ->whereIn('source', $publicOrderSources)
+                    ->whereBetween('created_at', [$start, $end])
+                    ->sum('qty');
+
+                // Stok keluar total hanya dari sale + public order
+                $keluar = abs($keluar_sale) + abs($keluar_public_order);
 
                 $penyesuaian = InventoryLog::where('product_id', $product->id)
-                    ->where('type', 'penyesuaian')
+                    ->where('source', InventoryLog::SOURCE_ADJUSTMENT)
                     ->whereBetween('created_at', [$start, $end])
                     ->sum('qty');
 
                 $rekap[$product->id] = [
                     'masuk' => $masuk,
-                    'keluar' => abs($keluar),
+                    'keluar' => $keluar,
+                    'keluar_sale' => abs($keluar_sale),
+                    'keluar_public_order' => abs($keluar_public_order),
+                    'keluar_rusak' => abs($keluar_rusak),
                     'penyesuaian' => $penyesuaian,
-                    'stok_akhir' => $product->current_stock
+                    'stok_akhir' => $product->current_stock,
                 ];
             }
 
@@ -559,28 +642,75 @@ class ReportController extends Controller
                 ->whereIn('public_orders.status', ['confirmed', 'processing', 'ready', 'completed'])
                 ->sum(DB::raw('public_order_items.quantity * public_order_items.price'));
 
-            $totalPendapatan = $totalPenjualan + $totalPemesanan;
+            // Ambil data cash flow (inflow dan outflow) pada periode yang sama
+            $totalInflow = \App\Models\CashFlow::where('type', 'inflow')
+                ->whereBetween('transaction_date', [$start, $end])
+                ->sum('amount');
+            $totalOutflow = \App\Models\CashFlow::where('type', 'outflow')
+                ->whereBetween('transaction_date', [$start, $end])
+                ->sum('amount');
 
-            // Pendapatan harian
+            // Breakdown per metode pembayaran untuk cash flow
+            $totalCashInflow = \App\Models\CashFlow::where('type', 'inflow')->where('payment_method', 'cash')->whereBetween('transaction_date', [$start, $end])->sum('amount');
+            $totalCashOutflow = \App\Models\CashFlow::where('type', 'outflow')->where('payment_method', 'cash')->whereBetween('transaction_date', [$start, $end])->sum('amount');
+            $totalTransferInflow = \App\Models\CashFlow::where('type', 'inflow')->where('payment_method', 'transfer')->whereBetween('transaction_date', [$start, $end])->sum('amount');
+            $totalTransferOutflow = \App\Models\CashFlow::where('type', 'outflow')->where('payment_method', 'transfer')->whereBetween('transaction_date', [$start, $end])->sum('amount');
+            $totalEwalletInflow = \App\Models\CashFlow::where('type', 'inflow')->where('payment_method', 'e-wallet')->whereBetween('transaction_date', [$start, $end])->sum('amount');
+            $totalEwalletOutflow = \App\Models\CashFlow::where('type', 'outflow')->where('payment_method', 'e-wallet')->whereBetween('transaction_date', [$start, $end])->sum('amount');
+
+            // Statistik khusus cashflow saja (tanpa sale/order)
+            $totalCashflowCash = $totalCashInflow - $totalCashOutflow;
+            $totalCashflowTransfer = $totalTransferInflow - $totalTransferOutflow;
+            $totalCashflowEwallet = $totalEwalletInflow - $totalEwalletOutflow;
+
+            // Total pendapatan gabungan (penjualan + pemesanan + pemasukan cash flow - pengeluaran cash flow)
+            $totalPendapatan = ($totalPenjualan + $totalPemesanan + $totalInflow) - $totalOutflow;
+
+            // Pendapatan harian: hanya tampilkan tanggal yang ada transaksi
             $harian = [];
-            foreach (range(0, now()->parse($end)->diffInDays(now()->parse($start))) as $i) {
-                $date = now()->parse($start)->copy()->addDays($i)->toDateString();
-
+            $saleDates = Sale::whereBetween('created_at', [$start, $end])
+                ->selectRaw('DATE(created_at) as date')
+                ->groupBy('date')
+                ->pluck('date')
+                ->toArray();
+            $orderDates = DB::table('public_orders')
+                ->whereBetween('created_at', [$start, $end])
+                ->whereIn('status', ['confirmed', 'processing', 'ready', 'completed'])
+                ->selectRaw('DATE(created_at) as date')
+                ->groupBy('date')
+                ->pluck('date')
+                ->toArray();
+            $allDates = array_unique(array_merge($saleDates, $orderDates));
+            sort($allDates);
+            foreach ($allDates as $date) {
                 $dailyPenjualan = Sale::whereDate('created_at', $date)->sum('total');
                 $dailyPemesanan = DB::table('public_orders')
                     ->join('public_order_items', 'public_orders.id', '=', 'public_order_items.public_order_id')
                     ->whereDate('public_orders.created_at', $date)
                     ->whereIn('public_orders.status', ['confirmed', 'processing', 'ready', 'completed'])
                     ->sum(DB::raw('public_order_items.quantity * public_order_items.price'));
-
-                $harian[$date] = [
-                    'penjualan' => $dailyPenjualan,
-                    'pemesanan' => $dailyPemesanan,
-                ];
+                if ($dailyPenjualan > 0 || $dailyPemesanan > 0) {
+                    $harian[$date] = [
+                        'penjualan' => $dailyPenjualan,
+                        'pemesanan' => $dailyPemesanan,
+                    ];
+                }
             }
 
             // Load and render PDF
-            $pdf = Pdf::loadView('reports.income_pdf', compact('start', 'end', 'totalPenjualan', 'totalPemesanan', 'totalPendapatan', 'harian'));
+            $pdf = Pdf::loadView('reports.income_pdf', compact(
+                'start',
+                'end',
+                'totalPenjualan',
+                'totalPemesanan',
+                'totalPendapatan',
+                'harian',
+                'totalInflow',
+                'totalOutflow',
+                'totalCashflowCash',
+                'totalCashflowTransfer',
+                'totalCashflowEwallet'
+            ));
             $pdf->setPaper('a4', 'portrait');
 
             $filename = "laporan_pendapatan_{$start}_to_{$end}.pdf";
@@ -614,6 +744,12 @@ class ReportController extends Controller
             $statusLunas = ['paid', 'processed', 'completed'];
             $totalLunas = $orders->whereIn('status', $statusLunas)->count();
 
+            // Statistik status tambahan
+            $totalPending = $orders->where('status', 'pending')->count();
+            $totalProcessed = $orders->where('status', 'processed')->count();
+            $totalCompleted = $orders->where('status', 'completed')->count();
+            $totalCancelled = $orders->where('status', 'cancelled')->count();
+
             // Statistik pendapatan berdasarkan metode pembayaran
             $totalCashOrder = $orders->where('payment_method', 'cash')->sum('total');
             $totalTransferOrder = $orders->where('payment_method', 'transfer')->sum('total');
@@ -628,6 +764,10 @@ class ReportController extends Controller
                 'totalOrder',
                 'totalNominal',
                 'totalLunas',
+                'totalPending',
+                'totalProcessed',
+                'totalCompleted',
+                'totalCancelled',
                 'totalCashOrder',
                 'totalTransferOrder',
                 'totalDebitOrder',
